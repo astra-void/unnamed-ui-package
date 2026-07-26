@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { composeRefs, getElementRef, toRef } from "./refs";
+import { composeRefs, getElementRef } from "./refs";
 
 type Fn = (...args: unknown[]) => void;
 type HandlerTable = Partial<Record<string, Fn>>;
@@ -257,14 +257,13 @@ export const Slot = React.forwardRef<Instance, SlotProps>((props, forwardedRef) 
   if (Event) mergedProps.Event = Event;
   if (Change) mergedProps.Change = Change;
 
-  const slotRef = toRef<Instance>(props.ref);
+  // A `ref` written on `Slot` arrives as `forwardedRef` — React strips it out of
+  // `props` for every forwardRef component, so `props.ref` only ever held the
+  // development warning accessor.
   const childRef = getElementRef<Instance>(child);
   // Memoize: a fresh callback-ref identity per render would make react-lua
   // detach and reattach every composed ref on each parent re-render.
-  const mergedRef = React.useMemo(
-    () => composeRefs(childRef, forwardedRef, slotRef),
-    [childRef, forwardedRef, slotRef],
-  );
+  const mergedRef = React.useMemo(() => composeRefs(childRef, forwardedRef), [childRef, forwardedRef]);
   mergedProps.ref = mergedRef;
 
   // cloneElement bypasses @rbxts/react createElement Event/Change normalization.
