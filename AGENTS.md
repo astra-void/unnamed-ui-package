@@ -81,7 +81,7 @@ Agent guidance for Roblox-related work:
 - Do not treat this repository like a browser-first React app.
 - Do not assume DOM, CSS, or browser globals such as `window`, `document`, `HTMLElement`, or CSS layout behavior.
 - Do not assume generic Node.js runtime APIs are available inside package runtime code unless the touched area is explicitly a Node-only script or CLI surface.
-- Prefer existing Roblox GUI concepts and patterns used in the repository, such as `UDim2`, `Vector2`, `CanvasGroup`, `GuiObject`, `ScreenGui`, selection/focus behavior, and explicit instance props.
+- Prefer existing Roblox GUI concepts and patterns used in the repository, such as `UDim2`, `Vector2`, `Frame`, `GuiObject`, `ScreenGui`, selection/focus behavior, and explicit instance props.
 
 Environment-specific expectations:
 

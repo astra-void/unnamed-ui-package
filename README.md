@@ -93,6 +93,20 @@ Beyond those, geometry is owned wherever the primitive computes it:
 </Select.Content>
 ```
 
+### What a `transition` animates
+
+No part renders a `CanvasGroup`. Presence hosts — every `Content` part and `Toast.Root` — are plain `Frame`s, so a `transition` animates that one instance and nothing below it: a fade moves the host's own `BackgroundTransparency`, and children keep whatever transparency you gave them. `createSurfaceRevealRecipe` and `createPopperEntranceRecipe` are the recipes written against that host.
+
+To fade a whole subtree as a single composited layer, slot your own `canvasgroup` with `asChild` and animate it with `createCanvasGroupRevealRecipe` or `createCanvasGroupPopperEntranceRecipe`:
+
+```tsx
+<Popover.Content asChild transition={createCanvasGroupPopperEntranceRecipe("bottom")}>
+  <canvasgroup BackgroundColor3={Color3.fromRGB(24, 24, 27)} />
+</Popover.Content>
+```
+
+`GroupTransparency` and `GroupColor3` only exist on a `CanvasGroup`. Passing them to a part is a compile error, and a `transition` that animates them on a `Frame` host is skipped silently rather than reported — so migrate those recipes to `BackgroundTransparency` rather than waiting for a diagnostic.
+
 ## Development
 
 This is a [pnpm](https://pnpm.io/) monorepo managed with [Turbo](https://turbo.build/).
