@@ -69,7 +69,7 @@ function MenuContentImpl(props: {
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
   asChild?: boolean;
   children?: React.ReactNode;
-  passthrough: PassthroughProps<CanvasGroup>;
+  passthrough: PassthroughProps<Frame>;
 }) {
   const menuContext = useMenuContext();
   const open = menuContext.open;
@@ -118,8 +118,8 @@ function MenuContentImpl(props: {
 
   const passthrough = props.passthrough;
 
-  // The canvasgroup measures itself against its items so the popper has something to position, and
-  // it is the flattening layer any consumer-supplied `transition` fades as a unit.
+  // The content host measures itself against its items so the popper has something to position, and
+  // it is the instance any consumer-supplied `transition` animates.
   const contentBehaviorProps = {
     AutomaticSize: Enum.AutomaticSize.XY,
     Size: ZERO_UDIM2,
@@ -137,7 +137,7 @@ function MenuContentImpl(props: {
       const childRef = getElementRef<Instance>(child);
 
       return (
-        <canvasgroup {...NEUTRAL_PROPS} {...contentBehaviorProps} ref={setContentRef as React.Ref<CanvasGroup>}>
+        <frame {...NEUTRAL_PROPS} {...contentBehaviorProps} ref={setContentRef as React.Ref<Frame>}>
           {/* No neutral defaults here: the rendered element belongs to the consumer. */}
           {React.cloneElement(child as React.ReactElement<GuiPropBag>, {
             ...childProps,
@@ -147,13 +147,13 @@ function MenuContentImpl(props: {
             Visible: contentVisible,
             ref: composeRefs(childRef, (passthrough.ref ?? undefined) as never),
           })}
-        </canvasgroup>
+        </frame>
       );
     })()
   ) : (
-    <canvasgroup {...NEUTRAL_PROPS} {...passthrough} {...contentBehaviorProps} ref={setContentRef}>
+    <frame {...NEUTRAL_PROPS} {...passthrough} {...contentBehaviorProps} ref={setContentRef}>
       {props.children}
-    </canvasgroup>
+    </frame>
   );
 
   return (
@@ -192,7 +192,7 @@ function MenuContentImpl(props: {
 export function MenuContent(props: MenuContentProps) {
   const menuContext = useMenuContext();
   const open = menuContext.open;
-  const passthrough = getPassthroughProps<CanvasGroup>(props, OWN_PROPS);
+  const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 
   if (props.forceMount) {
     return (

@@ -102,7 +102,7 @@ export type ComboboxContentProps = {
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
   onInteractOutside?: (event: LayerInteractEvent) => void;
   children?: React.ReactNode;
-} & PassthroughProps<CanvasGroup>;
+} & PassthroughProps<Frame>;
 
 export type ComboboxItemProps = {
   value: string;

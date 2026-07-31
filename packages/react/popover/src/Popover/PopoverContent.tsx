@@ -31,7 +31,7 @@ const OWN_PROPS = [
   "children",
 ] as const;
 
-// Roblox instance defaults are themselves a look: a bare canvasgroup renders an opaque grey box.
+// Roblox instance defaults are themselves a look: a bare frame renders an opaque grey box.
 // Neutralize only that, and leave every real appearance decision to the consumer. Passthrough props
 // are spread after these, so they stay overridable.
 const NEUTRAL_PROPS = {
@@ -69,7 +69,7 @@ function PopoverContentImpl(props: {
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
   asChild?: boolean;
   children?: React.ReactNode;
-  passthrough: PassthroughProps<CanvasGroup>;
+  passthrough: PassthroughProps<Frame>;
 }) {
   const popoverContext = usePopoverContext();
   const open = popoverContext.open;
@@ -148,9 +148,9 @@ function PopoverContentImpl(props: {
       });
     })()
   ) : (
-    <canvasgroup {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
+    <frame {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
       {props.children}
-    </canvasgroup>
+    </frame>
   );
 
   return (
@@ -182,7 +182,7 @@ function PopoverContentImpl(props: {
 export function PopoverContent(props: PopoverContentProps) {
   const popoverContext = usePopoverContext();
   const open = popoverContext.open;
-  const passthrough = getPassthroughProps<CanvasGroup>(props, OWN_PROPS);
+  const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 
   if (props.forceMount) {
     return (

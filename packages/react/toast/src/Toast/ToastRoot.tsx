@@ -4,7 +4,7 @@ import type { ToastRootProps } from "./types";
 
 const OWN_PROPS = ["transition", "asChild", "visible", "onExitComplete", "children"] as const;
 
-// Roblox instance defaults are themselves a look: a bare `canvasgroup` renders an opaque grey box.
+// Roblox instance defaults are themselves a look: a bare `frame` renders an opaque grey box.
 // Neutralize only that, and leave every real appearance decision (colors, size, corners, padding)
 // to the consumer. Passthrough props are spread after these, so they stay overridable.
 const NEUTRAL_PROPS = {
@@ -20,7 +20,7 @@ export function ToastRoot(props: ToastRootProps) {
   const visible = props.visible ?? true;
   const transition = props.transition ?? NO_MOTION;
 
-  const motion = usePresenceMotionController<CanvasGroup>({
+  const motion = usePresenceMotionController<Frame>({
     present: visible,
     config: transition,
     onExitComplete: props.onExitComplete,
@@ -30,10 +30,10 @@ export function ToastRoot(props: ToastRootProps) {
   // the instance only hides once the presence controller reports "exited".
   const motionVisible = motion.mounted && motion.phase !== "exited";
 
-  const passthrough = getPassthroughProps<CanvasGroup>(props, OWN_PROPS);
+  const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
   const behaviorProps = {
     Visible: motionVisible,
-    ref: composeRefs<CanvasGroup>(passthrough.ref as never, motion.ref),
+    ref: composeRefs<Frame>(passthrough.ref as never, motion.ref),
   };
 
   if (props.asChild) {
@@ -51,8 +51,8 @@ export function ToastRoot(props: ToastRootProps) {
   }
 
   return (
-    <canvasgroup {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
+    <frame {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
       {props.children}
-    </canvasgroup>
+    </frame>
   );
 }

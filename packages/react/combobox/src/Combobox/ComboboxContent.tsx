@@ -66,7 +66,7 @@ function ComboboxContentImpl(props: {
   asChild?: boolean;
   transition?: PresenceMotionConfig;
   children?: React.ReactNode;
-  passthrough: PassthroughProps<CanvasGroup>;
+  passthrough: PassthroughProps<Frame>;
 }) {
   const comboboxContext = useComboboxContext();
   const open = comboboxContext.open;
@@ -117,7 +117,7 @@ function ComboboxContentImpl(props: {
 
   const passthrough = props.passthrough;
 
-  // `AutomaticSize`/`Size` on the canvasgroup are measured layout, not styling: automatic sizing
+  // `AutomaticSize`/`Size` on the content host are measured layout, not styling: automatic sizing
   // from zero is what lets the popper read the content's real extents before positioning it.
   const contentNode = props.asChild ? (
     (() => {
@@ -130,12 +130,12 @@ function ComboboxContentImpl(props: {
       const childRef = getElementRef<Instance>(child);
 
       return (
-        <canvasgroup
+        <frame
           {...NEUTRAL_PROPS}
           AutomaticSize={Enum.AutomaticSize.XY}
           Size={UDim2.fromOffset(0, 0)}
           Visible={contentVisible}
-          ref={setContentRef as React.Ref<CanvasGroup>}
+          ref={setContentRef as React.Ref<Frame>}
         >
           {React.cloneElement(child as React.ReactElement<GuiPropBag>, {
             ...childProps,
@@ -145,11 +145,11 @@ function ComboboxContentImpl(props: {
             Visible: contentVisible,
             ref: composeRefs(childRef, passthrough.ref as never),
           })}
-        </canvasgroup>
+        </frame>
       );
     })()
   ) : (
-    <canvasgroup
+    <frame
       {...NEUTRAL_PROPS}
       {...passthrough}
       AutomaticSize={Enum.AutomaticSize.XY}
@@ -158,7 +158,7 @@ function ComboboxContentImpl(props: {
       ref={composeRefs<Instance>(passthrough.ref as never, setContentRef)}
     >
       {props.children}
-    </canvasgroup>
+    </frame>
   );
 
   return (
@@ -187,7 +187,7 @@ function ComboboxContentImpl(props: {
 export function ComboboxContent(props: ComboboxContentProps) {
   const comboboxContext = useComboboxContext();
   const open = comboboxContext.open;
-  const passthrough = getPassthroughProps<CanvasGroup>(props, OWN_PROPS);
+  const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 
   if (props.forceMount) {
     return (

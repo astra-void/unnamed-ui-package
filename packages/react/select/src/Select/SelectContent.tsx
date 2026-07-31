@@ -67,7 +67,7 @@ function SelectContentImpl(props: {
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
   asChild?: boolean;
   children?: React.ReactNode;
-  passthrough: PassthroughProps<CanvasGroup>;
+  passthrough: PassthroughProps<Frame>;
 }) {
   const selectContext = useSelectContext();
   const open = selectContext.open;
@@ -140,7 +140,7 @@ function SelectContentImpl(props: {
   ) : (
     // `AutomaticSize`/`Size` below are measured layout, not styling: automatic sizing from zero is
     // what lets the popper read the content's real extents before positioning it.
-    <canvasgroup
+    <frame
       {...NEUTRAL_PROPS}
       {...passthrough}
       AutomaticSize={Enum.AutomaticSize.XY}
@@ -149,7 +149,7 @@ function SelectContentImpl(props: {
       ref={composeRefs<Instance>(passthrough.ref as never, setContentRef)}
     >
       {props.children}
-    </canvasgroup>
+    </frame>
   );
 
   return (
@@ -187,7 +187,7 @@ function SelectContentImpl(props: {
 export function SelectContent(props: SelectContentProps) {
   const selectContext = useSelectContext();
   const open = selectContext.open;
-  const passthrough = getPassthroughProps<CanvasGroup>(props, OWN_PROPS);
+  const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 
   if (props.forceMount) {
     return (

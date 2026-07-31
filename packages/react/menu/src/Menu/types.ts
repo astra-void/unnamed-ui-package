@@ -61,7 +61,7 @@ export type MenuContentProps = {
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
   onInteractOutside?: (event: LayerInteractEvent) => void;
   children?: React.ReactNode;
-} & PassthroughProps<CanvasGroup>;
+} & PassthroughProps<Frame>;
 
 export type MenuSelectEvent = {
   defaultPrevented: boolean;

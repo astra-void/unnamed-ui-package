@@ -6,7 +6,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { usePresenceMotionController, createToastRevealRecipe, defaultRecipe, slotPropsLog } = vi.hoisted(() => {
-  const defaultRecipe = { initial: { GroupTransparency: 1 } };
+  const defaultRecipe = { initial: { BackgroundTransparency: 1 } };
 
   return {
     usePresenceMotionController: vi.fn(),
@@ -77,9 +77,9 @@ describe("ToastRoot motion regressions", () => {
   it("forwards custom presence transitions and exit callbacks to the controller", () => {
     usePresenceMotionController.mockReturnValue(controller());
     const customTransition = {
-      initial: { GroupTransparency: 1 },
-      reveal: { values: { GroupTransparency: 0 }, intent: { duration: 0.3 } },
-      exit: { values: { GroupTransparency: 1 }, intent: { duration: 0.3 } },
+      initial: { BackgroundTransparency: 1 },
+      reveal: { values: { BackgroundTransparency: 0 }, intent: { duration: 0.3 } },
+      exit: { values: { BackgroundTransparency: 1 }, intent: { duration: 0.3 } },
     };
     const onExitComplete = vi.fn();
 

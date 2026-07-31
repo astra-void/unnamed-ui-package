@@ -66,7 +66,7 @@ function TooltipContentImpl(props: {
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
   asChild?: boolean;
   children?: React.ReactNode;
-  passthrough: PassthroughProps<CanvasGroup>;
+  passthrough: PassthroughProps<Frame>;
 }) {
   const tooltipContext = useTooltipContext();
   const open = tooltipContext.open;
@@ -153,7 +153,7 @@ function TooltipContentImpl(props: {
         contentBoundaryRef={contentBoundaryRef}
       >
         <frame {...wrapperProps}>
-          <canvasgroup {...NEUTRAL_PROPS} {...contentBehaviorProps} ref={setContentRef as React.Ref<CanvasGroup>}>
+          <frame {...NEUTRAL_PROPS} {...contentBehaviorProps} ref={setContentRef as React.Ref<Frame>}>
             {React.cloneElement(child as React.ReactElement<GuiPropBag>, {
               // No neutral defaults here: the rendered element belongs to the consumer.
               ...childProps,
@@ -163,7 +163,7 @@ function TooltipContentImpl(props: {
               Visible: contentVisible,
               ref: composeRefs(childRef),
             })}
-          </canvasgroup>
+          </frame>
         </frame>
       </DismissableLayer>
     );
@@ -179,9 +179,9 @@ function TooltipContentImpl(props: {
       contentBoundaryRef={contentBoundaryRef}
     >
       <frame {...wrapperProps}>
-        <canvasgroup {...NEUTRAL_PROPS} {...passthrough} {...contentBehaviorProps} ref={setContentRef}>
+        <frame {...NEUTRAL_PROPS} {...passthrough} {...contentBehaviorProps} ref={setContentRef}>
           {props.children}
-        </canvasgroup>
+        </frame>
       </frame>
     </DismissableLayer>
   );
@@ -190,7 +190,7 @@ function TooltipContentImpl(props: {
 export function TooltipContent(props: TooltipContentProps) {
   const tooltipContext = useTooltipContext();
   const open = tooltipContext.open;
-  const passthrough = getPassthroughProps<CanvasGroup>(props, OWN_PROPS);
+  const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 
   if (props.forceMount) {
     return (

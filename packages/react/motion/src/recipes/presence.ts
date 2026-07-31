@@ -30,6 +30,9 @@ export function createSurfaceRevealRecipe(
   };
 }
 
+// No part renders a `CanvasGroup` host any more, so this and the popper variant below are for
+// consumers who supply their own `canvasgroup` through `asChild` and want the whole subtree to fade
+// as one composited layer. `createSurfaceRevealRecipe` is the `Frame` counterpart.
 export function createCanvasGroupRevealRecipe(
   offsetY: number = motionOffset.surface,
   duration: number = motionDuration.reveal,
@@ -60,13 +63,13 @@ export function createCanvasGroupRevealRecipe(
 export function createToastRevealRecipe(duration: number = motionDuration.toast): PresenceMotionConfig {
   return {
     target: motionTargets.appearance("toast reveal"),
-    initial: { GroupTransparency: 1 },
+    initial: { BackgroundTransparency: 1 },
     reveal: {
-      values: { GroupTransparency: 0 },
+      values: { BackgroundTransparency: 0 },
       intent: { duration, tempo: "swift", tone: "calm" },
     },
     exit: {
-      values: { GroupTransparency: 1 },
+      values: { BackgroundTransparency: 1 },
       intent: { duration: motionExitDuration(duration), tempo: "swift", tone: "calm" },
     },
   };
@@ -117,6 +120,8 @@ export function createPopperEntranceRecipe(
   };
 }
 
+// See `createCanvasGroupRevealRecipe`: for consumer-owned `canvasgroup` content only.
+// `createPopperEntranceRecipe` is the `Frame` counterpart.
 export function createCanvasGroupPopperEntranceRecipe(
   placement?: MotionPlacement,
   distance: number = motionOffset.popper,

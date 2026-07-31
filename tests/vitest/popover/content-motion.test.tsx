@@ -87,7 +87,7 @@ function setGuiDefaults() {
   prototype.AnchorPoint = new Vector2(0, 0);
   prototype.Position = UDim2.fromOffset(0, 0);
   prototype.Size = UDim2.fromOffset(0, 0);
-  prototype.GroupTransparency = 0;
+  prototype.BackgroundTransparency = 0;
 }
 
 function clearGuiDefaults() {
@@ -95,7 +95,7 @@ function clearGuiDefaults() {
   delete prototype.AnchorPoint;
   delete prototype.Position;
   delete prototype.Size;
-  delete prototype.GroupTransparency;
+  delete prototype.BackgroundTransparency;
 }
 
 vi.mock("@lattice-ui/react-runtime", async () => {
@@ -234,7 +234,7 @@ vi.mock("@lattice-ui/react-popper", () => ({
   usePopper: () => mockPopperResult,
 }));
 
-import { createCanvasGroupPopperEntranceRecipe } from "@lattice-ui/react-motion";
+import { createPopperEntranceRecipe } from "@lattice-ui/react-motion";
 import { Popover } from "@lattice-ui/react-popover";
 
 beforeEach(() => {
@@ -257,7 +257,7 @@ describe("Popover.Content motion host", () => {
   it("keeps positioning on the outer host and animates asChild content relative to it", () => {
     const { getByTestId } = render(
       <Popover.Root open={true}>
-        <Popover.Content asChild transition={createCanvasGroupPopperEntranceRecipe("bottom")}>
+        <Popover.Content asChild transition={createPopperEntranceRecipe("bottom")}>
           <div data-testid="content" />
         </Popover.Content>
       </Popover.Root>,

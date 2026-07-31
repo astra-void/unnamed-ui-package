@@ -47,7 +47,7 @@ export type ToastRootProps = {
   visible?: boolean;
   onExitComplete?: () => void;
   children?: React.ReactNode;
-} & PassthroughProps<CanvasGroup>;
+} & PassthroughProps<Frame>;
 
 export type ToastTitleProps = {
   asChild?: boolean;
