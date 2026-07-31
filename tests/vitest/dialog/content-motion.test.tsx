@@ -174,12 +174,12 @@ describe("Dialog.Content motion regressions", () => {
   it("applies the provided presence transition to the dialog-owned motion host and waits for exit completion before unmounting", async () => {
     const customTransition: PresenceMotionConfig = {
       initial: {
-        GroupTransparency: 1,
+        BackgroundTransparency: 1,
         Position: UDim2.fromOffset(0, 10),
       },
       reveal: {
         values: {
-          GroupTransparency: 0.4,
+          BackgroundTransparency: 0.4,
           Position: UDim2.fromOffset(0, 0),
         },
         intent: {
@@ -190,7 +190,7 @@ describe("Dialog.Content motion regressions", () => {
       },
       exit: {
         values: {
-          GroupTransparency: 0.85,
+          BackgroundTransparency: 0.85,
           Position: UDim2.fromOffset(0, 12),
         },
         intent: {
@@ -211,14 +211,14 @@ describe("Dialog.Content motion regressions", () => {
 
     const content = getByTestId("content");
     const motionHost = content.parentElement as HTMLElement & Record<string, unknown>;
-    expect(motionHost.tagName.toLowerCase()).toBe("canvasgroup");
-    expect(motionHost.GroupTransparency).toBe(1);
+    expect(motionHost.tagName.toLowerCase()).toBe("frame");
+    expect(motionHost.BackgroundTransparency).toBe(1);
 
     act(() => {
       runService.step(1);
     });
 
-    expect(motionHost.GroupTransparency).toBe(0.4);
+    expect(motionHost.BackgroundTransparency).toBe(0.4);
 
     rerender(
       <Dialog.Root open={false}>
@@ -235,7 +235,7 @@ describe("Dialog.Content motion regressions", () => {
       await Promise.resolve();
     });
 
-    expect(motionHost.GroupTransparency).toBe(0.85);
+    expect(motionHost.BackgroundTransparency).toBe(0.85);
     expect(queryByTestId("content")).toBeNull();
   });
 

@@ -127,7 +127,7 @@ function DialogContentImpl(props: {
   onInteractOutside?: (event: LayerInteractEvent) => void;
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
   children?: React.ReactNode;
-  passthrough: PassthroughProps<CanvasGroup>;
+  passthrough: PassthroughProps<Frame>;
 }) {
   const dialogContext = useDialogContext();
   const open = dialogContext.open;
@@ -137,7 +137,7 @@ function DialogContentImpl(props: {
 
   const config = props.transition ?? NO_MOTION;
 
-  const motion = usePresenceMotionController<CanvasGroup>({
+  const motion = usePresenceMotionController<Frame>({
     present: props.motionPresent,
     forceMount: props.forceMount,
     config,
@@ -213,7 +213,7 @@ function DialogContentImpl(props: {
     // layer geometry, not a size design choice.
     Size: UDim2.fromScale(1, 1),
     Visible: motionVisible,
-    ref: composeRefs<CanvasGroup>(passthrough.ref as never, motion.ref),
+    ref: composeRefs<Frame>(passthrough.ref as never, motion.ref),
   };
 
   return (
@@ -229,9 +229,9 @@ function DialogContentImpl(props: {
       <FocusScope active={open} restoreFocus={props.restoreFocus} trapped={props.trapFocus}>
         {/* Layer host: full-screen and ZIndex-stacked above the overlay. Layering, not appearance. */}
         <frame {...NEUTRAL_PROPS} Size={UDim2.fromScale(1, 1)} Visible={shouldRender} ZIndex={10}>
-          <canvasgroup {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
+          <frame {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
             {renderedChildren.content}
-          </canvasgroup>
+          </frame>
         </frame>
       </FocusScope>
     </DismissableLayer>
@@ -243,7 +243,7 @@ export function DialogContent(props: DialogContentProps) {
   const open = dialogContext.open;
   const trapFocus = props.trapFocus ?? true;
   const restoreFocus = props.restoreFocus ?? true;
-  const passthrough = getPassthroughProps<CanvasGroup>(props, OWN_PROPS);
+  const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 
   if (props.forceMount) {
     return (

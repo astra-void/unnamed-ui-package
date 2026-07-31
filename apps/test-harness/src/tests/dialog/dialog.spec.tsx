@@ -28,15 +28,15 @@ function requireGuiObjectParent(instance: Instance | undefined, message: string)
   return parent as GuiObject;
 }
 
-function requireCanvasGroupParent(instance: Instance | undefined, message: string) {
+function requireFrameParent(instance: Instance | undefined, message: string) {
   const parent = instance?.Parent;
-  assert(parent?.IsA("CanvasGroup"), message);
-  return parent as CanvasGroup;
+  assert(parent?.IsA("Frame"), message);
+  return parent as Frame;
 }
 
-function getCanvasGroupAbsoluteRect(canvasGroup: CanvasGroup) {
-  const topLeft = canvasGroup.AbsolutePosition;
-  const size = canvasGroup.AbsoluteSize;
+function getFrameAbsoluteRect(frame: Frame) {
+  const topLeft = frame.AbsolutePosition;
+  const size = frame.AbsoluteSize;
   return {
     minX: topLeft.X,
     minY: topLeft.Y,
@@ -122,9 +122,9 @@ export = () => {
         const panel = panelRef.current;
         assert(panel !== undefined, "Normal Frame dialog content should mount without crashing.");
 
-        const motionHost = requireCanvasGroupParent(
+        const motionHost = requireFrameParent(
           panel,
-          "Dialog should wrap normal Frame content in a panel-owned CanvasGroup motion host.",
+          "Dialog should wrap normal Frame content in a panel-owned Frame motion host.",
         );
         const layoutHost = requireGuiObjectParent(
           motionHost,
@@ -175,11 +175,11 @@ export = () => {
           "Dialog panel should mount so the outside-hit boundary can be evaluated against the actual surface.",
         );
 
-        const motionHost = requireCanvasGroupParent(
+        const motionHost = requireFrameParent(
           panel,
-          "Dialog panel should render inside the panel-owned CanvasGroup motion host.",
+          "Dialog panel should render inside the panel-owned Frame motion host.",
         );
-        const motionHostRect = getCanvasGroupAbsoluteRect(motionHost);
+        const motionHostRect = getFrameAbsoluteRect(motionHost);
         const outsidePoint = createPointerInput(
           panel.AbsolutePosition.X + panel.AbsoluteSize.X + 24,
           panel.AbsolutePosition.Y + 12,
@@ -290,7 +290,7 @@ export = () => {
 
         const openPanel = panelRef.current;
         assert(openPanel !== undefined, "Force-mounted dialog panel should mount while open.");
-        const openMotionHost = requireCanvasGroupParent(
+        const openMotionHost = requireFrameParent(
           openPanel,
           "Force-mounted dialog panel should stay inside the panel-owned motion host while open.",
         );
@@ -306,7 +306,7 @@ export = () => {
           exitingPanel !== undefined,
           "Force-mounted dialog panel should remain mounted while exit motion starts.",
         );
-        const exitingMotionHost = requireCanvasGroupParent(
+        const exitingMotionHost = requireFrameParent(
           exitingPanel,
           "Force-mounted dialog panel should stay inside the motion host during exit.",
         );
@@ -320,7 +320,7 @@ export = () => {
 
         assert(
           panelRef.current !== undefined &&
-            requireCanvasGroupParent(
+            requireFrameParent(
               panelRef.current,
               "Force-mounted dialog panel should stay inside the motion host during close motion.",
             ).Position.Y.Offset > 0,
@@ -341,7 +341,7 @@ export = () => {
         const hiddenPanel = panelRef.current;
         assert(hiddenPanel !== undefined, "Force-mounted dialog panel should stay mounted after closing.");
         assert(
-          !requireCanvasGroupParent(hiddenPanel, "Force-mounted dialog host should still exist after close.").Visible,
+          !requireFrameParent(hiddenPanel, "Force-mounted dialog host should still exist after close.").Visible,
           "Force-mounted dialog motion host should hide only after the panel exit motion completes.",
         );
         assert(
@@ -477,9 +477,9 @@ export = () => {
         assert(panel !== undefined, "Fragment-wrapped dialog panel should mount.");
         assert(overlay !== undefined, "Fragment-wrapped dialog overlay should mount.");
 
-        const motionHost = requireCanvasGroupParent(
+        const motionHost = requireFrameParent(
           panel,
-          "Fragment-wrapped dialog panel should render inside the panel-owned CanvasGroup motion host.",
+          "Fragment-wrapped dialog panel should render inside the panel-owned Frame motion host.",
         );
         const layoutHost = requireGuiObjectParent(
           motionHost,
@@ -519,8 +519,8 @@ export = () => {
         waitForEffects(2);
         assert(
           panelRef.current !== undefined &&
-            requireCanvasGroupParent(panelRef.current, "Dialog panel should still be inside the motion host.").Position
-              .Y.Offset === 0,
+            requireFrameParent(panelRef.current, "Dialog panel should still be inside the motion host.").Position.Y
+              .Offset === 0,
           "Dialog motion host should settle back to its base position after enter motion.",
         );
 
@@ -537,10 +537,8 @@ export = () => {
         waitForEffects(1);
         assert(
           panelRef.current !== undefined &&
-            requireCanvasGroupParent(
-              panelRef.current,
-              "Dialog panel should stay inside the motion host during close motion.",
-            ).Position.Y.Offset > 0,
+            requireFrameParent(panelRef.current, "Dialog panel should stay inside the motion host during close motion.")
+              .Position.Y.Offset > 0,
           "Dialog motion host should continue moving during close motion.",
         );
         assert(
