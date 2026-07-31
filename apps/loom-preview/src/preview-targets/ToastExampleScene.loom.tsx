@@ -45,7 +45,7 @@ function ToastExampleContent() {
               onExitComplete={() => toast.finalize(record.id)}
               visible={!record.exiting}
             >
-              <canvasgroup
+              <frame
                 BackgroundColor3={theme.colors.surfaceElevated}
                 BorderSizePixel={0}
                 Size={UDim2.fromOffset(340, 64)}
@@ -96,7 +96,7 @@ function ToastExampleContent() {
                     TextSize={12}
                   />
                 </Toast.Close>
-              </canvasgroup>
+              </frame>
             </Toast.Root>
           ))}
         </frame>

@@ -353,7 +353,7 @@ function PartyCard() {
               onExitComplete={() => toast.finalize(record.id)}
               visible={!record.exiting}
             >
-              <canvasgroup
+              <frame
                 BackgroundColor3={theme.colors.surfaceElevated}
                 BorderSizePixel={0}
                 Size={UDim2.fromOffset(340, 62)}
@@ -404,7 +404,7 @@ function PartyCard() {
                     TextSize={12}
                   />
                 </Toast.Close>
-              </canvasgroup>
+              </frame>
             </Toast.Root>
           ))}
         </frame>
