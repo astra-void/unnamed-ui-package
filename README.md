@@ -128,7 +128,7 @@ Workspaces:
 - `apps/test-harness` — Roblox TestEZ harness for package-level behavior checks.
 - `apps/loom-preview` — typecheck-only preview integration workspace.
 
-See [AGENTS.md](AGENTS.md) for repository conventions and contribution guidance.
+See [CONTRIBUTING.md](CONTRIBUTING.md) to get set up and send a change, and [AGENTS.md](AGENTS.md) for the full repository conventions.
 
 ## Stability and Versioning
 
