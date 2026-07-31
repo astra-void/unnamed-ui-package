@@ -6,19 +6,24 @@ import {
   composeRefs,
   getElementRef,
   getPassthroughProps,
+  mergeSlotModifiers,
   type PassthroughProps,
   React,
+  resolveSlotChildren,
 } from "@lattice-ui/react-runtime";
 import { useDialogContext } from "./context";
 import type { DialogContentProps } from "./types";
 
 type InstanceRef = React.Ref<Instance> | React.ForwardedRef<Instance>;
 
+type GuiPropBag = React.Attributes & Record<string, unknown>;
+
 const OWN_PROPS = [
   "transition",
   "forceMount",
   "trapFocus",
   "restoreFocus",
+  "asChild",
   "onPointerDownOutside",
   "onInteractOutside",
   "children",
@@ -82,6 +87,10 @@ function isHostElement(child: React.ReactElement) {
   return typeIs((child as { type?: unknown }).type, "string");
 }
 
+function toGuiPropBag(value: unknown): GuiPropBag {
+  return typeIs(value, "table") ? (value as GuiPropBag) : {};
+}
+
 function cloneChildrenWithBoundaryRefs(
   children: React.ReactNode,
   nextBoundaryIndex: { current: number },
@@ -126,6 +135,7 @@ function DialogContentImpl(props: {
   restoreFocus?: boolean;
   onInteractOutside?: (event: LayerInteractEvent) => void;
   onPointerDownOutside?: (event: LayerInteractEvent) => void;
+  asChild?: boolean;
   children?: React.ReactNode;
   passthrough: PassthroughProps<Frame>;
 }) {
@@ -166,16 +176,28 @@ function DialogContentImpl(props: {
     [ensureInsideBoundaryRef],
   );
 
+  const slot = React.useMemo(
+    () => (props.asChild ? resolveSlotChildren(props.children) : undefined),
+    [props.asChild, props.children],
+  );
+  const slotChild = slot?.target;
+  const slotChildProps = toGuiPropBag((slotChild as { props?: unknown } | undefined)?.props);
+
+  // Under `asChild` the consumer's element *is* the layer-spanning motion host, so the
+  // outside-press boundary moves one level down: it is that element's own first host child, which
+  // is the same panel a plain dialog renders directly under Content.
+  const boundarySource = props.asChild ? (slotChildProps.children as React.ReactNode) : props.children;
+
   const renderedChildren = React.useMemo(() => {
     const nextBoundaryIndex = { current: 0 };
     const content = cloneChildrenWithBoundaryRefs(
-      props.children,
+      boundarySource,
       nextBoundaryIndex,
       ensureInsideBoundaryRef,
       setBoundaryRef,
     );
     return { content, boundaryCount: nextBoundaryIndex.current };
-  }, [ensureInsideBoundaryRef, props.children, setBoundaryRef]);
+  }, [boundarySource, ensureInsideBoundaryRef, setBoundaryRef]);
 
   const insideBoundaryRefs = React.useMemo(() => {
     const refs: React.MutableRefObject<GuiObject | undefined>[] = [];
@@ -208,13 +230,37 @@ function DialogContentImpl(props: {
   }, [dialogContext.setOpen]);
 
   const passthrough = props.passthrough;
+  const hostRef = composeRefs<Frame>(passthrough.ref as never, motion.ref);
   const behaviorProps = {
     // The motion host spans the layer so the consumer's own children lay themselves out inside it:
     // layer geometry, not a size design choice.
     Size: UDim2.fromScale(1, 1),
     Visible: motionVisible,
-    ref: composeRefs<Frame>(passthrough.ref as never, motion.ref),
   };
+
+  const contentNode = props.asChild ? (
+    (() => {
+      if (!slotChild) {
+        error("[DialogContent] `asChild` requires a child element.");
+      }
+
+      const childRef = getElementRef<Instance>(slotChild as React.ReactElement);
+
+      // No neutral defaults here: the rendered element belongs to the consumer. Size stays owned,
+      // because it is the layer geometry this element inherits by standing in for the host.
+      return React.cloneElement(slotChild as React.ReactElement<GuiPropBag>, {
+        ...slotChildProps,
+        children: mergeSlotModifiers(slot?.modifiers ?? [], renderedChildren.content),
+        ...passthrough,
+        ...behaviorProps,
+        ref: composeRefs<Instance>(childRef, hostRef as never),
+      });
+    })()
+  ) : (
+    <frame {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps} ref={hostRef}>
+      {renderedChildren.content}
+    </frame>
+  );
 
   return (
     <DismissableLayer
@@ -229,9 +275,7 @@ function DialogContentImpl(props: {
       <FocusScope active={open} restoreFocus={props.restoreFocus} trapped={props.trapFocus}>
         {/* Layer host: full-screen and ZIndex-stacked above the overlay. Layering, not appearance. */}
         <frame {...NEUTRAL_PROPS} Size={UDim2.fromScale(1, 1)} Visible={shouldRender} ZIndex={10}>
-          <frame {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
-            {renderedChildren.content}
-          </frame>
+          {contentNode}
         </frame>
       </FocusScope>
     </DismissableLayer>
@@ -248,6 +292,7 @@ export function DialogContent(props: DialogContentProps) {
   if (props.forceMount) {
     return (
       <DialogContentImpl
+        asChild={props.asChild}
         motionPresent={open}
         forceMount={true}
         trapFocus={trapFocus}
@@ -267,6 +312,7 @@ export function DialogContent(props: DialogContentProps) {
       present={open}
       render={(state) => (
         <DialogContentImpl
+          asChild={props.asChild}
           motionPresent={state.isPresent}
           onExitComplete={state.onExitComplete}
           trapFocus={trapFocus}

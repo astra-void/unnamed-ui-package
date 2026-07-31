@@ -39,6 +39,7 @@ export type DialogOverlayProps = {
 } & PassthroughProps<TextButton>;
 
 export type DialogContentProps = {
+  asChild?: boolean;
   transition?: PresenceMotionConfig;
   forceMount?: boolean;
   trapFocus?: boolean;

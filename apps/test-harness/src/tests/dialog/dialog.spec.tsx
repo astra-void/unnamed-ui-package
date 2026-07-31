@@ -203,6 +203,57 @@ export = () => {
       });
     });
 
+    it("moves the outside-hit boundary one level down when the motion host is an asChild element", () => {
+      withReactHarness("DialogAsChildHitBoundary", (harness) => {
+        const hostRef = React.createRef<CanvasGroup>();
+        const panelRef = React.createRef<Frame>();
+
+        harness.render(
+          <PortalProvider container={harness.playerGui}>
+            <Dialog.Root defaultOpen={true}>
+              <Dialog.Portal>
+                <Dialog.Content asChild={true}>
+                  <canvasgroup ref={hostRef}>
+                    <frame Position={UDim2.fromOffset(80, 64)} Size={UDim2.fromOffset(180, 120)} ref={panelRef} />
+                  </canvasgroup>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+          </PortalProvider>,
+        );
+
+        waitForEffects(2);
+
+        const host = hostRef.current;
+        const panel = panelRef.current;
+        assert(host !== undefined, "The asChild element should render in place of the dialog-owned motion host.");
+        assert(panel !== undefined, "The panel inside an asChild host should mount.");
+        assert(panel.Parent === host, "The panel should stay a direct child of the asChild element.");
+
+        const viewportSize = getViewportSize();
+        assertWithinTolerance(
+          host.AbsoluteSize.X,
+          viewportSize.X,
+          1,
+          "The asChild host should inherit the layer geometry the dialog owns.",
+        );
+
+        const outsidePoint = createPointerInput(
+          panel.AbsolutePosition.X + panel.AbsoluteSize.X + 24,
+          panel.AbsolutePosition.Y + 12,
+        );
+
+        assert(
+          !isOutsidePointerEvent(outsidePoint, harness.playerGui, host, { layerIgnoresGuiInset: true }),
+          "The layer-spanning asChild host would swallow every outside hit if it were the boundary.",
+        );
+        assert(
+          isOutsidePointerEvent(outsidePoint, harness.playerGui, panel, { layerIgnoresGuiInset: true }),
+          "The boundary should be the first host child of the asChild element, not the element itself.",
+        );
+      });
+    });
+
     it("keeps content mounted when forceMount is true while closed", () => {
       withReactHarness("DialogForceMount", (harness) => {
         harness.render(

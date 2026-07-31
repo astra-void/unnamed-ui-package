@@ -51,6 +51,7 @@ const { runService } = vi.hoisted(() => {
 vi.mock("@lattice-ui/react-runtime", async () => {
   const runtimeProps = await import("../../../packages/react/runtime/src/props");
   const runtimeRefs = await import("../../../packages/react/runtime/src/refs");
+  const runtimeSlot = await import("../../../packages/react/runtime/src/slot");
   const React = require("react");
 
   function Slot(props: { children?: React.ReactNode; ref?: React.Ref<unknown> } & Record<string, unknown>) {
@@ -107,6 +108,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
     getPassthroughProps: runtimeProps.getPassthroughProps,
     toSlotProps: runtimeProps.toSlotProps,
     composeRefs: runtimeRefs.composeRefs,
+    mergeSlotModifiers: runtimeSlot.mergeSlotModifiers,
+    resolveSlotChildren: runtimeSlot.resolveSlotChildren,
     React,
     Slot,
     getElementRef,
@@ -237,6 +240,41 @@ describe("Dialog.Content motion regressions", () => {
 
     expect(motionHost.BackgroundTransparency).toBe(0.85);
     expect(queryByTestId("content")).toBeNull();
+  });
+
+  it("animates the asChild element itself instead of nesting it in a dialog-owned host", () => {
+    const fadeSubtree: PresenceMotionConfig = {
+      initial: { GroupTransparency: 1 },
+      reveal: {
+        values: { GroupTransparency: 0 },
+        intent: { duration: 0.2, tempo: "steady", tone: "calm" },
+      },
+    };
+
+    const { getByTestId } = render(
+      <Dialog.Root open={true}>
+        <Dialog.Content asChild transition={fadeSubtree}>
+          <canvasgroup data-testid="host">
+            <div data-testid="panel" />
+          </canvasgroup>
+        </Dialog.Content>
+      </Dialog.Root>,
+    );
+
+    const host = getByTestId("host") as HTMLElement & Record<string, unknown>;
+    const panel = getByTestId("panel");
+
+    // The consumer element replaces the motion host rather than sitting inside one, so a
+    // GroupTransparency fade reaches the whole subtree.
+    expect(host.tagName.toLowerCase()).toBe("canvasgroup");
+    expect(panel.parentElement).toBe(host);
+    expect(host.GroupTransparency).toBe(1);
+
+    act(() => {
+      runService.step(1);
+    });
+
+    expect(host.GroupTransparency).toBe(0);
   });
 
   it("preserves forceMount when closed", () => {
