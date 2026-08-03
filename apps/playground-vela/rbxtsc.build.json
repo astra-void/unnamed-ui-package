@@ -4,6 +4,19 @@
     "rootDir": "src",
     "outDir": "out",
     "declaration": false,
+    "baseUrl": ".",
+    // vela's inlined runtime helper imports `@rbxts/react` from this app's own
+    // sources. Every workspace-linked Lattice package carries a nested
+    // `node_modules/@rbxts/react` of its own, and roblox-ts resolves through one
+    // of those instead of the copy `scripts/materialize-rbxts.cjs` puts here —
+    // emitting a require path through `@lattice-ui/react-layer/node_modules/...`
+    // that no `$path` in `default.project.json` covers. Pinning the scope keeps
+    // resolution on the local copies, which Rojo does sync.
+    "paths": {
+      "@rbxts/react": ["node_modules/@rbxts/react"],
+      "@rbxts/react-roblox": ["node_modules/@rbxts/react-roblox"],
+      "@rbxts/services": ["node_modules/@rbxts/services"]
+    },
     "typeRoots": [
       "./node_modules/@rbxts",
       "../../node_modules/@rbxts",

@@ -482,7 +482,13 @@ function AppContent(props: PlaygroundWorkspaceProps) {
             Size={new UDim2(1, -32, 0, 104)}
             className="bg-surface rounded-lg border border-edge px-4 py-3"
           >
-            <frame Size={new UDim2(1, -266, 1, 0)}>
+            {/*
+              `bg-transparent` is load-bearing. Preflight only neutralizes the
+              Roblox defaults on elements that carry a `className`, so a bare
+              `<frame>` keeps the engine's opaque gray fill — this one painted a
+              box behind the header text until it got a class.
+            */}
+            <frame Size={new UDim2(1, -266, 1, 0)} className="bg-transparent">
               <textlabel
                 Size={new UDim2(1, 0, 0, 30)}
                 Text="Lattice UI Playground · vela"
