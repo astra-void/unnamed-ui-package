@@ -18,3 +18,17 @@ onlyBuiltDependencies:
   - esbuild
 
 nodeLinker: hoisted
+
+minimumReleaseAgeExclude:
+  - '@vela-rbxts/compiler-darwin-arm64@0.5.2'
+  - '@vela-rbxts/compiler-darwin-x64@0.5.2'
+  - '@vela-rbxts/compiler-linux-arm64-gnu@0.5.2'
+  - '@vela-rbxts/compiler-linux-x64-gnu@0.5.2'
+  - '@vela-rbxts/compiler-linux-x64-musl@0.5.2'
+  - '@vela-rbxts/compiler-win32-x64-msvc@0.5.2'
+  - '@vela-rbxts/compiler@0.5.2'
+  - '@vela-rbxts/config@0.5.2'
+  - '@vela-rbxts/ir@0.5.2'
+  - '@vela-rbxts/rbxtsc-host@0.5.2'
+  - '@vela-rbxts/types@0.5.2'
+  - vela-rbxts@0.5.2

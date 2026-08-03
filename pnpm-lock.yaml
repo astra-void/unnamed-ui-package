@@ -305,6 +305,103 @@ importers:
         specifier: 17.3.7-ts.1
         version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
 
+  apps/playground-vela:
+    dependencies:
+      '@lattice-ui/react-accordion':
+        specifier: workspace:*
+        version: link:../../packages/react/accordion
+      '@lattice-ui/react-avatar':
+        specifier: workspace:*
+        version: link:../../packages/react/avatar
+      '@lattice-ui/react-checkbox':
+        specifier: workspace:*
+        version: link:../../packages/react/checkbox
+      '@lattice-ui/react-combobox':
+        specifier: workspace:*
+        version: link:../../packages/react/combobox
+      '@lattice-ui/react-context-menu':
+        specifier: workspace:*
+        version: link:../../packages/react/context-menu
+      '@lattice-ui/react-dialog':
+        specifier: workspace:*
+        version: link:../../packages/react/dialog
+      '@lattice-ui/react-focus':
+        specifier: workspace:*
+        version: link:../../packages/react/focus
+      '@lattice-ui/react-layer':
+        specifier: workspace:*
+        version: link:../../packages/react/layer
+      '@lattice-ui/react-menu':
+        specifier: workspace:*
+        version: link:../../packages/react/menu
+      '@lattice-ui/react-motion':
+        specifier: workspace:*
+        version: link:../../packages/react/motion
+      '@lattice-ui/react-popover':
+        specifier: workspace:*
+        version: link:../../packages/react/popover
+      '@lattice-ui/react-popper':
+        specifier: workspace:*
+        version: link:../../packages/react/popper
+      '@lattice-ui/react-progress':
+        specifier: workspace:*
+        version: link:../../packages/react/progress
+      '@lattice-ui/react-radio-group':
+        specifier: workspace:*
+        version: link:../../packages/react/radio-group
+      '@lattice-ui/react-runtime':
+        specifier: workspace:*
+        version: link:../../packages/react/runtime
+      '@lattice-ui/react-scroll-area':
+        specifier: workspace:*
+        version: link:../../packages/react/scroll-area
+      '@lattice-ui/react-select':
+        specifier: workspace:*
+        version: link:../../packages/react/select
+      '@lattice-ui/react-slider':
+        specifier: workspace:*
+        version: link:../../packages/react/slider
+      '@lattice-ui/react-style':
+        specifier: workspace:*
+        version: link:../../packages/react/style
+      '@lattice-ui/react-switch':
+        specifier: workspace:*
+        version: link:../../packages/react/switch
+      '@lattice-ui/react-system':
+        specifier: workspace:*
+        version: link:../../packages/react/system
+      '@lattice-ui/react-tabs':
+        specifier: workspace:*
+        version: link:../../packages/react/tabs
+      '@lattice-ui/react-text-field':
+        specifier: workspace:*
+        version: link:../../packages/react/text-field
+      '@lattice-ui/react-textarea':
+        specifier: workspace:*
+        version: link:../../packages/react/textarea
+      '@lattice-ui/react-toast':
+        specifier: workspace:*
+        version: link:../../packages/react/toast
+      '@lattice-ui/react-toggle-group':
+        specifier: workspace:*
+        version: link:../../packages/react/toggle-group
+      '@lattice-ui/react-tooltip':
+        specifier: workspace:*
+        version: link:../../packages/react/tooltip
+      vela-rbxts:
+        specifier: ^0.5.2
+        version: 0.5.2
+    devDependencies:
+      '@rbxts/react':
+        specifier: 17.3.7-ts.1
+        version: 17.3.7-ts.1
+      '@rbxts/react-roblox':
+        specifier: 17.3.7-ts.1
+        version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
+      '@rbxts/services':
+        specifier: ^1.6.0
+        version: 1.6.0
+
   apps/test-harness:
     dependencies:
       '@lattice-ui/react-accordion':
@@ -1705,6 +1802,65 @@ packages:
     resolution: {integrity: sha512-XJ9UD9+bbDo4a4epraTwG3TsNPeiB9aShrUneAVXy8q4LuwowN+qu89/6ByLMINqvIMeI9H9hOHQtg/ijrYXzQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@vela-rbxts/compiler-darwin-arm64@0.5.2':
+    resolution: {integrity: sha512-U1AvXGisBhi64KNbHSxl3zLK/fuJKbVPtFVBTgEfXm4L62lqip+gmRIOscHBtKP+I6o7cwSaI4pLrZEp0B8zQQ==}
+    engines: {node: '>=20'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@vela-rbxts/compiler-darwin-x64@0.5.2':
+    resolution: {integrity: sha512-yAXgoIXTJCnoutjpaCTNiaMTVi9vCyc2IobiLDHX954rTMgk/7KTl3I43+2ZCtRtOX+E1xikq0ftmnits7jr8Q==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@vela-rbxts/compiler-linux-arm64-gnu@0.5.2':
+    resolution: {integrity: sha512-V7YDy2ZUGKuZLdkbUXX4me2cxHTOrBlOU7dY1McZ6On1UJ/Ow1ZRyr017w+N4b6lBGU+NTsSRPls0GUWWY1G/Q==}
+    engines: {node: '>=20'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@vela-rbxts/compiler-linux-x64-gnu@0.5.2':
+    resolution: {integrity: sha512-iOTHvBrJLO6fyWtGXFqCci6QYbQpCKrafVg0aKrKGw0ivwqkh4AuKwZ1VnkIXB3HIilL/nwvMP2EZm0bjWRF/g==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@vela-rbxts/compiler-linux-x64-musl@0.5.2':
+    resolution: {integrity: sha512-yDS5uS158YBfcC1bc/oT74IVo1Yh0gWIbekFuB+/THWLqqEVnyLWeXEW0I+HeO/4GL8xrPmLkbDziBNI3ObqGQ==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@vela-rbxts/compiler-win32-x64-msvc@0.5.2':
+    resolution: {integrity: sha512-Ls01JPM17iaMGVk3JdfCfwJ2vXz/7gyj4yUBMjInDdluMYXx6ZPiFIbMS6och9ZkgDWoz2t9nOt8kfh6ppNEtQ==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [win32]
+
+  '@vela-rbxts/compiler@0.5.2':
+    resolution: {integrity: sha512-bxwfof7rr/JSWHzAKIw00a7MSEGmBpkbDQDfzwp9nOwcx8Byf5dnXiD/shDt51phrj0xD6oyYcau6ft+UQjKYg==}
+    engines: {node: '>=20'}
+
+  '@vela-rbxts/config@0.5.2':
+    resolution: {integrity: sha512-ULgph9s+mf3GwsRZXhq+pWVNrpyatmGht/xTkQvKUwec7jqXMVPGjfxEMKilwBjHFSmGDftJQ+u6+Nvj142spQ==}
+    engines: {node: '>=20'}
+
+  '@vela-rbxts/ir@0.5.2':
+    resolution: {integrity: sha512-AayBnZt7thHrMrSM/kxp1ZG4/08rHwCVoS8CfnWeaIuija9OV7KLkk3RdYNQytEC6BCkkunMKKZpQpyMD5PMyQ==}
+    engines: {node: '>=20'}
+
+  '@vela-rbxts/rbxtsc-host@0.5.2':
+    resolution: {integrity: sha512-kwsp0+oqqOpj/fYi3mSCwifgdvl+ywgQU/VdGmvj4Nh6tEDGctWBFfCLm4zMArdu26FIDd6fw+SJjPE15tQLLQ==}
+    engines: {node: '>=20'}
+
+  '@vela-rbxts/types@0.5.2':
+    resolution: {integrity: sha512-DhIOw0sPauqqFVI8EJe8hcW+fWMG0+zCgOlCFIbNFUV4f7qnSq65vJYnD5sstnOesC2egXrHntWvfCAuoCgcVw==}
+    engines: {node: '>=20'}
+
   '@vitejs/plugin-react@6.0.1':
     resolution: {integrity: sha512-l9X/E3cDb+xY3SWzlG1MOGt2usfEHGMNIaegaUGFsLkb3RCn/k8/TOXBcab+OndDI4TBtktT8/9BwwW8Vi9KUQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -2699,6 +2855,10 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
+  vela-rbxts@0.5.2:
+    resolution: {integrity: sha512-TQkhbFbAUQR5mHmSkHV6EQmiFUPVlGzPrx8QcNS0UfGw201BJmG8lJhANsCStxWn4uP//d5dOkn6BLZCHgZI8A==}
+    engines: {node: '>=20'}
+
   vite@8.0.8:
     resolution: {integrity: sha512-dbU7/iLVa8KZALJyLOBOQ88nOXtNG8vxKuOT4I2mD+Ya70KPceF4IAmDsmU0h1Qsn5bPrvsY9HJstCRh3hG6Uw==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -3641,6 +3801,50 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.58.0
       eslint-visitor-keys: 5.0.1
+
+  '@vela-rbxts/compiler-darwin-arm64@0.5.2':
+    optional: true
+
+  '@vela-rbxts/compiler-darwin-x64@0.5.2':
+    optional: true
+
+  '@vela-rbxts/compiler-linux-arm64-gnu@0.5.2':
+    optional: true
+
+  '@vela-rbxts/compiler-linux-x64-gnu@0.5.2':
+    optional: true
+
+  '@vela-rbxts/compiler-linux-x64-musl@0.5.2':
+    optional: true
+
+  '@vela-rbxts/compiler-win32-x64-msvc@0.5.2':
+    optional: true
+
+  '@vela-rbxts/compiler@0.5.2':
+    optionalDependencies:
+      '@vela-rbxts/compiler-darwin-arm64': 0.5.2
+      '@vela-rbxts/compiler-darwin-x64': 0.5.2
+      '@vela-rbxts/compiler-linux-arm64-gnu': 0.5.2
+      '@vela-rbxts/compiler-linux-x64-gnu': 0.5.2
+      '@vela-rbxts/compiler-linux-x64-musl': 0.5.2
+      '@vela-rbxts/compiler-win32-x64-msvc': 0.5.2
+
+  '@vela-rbxts/config@0.5.2':
+    dependencies:
+      '@vela-rbxts/types': 0.5.2
+
+  '@vela-rbxts/ir@0.5.2':
+    dependencies:
+      '@vela-rbxts/types': 0.5.2
+
+  '@vela-rbxts/rbxtsc-host@0.5.2':
+    dependencies:
+      '@vela-rbxts/compiler': 0.5.2
+      '@vela-rbxts/config': 0.5.2
+      '@vela-rbxts/ir': 0.5.2
+      '@vela-rbxts/types': 0.5.2
+
+  '@vela-rbxts/types@0.5.2': {}
 
   '@vitejs/plugin-react@6.0.1(vite@8.0.8(@types/node@25.5.2)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.21.0))':
     dependencies:
@@ -4594,6 +4798,14 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  vela-rbxts@0.5.2:
+    dependencies:
+      '@rbxts/react': 17.3.7-ts.1
+      '@rbxts/services': 1.6.0
+      '@vela-rbxts/config': 0.5.2
+      '@vela-rbxts/rbxtsc-host': 0.5.2
+      '@vela-rbxts/types': 0.5.2
 
   vite@8.0.8(@types/node@25.5.2)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.21.0):
     dependencies:

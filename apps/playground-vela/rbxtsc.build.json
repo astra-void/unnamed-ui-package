@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "out",
+    "declaration": false,
+    "typeRoots": [
+      "./node_modules/@rbxts",
+      "../../node_modules/@rbxts",
+      "./node_modules/@lattice-ui",
+      "../../node_modules/@lattice-ui"
+    ],
+    "types": ["types", "compiler-types"],
+    "plugins": [
+      {
+        "transform": "vela-rbxts/transformer"
+      }
+    ]
+  },
+  "include": ["src"],
+  "rbxts": {
+    "type": "game",
+    "rojo": "default.project.json",
+    "includePath": "include"
+  }
+}
