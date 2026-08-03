@@ -43,8 +43,13 @@ function SectionHeader(props: { title: string; hint: string; layoutOrder: number
  *
  * A `p-*`/`gap-*` utility is a constant baked in at compile time. It cannot
  * read a provider, so density has to be enumerated: one literal class set per
- * step, chosen by a branch. The three scales below are hand-written rather than
- * derived, and nothing here reacts to the density toggle in the header.
+ * step, chosen by a branch, and the three scales below are hand-written rather
+ * than derived from `theme.space`.
+ *
+ * The branch still reacts at runtime — `DensityDetails` feeds it the live
+ * scoped value, so the header toggle moves it. What is lost is derivation, not
+ * reactivity: a new density step means editing every branch here, where the
+ * sibling scene gets it from the provider for free.
  */
 function DensityCluster(props: { scale: DensityToken; width: number }) {
   if (props.scale === "compact") {
@@ -209,9 +214,24 @@ function DensityDetails(props: { title: string; description: string; layoutOrder
         <textlabel
           LayoutOrder={2}
           Size={UDim2.fromOffset(520, 20)}
-          Text="Chrome here is utility-styled, so this readout changes but the spacing does not."
+          Text="The cluster below re-picks its class set from this scope's density."
           className="text-ink-400 text-sm text-left align-middle"
         />
+      </frame>
+
+      {/*
+        A utility cannot read a provider, but the code around it can. Feeding
+        the live scoped `density` into the branch is what makes the header
+        toggle move this section: each step still resolves to its own fully
+        static class set, so nothing drops to the runtime resolver.
+      */}
+      <frame
+        AutomaticSize={Enum.AutomaticSize.Y}
+        LayoutOrder={4}
+        Size={UDim2.fromOffset(286, 0)}
+        className="bg-transparent"
+      >
+        <DensityCluster scale={density} width={286} />
       </frame>
     </frame>
   );
@@ -254,25 +274,45 @@ export function DensityScopeScene() {
         </frame>
       </frame>
 
+      {/*
+        This cluster sits next to the toggle on purpose. Everything below it is
+        a fixed reference — three hand-written scales that never move — so
+        without something live in view the button reads as broken even while it
+        is re-rendering the sections further down.
+      */}
+      <frame AutomaticSize={Enum.AutomaticSize.Y} LayoutOrder={2} className="w-225 bg-transparent flex-col gap-1.5">
+        <textlabel
+          LayoutOrder={1}
+          Size={UDim2.fromOffset(900, 20)}
+          Text={`LIVE — follows the root scope (density="${density}")`}
+          className="text-ink text-base text-left"
+        />
+        {/* `DensityCluster` sets no LayoutOrder of its own, and the list sorts by
+            it, so an unwrapped cluster sorts to 0 and jumps above the label. */}
+        <frame AutomaticSize={Enum.AutomaticSize.Y} LayoutOrder={2} className="w-72 bg-transparent">
+          <DensityCluster scale={density} width={286} />
+        </frame>
+      </frame>
+
       <SectionHeader
-        hint="Three hand-written scales, one per step. The sibling scene renders one cluster and lets the provider size it."
-        layoutOrder={2}
+        hint="Three hand-written scales, one per step — fixed references that never move, unlike the live cluster above."
+        layoutOrder={3}
         title="SIDE BY SIDE — compact / comfortable / spacious"
       />
-      <frame AutomaticSize={Enum.AutomaticSize.Y} LayoutOrder={3} className="w-225 bg-transparent flex-row gap-2.5">
+      <frame AutomaticSize={Enum.AutomaticSize.Y} LayoutOrder={4} className="w-225 bg-transparent flex-row gap-2.5">
         <DensityColumn density="compact" layoutOrder={1} />
         <DensityColumn density="comfortable" layoutOrder={2} />
         <DensityColumn density="spacious" layoutOrder={3} />
       </frame>
 
       <SectionHeader
-        hint="The readouts still scope correctly — only the spacing they describe has stopped following them."
-        layoutOrder={4}
+        hint="The outer section follows the root toggle; the inner one has its own provider and ignores it."
+        layoutOrder={5}
         title="NESTED SCOPING"
       />
       <frame
         AutomaticSize={Enum.AutomaticSize.Y}
-        LayoutOrder={5}
+        LayoutOrder={6}
         className="w-225 bg-surface-100 rounded-lg p-3 flex-col gap-2.5"
       >
         <DensityDetails
