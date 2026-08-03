@@ -23,9 +23,13 @@ pnpm --filter @lattice-ui/playground-vela serve
   `gap-*`, `p-*`, `rounded-*` and `bg-*` lower to. `Grid` survives only where
   `minColumnWidth` auto-fill is used, which has no utility equivalent.
 - **The light/dark toggle is gone.** See [Runtime theming](#runtime-theming) below.
-- **`scripts/link-rbxts.cjs`** links the workspace `@rbxts` scope into this app's
-  `node_modules`, because vela's inlined runtime helper imports `@rbxts/services` and
-  roblox-ts resolves Rojo `$path` coverage from the walked path, not the realpath.
+- **`scripts/materialize-rbxts.cjs`** copies the workspace `@rbxts` scope into this app's
+  `node_modules`. vela's inlined runtime helper imports `@rbxts/react` and `@rbxts/services`,
+  so this app resolves the scope itself where the sibling never does. roblox-ts derives a
+  module's scope from its **realpath** and Rojo walks real directories, so a symlink is not
+  enough — resolution escapes the project and emits require paths no `$path` covers.
+  `rbxtsc.build.json` also pins `@rbxts/*` through `paths`, because every workspace-linked
+  Lattice package carries a nested `@rbxts/react` that would otherwise win.
 
 ## Numbers
 
@@ -35,8 +39,8 @@ Measured on this repo at the commit that added this app.
 
 | | `apps/playground` | `apps/playground-vela` | |
 | --- | ---: | ---: | --- |
-| Scene source lines | 8,692 | **6,599** | −24% |
-| Total app source lines | 9,650 | **7,298** | −24% |
+| Scene source lines | 8,692 | **6,618** | −24% |
+| Total app source lines | 9,650 | **7,323** | −24% |
 | Theme definition | 163 (`recipes.ts`) | **62** (`vela.config.ts`) | |
 | `theme.*` token reads | 1,212 | **0** | |
 | `mergeGuiProps(...)` spreads | 142 | **0** | |
@@ -63,23 +67,23 @@ Per-scene, the reduction is consistent rather than driven by one outlier:
 
 | | `apps/playground` | `apps/playground-vela` | |
 | --- | ---: | ---: | --- |
-| Whole app | 10,543 | 24,424 | +132% |
-| The 32 scenes with no dynamic `className` | 8,020 | 8,822 | +10% |
-| Modules carrying the inlined runtime host | — | 5 | ~2,600 lines each |
-| `out/` on disk | 436 KB | 796 KB | |
+| Whole app | 10,543 | 24,822 | +135% |
+| The 32 scenes with no dynamic `className` | 8,020 | 8,862 | +11% |
+| Modules carrying the inlined runtime host | — | 5 | ~2,870 lines each |
+| `out/` on disk | 436 KB | 808 KB | |
 
 **This is the headline cost, and it is not the utilities' fault.** A `className` the compiler
 can fold to a constant costs about 10% over hand-written props — that is preflight plus the
 helper instances, and it is a fair trade. A `className` it cannot fold inlines vela's entire
 runtime resolver *into that module*, and it is duplicated per module, not shared: five scenes
-here carry ~2,600 lines apiece. Those five account for ~13,000 of the 24,424 lines.
+here carry ~2,870 lines apiece. Those five account for ~14,000 of the 24,822 lines.
 
 Five dynamic class values out of 711 doubled the output. Keeping class values static is not a
-style preference in vela; it is the difference between a 10% and a 130% code-size delta.
+style preference in vela; it is the difference between an 11% and a 135% code-size delta.
 
 ## Capability comparison
 
-| | `@lattice-ui/react-style` | `vela-rbxts` 0.5.2 |
+| | `@lattice-ui/react-style` | `vela-rbxts` 0.6.0 |
 | --- | --- | --- |
 | **Resolution** | Runtime, through `useTheme()` | Compile time, in the rbxtsc transformer |
 | **Runtime light/dark swap** | ✅ header toggle re-renders everything | ❌ no `dark:` variant; one theme per config |
@@ -95,7 +99,7 @@ style preference in vela; it is the difference between a 10% and a 130% code-siz
 | **`TextTransparency`** | ✅ | ❌ `opacity-*` targets the background |
 | **Font family** | ✅ any `Enum.Font` | ❌ fixed to Source Sans Pro, weight only |
 | **Type size** | ✅ any number | ⚠️ Tailwind steps; `titleMd`'s 22px lands on `text-xl` (20) |
-| **Responsive grid auto-fill** | ✅ `Grid minColumnWidth` | ❌ `grid-cols-*` is a constant |
+| **Responsive grid auto-fill** | ✅ `Grid minColumnWidth` | ❌ track count is a compile-time constant |
 | **Neutralizing Roblox defaults** | manual, every element | ✅ preflight, automatic |
 
 ## The four frictions worth knowing before you pick
@@ -105,13 +109,13 @@ style preference in vela; it is the difference between a 10% and a 130% code-siz
 The sibling playground's header toggles light/dark, and every scene restyles. vela has no
 `dark:` variant, and the compiler folds a `className` only when the expression is constant —
 `cond ? "a" : "b"` with a non-constant test drops to the runtime path, which understands
-`bg-*`, `border*`, `rounded-*`, spacing, sizing, `divide-*`, the text transforms and motion,
-and **silently discards everything else**, including every `text-*` color and every flex
-utility.
+`bg-*`, `text-{color}`, `border*`, `rounded-*`, spacing, sizing, `divide-*`, the text
+transforms and motion, and **silently discards everything else**, including every flex
+utility and every type size.
 
-So a runtime theme swap is not "verbose" here, it is out of reach: you would lose text colors
-and layout on every themed element. This app compiles against the Lattice dark theme and drops
-the toggle. `DensityScopeScene` and `SurfaceShowcaseScene` say so on screen.
+So a runtime theme swap is still out of reach — you would keep the fills and lose the layout —
+and this app compiles against the Lattice dark theme with the toggle dropped.
+`DensityScopeScene` and `SurfaceShowcaseScene` say so on screen.
 
 ### Variants become branches
 
@@ -164,10 +168,30 @@ utilities for static chrome, `useTheme()` for the parts that must move.
 Deliberate, and visible on screen:
 
 1. **No theme toggle.** The header shows `Theme · Dark (compile-time)`.
-2. **Density affects components only.** The toggle still drives Lattice primitives via
-   `SystemProvider`; utility-styled chrome is frozen. `DensityScopeScene` hand-writes three
-   scales instead of deriving them.
+2. **Density is enumerated, not derived.** `DensityScopeScene` hand-writes one class set per
+   step and branches on the live scoped value, so the toggle does move it — what is lost is
+   derivation from `theme.space`, not reactivity. A new density step means editing every
+   branch.
 3. **Type sizes land on Tailwind steps.** `titleMd` (22px) renders at `text-xl` (20px).
 4. **Strokes are opaque.** The sibling's `Transparency={0.35}` accents are not reproducible
-   through `border-{color}` in 0.5.2.
+   through `border-{color}` in 0.6.0 — an opacity modifier there is `unsupported-border-value`.
 5. **Fonts are Source Sans Pro.** `theme.typography.*.font` (Gotham) has no utility.
+
+## What this port sent back upstream
+
+Porting 37 real scenes turned up three compiler bugs that a smaller demo would not have hit.
+All three are fixed in `vela-rbxts` 0.6.0, which is why this app depends on it:
+
+1. **`text-{color}` was dropped on the runtime path.** The inlined runtime host had no `text-`
+   branch at all, so every text color behind a dynamic class value silently became Roblox's
+   near-black default — invisible on a dark surface, and only in the scenes that happened to
+   compute a class. `SurfaceShowcaseScene` is the case that caught it.
+2. **`grid-cols-*` emitted no `CellSize`.** `UIGridLayout` overrides each child's own `Size`,
+   so every cell collapsed to the engine's 100x100 default and wide content spilled across the
+   next track. The utility was unusable in every case, not merely imprecise.
+3. **Nothing named the grid cross axis.** `grid-cols-N` only sizes the axis it fills;
+   `auto-rows-*`/`auto-cols-*` were added so a row height can be stated at all.
+
+The first two rendered wrong rather than failing the build, and neither `rbxtsc` nor `tsc`
+said anything. They were found by running the app in Studio and reading the instance tree —
+which is the argument for keeping a port like this around.
