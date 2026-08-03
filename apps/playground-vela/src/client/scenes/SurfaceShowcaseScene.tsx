@@ -183,7 +183,7 @@ export function SurfaceShowcaseScene() {
       <frame
         AutomaticSize={Enum.AutomaticSize.Y}
         LayoutOrder={3}
-        className="w-225 bg-transparent grid grid-cols-2 gap-2.5"
+        className="w-225 bg-transparent grid grid-cols-2 auto-rows-37.5 gap-2.5"
       >
         {TONES.map((meta, index) => (
           <ToneCard

@@ -3,12 +3,12 @@
   "version": "0.4.4",
   "private": true,
   "scripts": {
-    "prebuild": "node ./scripts/link-rbxts.cjs",
+    "prebuild": "node ./scripts/materialize-rbxts.cjs",
     "build": "rbxtsc -p rbxtsc.build.json",
-    "prewatch": "node ./scripts/link-rbxts.cjs",
+    "prewatch": "node ./scripts/materialize-rbxts.cjs",
     "watch": "rbxtsc -p rbxtsc.build.json -w",
     "serve": "rojo serve default.project.json",
-    "pretypecheck": "node ./scripts/link-rbxts.cjs",
+    "pretypecheck": "node ./scripts/materialize-rbxts.cjs",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "biome check src",
     "lint:fix": "biome check src --write --unsafe"
@@ -41,7 +41,7 @@
     "@lattice-ui/react-toast": "workspace:*",
     "@lattice-ui/react-toggle-group": "workspace:*",
     "@lattice-ui/react-tooltip": "workspace:*",
-    "vela-rbxts": "^0.5.2"
+    "vela-rbxts": "^0.6.0"
   },
   "devDependencies": {
     "@rbxts/services": "^1.6.0",
