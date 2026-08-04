@@ -30,11 +30,29 @@ describe("resolveSlotChildren", () => {
     expect(modifiers).toHaveLength(0);
   });
 
+  // roblox-ts labels a host element with its Roblox class name, so the tag written
+  // as `<uicorner/>` reaches Slot as `"UICorner"`. Matching only the written form
+  // made every modifier read as a second target, which failed `asChild` on any
+  // subtree a Tailwind-style transform had styled.
+  it("recognises modifiers by their Roblox class name, not just the JSX tag", () => {
+    const { target, modifiers } = resolveSlotChildren(
+      <>
+        {React.createElement("UICorner", { key: "c" })}
+        {React.createElement("UIListLayout", { key: "l" })}
+        {React.createElement("UIPadding", { key: "p" })}
+        <Probe />
+      </>,
+    );
+
+    expect((target as React.ReactElement).type).toBe(Probe);
+    expect(modifiers).toHaveLength(3);
+  });
+
   it("picks the non-modifier element out of a modifier-prefixed subtree", () => {
     const { target, modifiers } = resolveSlotChildren(
       <>
-        {React.createElement("uicorner", { key: "c" })}
-        {React.createElement("uipadding", { key: "p" })}
+        {React.createElement("UICorner", { key: "c" })}
+        {React.createElement("UIPadding", { key: "p" })}
         <Probe />
       </>,
     );
@@ -65,7 +83,7 @@ describe("resolveSlotChildren", () => {
   });
 
   it("refuses a subtree with modifiers but no element to clone", () => {
-    expect(getSlotChild(React.createElement("uicorner"))).toBeUndefined();
+    expect(getSlotChild(React.createElement("UICorner"))).toBeUndefined();
   });
 });
 
@@ -73,7 +91,7 @@ describe("Slot with modifier siblings", () => {
   it("clones the consumer's element and re-parents the modifiers under it", () => {
     render(
       <Slot BackgroundColor3="red">
-        {React.createElement("uicorner", { key: "c" })}
+        {React.createElement("UICorner", { key: "c" })}
         <Probe>
           <span data-testid="own" />
         </Probe>
@@ -85,7 +103,7 @@ describe("Slot with modifier siblings", () => {
 
     const children = React.Children.toArray(receivedProps?.children as React.ReactNode);
     expect(children).toHaveLength(2);
-    expect((children[0] as React.ReactElement).type).toBe("uicorner");
+    expect((children[0] as React.ReactElement).type).toBe("UICorner");
     // The element's own children survive alongside the injected modifier.
     expect((children[1] as React.ReactElement).type).toBe("span");
   });

@@ -109,28 +109,31 @@ function moveHandlersToReactKeyedProps(props: SlotPropBag, key: "Event" | "Chang
 // Tailwind-style transform emits exactly that shape — `rounded-md` on an `asChild` part becomes a
 // `uicorner` sibling of the element the consumer wrote. Treating those as the slot target would
 // clone the modifier instead of the element, so they are routed into the target's own children.
+// Keyed by Roblox class name rather than by the JSX tag: roblox-ts labels a host element with its
+// class, so `<uicorner />` reaches here as `"UICorner"`. Keying it the way it is written meant
+// every modifier read as a second slot target, and `asChild` failed on any styled subtree.
 // This is the complete set of UIBase classes; anything else counts as a candidate target.
-const UI_MODIFIER_TAGS: Record<string, boolean> = {
-  uiaspectratioconstraint: true,
-  uicorner: true,
-  uidragdetector: true,
-  uiflexitem: true,
-  uigradient: true,
-  uigridlayout: true,
-  uilistlayout: true,
-  uipadding: true,
-  uipagelayout: true,
-  uiscale: true,
-  uisizeconstraint: true,
-  uistroke: true,
-  uitablelayout: true,
-  uitextsizeconstraint: true,
+const UI_MODIFIER_CLASS_NAMES: Record<string, boolean> = {
+  UIAspectRatioConstraint: true,
+  UICorner: true,
+  UIDragDetector: true,
+  UIFlexItem: true,
+  UIGradient: true,
+  UIGridLayout: true,
+  UIListLayout: true,
+  UIPadding: true,
+  UIPageLayout: true,
+  UIScale: true,
+  UISizeConstraint: true,
+  UIStroke: true,
+  UITableLayout: true,
+  UITextSizeConstraint: true,
 };
 
 function isUiModifierElement(node: React.ReactElement) {
   const elementType = (node as { type?: unknown }).type;
 
-  return typeIs(elementType, "string") && UI_MODIFIER_TAGS[elementType] === true;
+  return typeIs(elementType, "string") && UI_MODIFIER_CLASS_NAMES[elementType] === true;
 }
 
 export type SlotChildren = {
