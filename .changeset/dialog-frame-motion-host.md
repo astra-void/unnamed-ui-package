@@ -1,5 +1,0 @@
----
-"@lattice-ui/react-dialog": minor
----
-
-`Dialog.Content` renders its motion host as a `Frame` instead of a `CanvasGroup`. Forwarded props are type-checked against the instance the part renders, so the `CanvasGroup`-only `GroupTransparency` and `GroupColor3` are no longer accepted. The host spans the whole layer, so a `transition` that faded the panel through `GroupTransparency` has no direct replacement: `BackgroundTransparency` on that host paints a full-screen rectangle rather than fading the surface. Give the content a `Position`-only config for the rise, and put the fade on the overlay dim or on your own panel elements. `Dialog.Content` takes no `asChild`, so the consumer-supplied `canvasgroup` route the anchored content parts have is not available here. Presence timing, exit-before-unmount, outside-dismissal boundaries, focus trapping and layer stacking are unchanged; the content subtree is no longer flattened into a single composited layer, so children carry their own transparency.
