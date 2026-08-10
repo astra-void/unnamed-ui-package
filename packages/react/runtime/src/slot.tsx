@@ -109,31 +109,59 @@ function moveHandlersToReactKeyedProps(props: SlotPropBag, key: "Event" | "Chang
 // Tailwind-style transform emits exactly that shape — `rounded-md` on an `asChild` part becomes a
 // `uicorner` sibling of the element the consumer wrote. Treating those as the slot target would
 // clone the modifier instead of the element, so they are routed into the target's own children.
-// Keyed by Roblox class name rather than by the JSX tag: roblox-ts labels a host element with its
-// class, so `<uicorner />` reaches here as `"UICorner"`. Keying it the way it is written meant
-// every modifier read as a second slot target, and `asChild` failed on any styled subtree.
-// This is the complete set of UIBase classes; anything else counts as a candidate target.
-const UI_MODIFIER_CLASS_NAMES: Record<string, boolean> = {
+// Both spellings of every modifier are listed because the two runtimes these primitives render
+// under disagree about which one an element carries, and neither of them is wrong:
+//   - `@rbxts/react`'s `createElement` rewrites a host tag to its Roblox class name before it
+//     builds the element (`tags[component]`, a lowercased-class-name lookup), so in Roblox the
+//     `<uicorner />` a transform emitted reaches here as `"UICorner"`.
+//   - loom's preview renderer re-exports browser React's `createElement` untouched and resolves
+//     the class name only when it creates the host instance, so the very same element reaches
+//     here as `"uicorner"`.
+// Keying one spelling alone therefore left the other runtime's modifiers reading as a second slot
+// target: keyed by tag, `asChild` failed on every styled subtree in Roblox; keyed by class name, it
+// failed the same way in the loom previews. Lower-casing the type instead of listing both is not
+// portable — this module compiles for Luau, where the method is `lower()`, and runs in the browser,
+// where it is `toLowerCase()`.
+// This is the complete set of creatable `UIComponent` classes (`@rbxts/types` CreatableInstances);
+// anything else counts as a candidate target.
+const UI_MODIFIER_TYPES: Record<string, boolean> = {
+  uiaspectratioconstraint: true,
   UIAspectRatioConstraint: true,
+  uicorner: true,
   UICorner: true,
+  uidragdetector: true,
   UIDragDetector: true,
+  uiflexitem: true,
   UIFlexItem: true,
+  uigradient: true,
   UIGradient: true,
+  uigridlayout: true,
   UIGridLayout: true,
+  uilistlayout: true,
   UIListLayout: true,
+  uipadding: true,
   UIPadding: true,
+  uipagelayout: true,
   UIPageLayout: true,
+  uiscale: true,
   UIScale: true,
+  // `shadow-*` lowers to one of these, so leaving it out failed `asChild` exactly like a casing miss.
+  uishadow: true,
+  UIShadow: true,
+  uisizeconstraint: true,
   UISizeConstraint: true,
+  uistroke: true,
   UIStroke: true,
+  uitablelayout: true,
   UITableLayout: true,
+  uitextsizeconstraint: true,
   UITextSizeConstraint: true,
 };
 
 function isUiModifierElement(node: React.ReactElement) {
   const elementType = (node as { type?: unknown }).type;
 
-  return typeIs(elementType, "string") && UI_MODIFIER_CLASS_NAMES[elementType] === true;
+  return typeIs(elementType, "string") && UI_MODIFIER_TYPES[elementType] === true;
 }
 
 export type SlotChildren = {
@@ -225,8 +253,17 @@ export function mergeSlotModifiers(modifiers: React.ReactElement[], children: Re
     return children;
   }
 
-  // `toArray` keys the element's own children too; an array holding unkeyed elements warns.
-  return [...modifiers, ...React.Children.toArray(children)];
+  // `toArray` keys the element's own children too; an array holding unkeyed elements warns. It also
+  // keyed the modifiers when `resolveSlotChildren` walked the subtree, and both walks start their
+  // numbering at `.0` — so merging the two lists as they are collides the first modifier with the
+  // element's first child, and React is explicit that a duplicate key may duplicate or omit a
+  // child rather than merely warn. Re-key the modifiers into a namespace of their own; the index
+  // keeps each one stable across renders, which their position in the subtree already is.
+  const keyed = modifiers.map((modifier, index) =>
+    React.cloneElement(modifier, { key: `lattice-slot-modifier-${index}` }),
+  );
+
+  return [...keyed, ...React.Children.toArray(children)];
 }
 
 export type SlotProps = {
