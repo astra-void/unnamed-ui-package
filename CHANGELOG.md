@@ -15,6 +15,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UIShadow` counts as a UI modifier. It is a creatable `UIComponent` that a Tailwind-style transform emits for `shadow-*`, and it was missing under either spelling, so it failed `asChild` exactly like a casing miss.
 - Re-parenting UI modifiers no longer collides their keys with the cloned element's own children. Both child walks numbered from `.0`, and React may resolve a duplicate key by dropping a child rather than by warning.
 
+## [0.8.0] - 2026-08-04
+
+Every motion host that was a `CanvasGroup` renders as a `Frame`, so no primitive flattens its content into an offscreen composited layer behind your back. A `CanvasGroup` is right for exactly one effect — fading a whole subtree as a unit through `GroupTransparency` — and wrong for everything else: children could not carry their own transparency, and every dialog, menu and tooltip paid for the layer whether or not it faded. The composite is now opt-in, which is why `Dialog.Content` also gains `asChild`. Placement, presence timing, exit-before-unmount, dismissal boundaries, focus scoping and layering are untouched.
+
+Migration notes:
+
+- `GroupTransparency` and `GroupColor3` no longer compile on `Dialog.Content`, `Popover.Content`, `Tooltip.Content`, `Menu.Content`, `ContextMenu.Content`, `Select.Content`, `Combobox.Content` or `Toast.Root`. They were the only reason to know the host was a `CanvasGroup`.
+- Swap `createCanvasGroupRevealRecipe()` for `createSurfaceRevealRecipe()` and `createCanvasGroupPopperEntranceRecipe(placement)` for `createPopperEntranceRecipe(placement)`. Both canvas-group recipes stay exported for a `canvasgroup` you slot in yourself.
+- `BackgroundTransparency` fades one instance's own background, not its children, so labels and icons inside a fading surface stay opaque. Fade them alongside it, or bring the composited layer back deliberately through `asChild`.
+- `Dialog.Content` is the one part with no drop-in replacement for a whole-surface fade: its host spans the layer, so `BackgroundTransparency` there paints the screen. Give the content a `Position`-only config and put the fade on the overlay dim, or pass `asChild` with your own `canvasgroup`.
+
+### Added
+
+- `Dialog.Content` accepts `asChild`. It was the last content part without it, and the only one with no way to fade its surface as a whole. Passing your own `canvasgroup` makes it the motion host, so `createCanvasGroupRevealRecipe()` fades the subtree as one composited layer again — opt-in rather than paid for by every dialog. The outside-press boundary moves one level down to match: the first host child of your element, which is the same panel a plain dialog renders directly under `Content`. Using the element itself would swallow every outside press, since it spans the layer. The dialog still owns `Size` and `Visible` on whatever element it renders.
+
+### Changed
+
+- **Breaking:** every remaining motion host renders a `Frame` instead of a `CanvasGroup`. `Dialog.Content`, `Popover.Content`, `Tooltip.Content`, `Menu.Content`, `ContextMenu.Content`, `Select.Content`, `Combobox.Content` and `Toast.Root` forward props onto a `Frame`, and forwarded props are type-checked against the instance the part renders, so the `CanvasGroup`-only props are compile errors there. A `transition` that faded a host through `GroupTransparency` has to animate `BackgroundTransparency` instead.
+- Content subtrees are no longer flattened into a single composited layer, so children carry their own transparency rather than inheriting the host's.
+- `createToastRevealRecipe` fades `BackgroundTransparency` so it still drives the now `Frame`-hosted `Toast.Root`.
+
+### Fixed
+
+- `asChild` works in Roblox on a subtree a Tailwind-style transform has styled. `Slot` decided which child to clone by looking each element's type up in a table of UI modifier tags keyed by the JSX tag — `uicorner`, `uilistlayout` — but `@rbxts/react` rewrites a host tag to its Roblox class name before building the element, so `<uicorner />` arrives as `"UICorner"` and every modifier missed the lookup. Missing it meant counting as a second candidate target, so `Slot` refused the subtree with "expected exactly one child element besides any UI modifiers" whenever more than one element was present. That is every styled `asChild` subtree in practice: a transform lowers `rounded-md` to a `UICorner` sibling and `flex-row` to a `UIListLayout`, so a component whose recipe sets either — which is most of them — could not use `asChild` at all. Class-to-prop lowering was never the problem; props reached the child correctly the whole time. Re-keying it by class name left the other spelling failing under a browser React renderer, which 0.8.1 finishes.
+- `Slot` no longer reads `props.ref`. It is a `forwardRef` component, so a `ref` written on it always arrives as the forwarded ref argument — React strips `ref` out of `props` — which made the read dead code that only ever returned the development warning accessor. Reading it logged "`ref` is not a prop" on every render of an `asChild` primitive that composes a ref (`Dialog.Trigger`, `Slider.Track`, `Tabs.Trigger`, `ContextMenu.Trigger`, and friends). Ref composition itself is unchanged.
+
 ## [0.7.0] - 2026-07-20
 
 This release strips every primitive down to behavior. Colors, sizes, fonts and decorative children are gone, any prop the underlying instance accepts now forwards through without `asChild`, and motion only runs when you ask for it. The CLI is rebuilt around the same idea: per-command help, keyboard-driven prompts, and a single connected run of output instead of five ceremonial sections.
