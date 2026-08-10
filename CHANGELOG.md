@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-08-10
+
+### Fixed
+
+- `asChild` accepts UI modifier siblings under both renderers. The modifier table held one spelling of each class at a time, and which one an element carries depends on who rendered it: `@rbxts/react` rewrites a host tag to its Roblox class name before building the element, so `<uicorner />` arrives as `"UICorner"`, while a browser React renderer leaves the tag as written. Keyed by tag, `asChild` failed on every styled subtree in Roblox; re-keyed by class name in 0.8.0, it failed the same way in a browser preview. Both spellings are now listed.
+- `UIShadow` counts as a UI modifier. It is a creatable `UIComponent` that a Tailwind-style transform emits for `shadow-*`, and it was missing under either spelling, so it failed `asChild` exactly like a casing miss.
+- Re-parenting UI modifiers no longer collides their keys with the cloned element's own children. Both child walks numbered from `.0`, and React may resolve a duplicate key by dropping a child rather than by warning.
+
 ## [0.7.0] - 2026-07-20
 
 This release strips every primitive down to behavior. Colors, sizes, fonts and decorative children are gone, any prop the underlying instance accepts now forwards through without `asChild`, and motion only runs when you ask for it. The CLI is rebuilt around the same idea: per-command help, keyboard-driven prompts, and a single connected run of output instead of five ceremonial sections.
