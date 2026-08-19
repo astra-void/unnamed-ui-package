@@ -1,7 +1,6 @@
 import { createProgressResponseRecipe, motionDrag, useResponseMotion } from "@lattice-ui/react-motion";
 import { composeRefs, getPassthroughProps, getSlotChild, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
 import { useSliderContext } from "./context";
-import { valueToPercent } from "./internals/math";
 import type { SliderRangeProps } from "./types";
 
 const OWN_PROPS = ["asChild", "children"] as const;
@@ -20,19 +19,12 @@ const CHILD_FILL_PROPS = {
 
 export function SliderRange(props: SliderRangeProps) {
   const sliderContext = useSliderContext();
-  const percent = valueToPercent(sliderContext.value, sliderContext.min, sliderContext.max);
-
-  const rangeSize =
-    sliderContext.orientation === "horizontal" ? UDim2.fromScale(percent, 1) : UDim2.fromScale(1, percent);
-  const rangePosition =
-    sliderContext.orientation === "horizontal" ? UDim2.fromScale(0, 0) : UDim2.fromScale(0, 1 - percent);
 
   // Position/Size are the value mapping, not decoration: motion owns them on this instance.
   const motionRef = useResponseMotion<Frame>(
     true,
     {
-      active: { Position: rangePosition, Size: rangeSize },
-      inactive: { Position: rangePosition, Size: rangeSize },
+      ...sliderContext.core.rangeGeometry(),
     },
     createProgressResponseRecipe(sliderContext.isDragging ? motionDrag.active : motionDrag.idle),
   );

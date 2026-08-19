@@ -10,7 +10,6 @@ import {
   toSlotProps,
 } from "@lattice-ui/react-runtime";
 import { useSliderContext } from "./context";
-import { valueToPercent } from "./internals/math";
 import type { SliderThumbProps } from "./types";
 
 const OWN_PROPS = ["asChild", "children"] as const;
@@ -34,14 +33,10 @@ function isPointerStartInput(inputObject: InputObject) {
 
 export function SliderThumb(props: SliderThumbProps) {
   const sliderContext = useSliderContext();
-  const percent = valueToPercent(sliderContext.value, sliderContext.min, sliderContext.max);
-
-  const position =
-    sliderContext.orientation === "horizontal" ? UDim2.fromScale(percent, 0.5) : UDim2.fromScale(0.5, 1 - percent);
-
+  // The travel geometry is computed from the value, so it comes from the core.
   const motionRef = useResponseMotion<GuiObject>(
     true,
-    { active: { Position: position }, inactive: { Position: position } },
+    sliderContext.core.thumbGeometry(),
     createSliderThumbResponseRecipe(sliderContext.isDragging),
   );
 
@@ -53,8 +48,7 @@ export function SliderThumb(props: SliderThumbProps) {
     disabled: sliderContext.disabled,
     // Arrow keys along the value axis adjust the slider, so the navigation
     // controller passes them through; cross-axis directions move focus away.
-    getCapturesDirectional: (direction) =>
-      isHorizontal ? direction === "left" || direction === "right" : direction === "up" || direction === "down",
+    getCapturesDirectional: (direction) => sliderContext.core.capturesDirectional(direction),
   });
 
   const setNodeRef = React.useCallback(

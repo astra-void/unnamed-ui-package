@@ -1,3 +1,4 @@
+import type { SliderCore } from "@lattice-ui/core-slider";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
 
@@ -19,6 +20,8 @@ export type SliderContextValue = {
   setTrackNode: (instance: Instance | undefined) => void;
   setThumbNode: (instance: Instance | undefined) => void;
   startDrag: (inputObject: InputObject) => void;
+  /** The core, for the parts that need geometry rather than a rendered value. */
+  core: SliderCore;
 };
 
 export type SliderProps = {

@@ -35,11 +35,23 @@
       "@lattice-ui/core-runtime": [
         "core/runtime/src/index.ts"
       ],
+      "@lattice-ui/core-scroll-area": [
+        "core/scroll-area/src/index.ts"
+      ],
+      "@lattice-ui/core-slider": [
+        "core/slider/src/index.ts"
+      ],
       "@lattice-ui/core-switch": [
         "core/switch/src/index.ts"
       ],
       "@lattice-ui/core-tabs": [
         "core/tabs/src/index.ts"
+      ],
+      "@lattice-ui/core-text-field": [
+        "core/text-field/src/index.ts"
+      ],
+      "@lattice-ui/core-textarea": [
+        "core/textarea/src/index.ts"
       ],
       "@lattice-ui/core-toggle-group": [
         "core/toggle-group/src/index.ts"
@@ -149,11 +161,23 @@
       "@lattice-ui/vide-runtime": [
         "vide/runtime/src/index.ts"
       ],
+      "@lattice-ui/vide-scroll-area": [
+        "vide/scroll-area/src/index.ts"
+      ],
+      "@lattice-ui/vide-slider": [
+        "vide/slider/src/index.ts"
+      ],
       "@lattice-ui/vide-switch": [
         "vide/switch/src/index.ts"
       ],
       "@lattice-ui/vide-tabs": [
         "vide/tabs/src/index.ts"
+      ],
+      "@lattice-ui/vide-text-field": [
+        "vide/text-field/src/index.ts"
+      ],
+      "@lattice-ui/vide-textarea": [
+        "vide/textarea/src/index.ts"
       ],
       "@lattice-ui/vide-toggle-group": [
         "vide/toggle-group/src/index.ts"

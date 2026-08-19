@@ -1,52 +1,45 @@
-import { React, useControllableState } from "@lattice-ui/react-runtime";
+import { createTextField } from "@lattice-ui/core-text-field";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { TextFieldContextProvider } from "./context";
 import type { TextFieldProps } from "./types";
 
 export function TextFieldRoot(props: TextFieldProps) {
-  const [value, setValueState] = useControllableState<string>({
-    value: props.value,
-    defaultValue: props.defaultValue ?? "",
-    onChange: props.onValueChange,
-  });
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const disabled = props.disabled === true;
-  const readOnly = props.readOnly === true;
-  const required = props.required === true;
-  const invalid = props.invalid === true;
-
-  const inputRef = React.useRef<TextBox>();
-
-  const setValue = React.useCallback(
-    (nextValue: string) => {
-      if (disabled || readOnly) {
-        return;
-      }
-
-      setValueState(nextValue);
-    },
-    [disabled, readOnly, setValueState],
+  const core = useLatticeCore((rx) =>
+    createTextField(rx, {
+      value: () => propsRef.current.value,
+      defaultValue: propsRef.current.defaultValue ?? "",
+      disabled: () => propsRef.current.disabled,
+      readOnly: () => propsRef.current.readOnly,
+      required: () => propsRef.current.required,
+      invalid: () => propsRef.current.invalid,
+      name: () => propsRef.current.name,
+      onValueChange: (value) => propsRef.current.onValueChange?.(value),
+      onValueCommit: (value) => propsRef.current.onValueCommit?.(value),
+    }),
   );
 
-  const commitValue = React.useCallback(
-    (nextValue: string) => {
-      props.onValueCommit?.(nextValue);
-    },
-    [props.onValueCommit],
-  );
+  const value = core.value();
+  const disabled = core.disabled();
+  const readOnly = core.readOnly();
+  const required = core.required();
+  const invalid = core.invalid();
 
   const contextValue = React.useMemo(
     () => ({
       value,
-      setValue,
-      commitValue,
+      setValue: core.setValue,
+      commitValue: core.commitValue,
       disabled,
       readOnly,
       required,
       invalid,
       name: props.name,
-      inputRef,
+      core,
     }),
-    [commitValue, disabled, invalid, props.name, readOnly, required, setValue, value],
+    [core, disabled, invalid, props.name, readOnly, required, value],
   );
 
   return <TextFieldContextProvider value={contextValue}>{props.children}</TextFieldContextProvider>;

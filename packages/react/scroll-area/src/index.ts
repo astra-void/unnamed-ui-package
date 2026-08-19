@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-scroll-area";
+
 import { ScrollAreaCorner } from "./ScrollArea/ScrollAreaCorner";
 import { ScrollAreaRoot } from "./ScrollArea/ScrollAreaRoot";
 import { ScrollAreaScrollbar } from "./ScrollArea/ScrollAreaScrollbar";
@@ -12,14 +14,6 @@ export const ScrollArea = {
   Corner: ScrollAreaCorner,
 } as const;
 
-export {
-  resolveCanvasPositionFromThumbOffset,
-  resolveCanvasPositionFromTrackPosition,
-  resolveThumbOffset,
-  resolveThumbOffsetFromPointerDelta,
-  resolveThumbOffsetFromTrackPosition,
-  resolveThumbSize,
-} from "./ScrollArea/scrollMath";
 export type {
   ScrollAreaContextValue,
   ScrollAreaCornerProps,

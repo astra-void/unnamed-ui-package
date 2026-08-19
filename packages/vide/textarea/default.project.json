@@ -1,0 +1,9 @@
+{
+  "name": "vide-textarea",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

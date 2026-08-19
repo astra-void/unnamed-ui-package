@@ -1,4 +1,9 @@
 import {
+  resolveCanvasPositionFromTrackPosition,
+  resolveThumbOffset,
+  resolveThumbSize,
+} from "@lattice-ui/core-scroll-area";
+import {
   composeEvents,
   composeRefs,
   getPassthroughProps,
@@ -8,7 +13,6 @@ import {
   toSlotProps,
 } from "@lattice-ui/react-runtime";
 import { useScrollAreaContext } from "./context";
-import { resolveCanvasPositionFromTrackPosition, resolveThumbOffset, resolveThumbSize } from "./scrollMath";
 import type { ScrollAreaScrollbarProps } from "./types";
 
 const OWN_PROPS = ["orientation", "asChild", "children"] as const;

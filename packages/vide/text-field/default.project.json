@@ -1,0 +1,9 @@
+{
+  "name": "vide-text-field",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

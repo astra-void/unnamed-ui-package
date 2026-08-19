@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-textarea";
+
 import { TextareaDescription } from "./Textarea/TextareaDescription";
 import { TextareaInput } from "./Textarea/TextareaInput";
 import { TextareaLabel } from "./Textarea/TextareaLabel";
@@ -12,7 +14,6 @@ export const Textarea = {
   Message: TextareaMessage,
 } as const;
 
-export { resolveTextareaHeight } from "./Textarea/autoResize";
 export type {
   TextareaCommitValue,
   TextareaContextValue,

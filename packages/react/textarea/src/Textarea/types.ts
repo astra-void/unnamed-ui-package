@@ -1,3 +1,4 @@
+import type { TextareaCore } from "@lattice-ui/core-textarea";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
 
@@ -16,7 +17,8 @@ export type TextareaContextValue = {
   autoResize: boolean;
   minRows: number;
   maxRows?: number;
-  inputRef: React.MutableRefObject<TextBox | undefined>;
+  /** The core, for the parts that build an input or act on the field rather than read its value. */
+  core: TextareaCore;
 };
 
 export type TextareaProps = {

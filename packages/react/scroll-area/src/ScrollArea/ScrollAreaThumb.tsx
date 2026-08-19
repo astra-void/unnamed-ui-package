@@ -1,4 +1,10 @@
 import {
+  resolveCanvasPositionFromThumbOffset,
+  resolveThumbOffset,
+  resolveThumbOffsetFromPointerDelta,
+  resolveThumbSize,
+} from "@lattice-ui/core-scroll-area";
+import {
   composeEvents,
   composeRefs,
   getPassthroughProps,
@@ -8,12 +14,6 @@ import {
   toSlotProps,
 } from "@lattice-ui/react-runtime";
 import { useScrollAreaContext } from "./context";
-import {
-  resolveCanvasPositionFromThumbOffset,
-  resolveThumbOffset,
-  resolveThumbOffsetFromPointerDelta,
-  resolveThumbSize,
-} from "./scrollMath";
 import type { ScrollAreaThumbProps } from "./types";
 
 const UserInputService = game.GetService("UserInputService");

@@ -1,3 +1,4 @@
+import type { ScrollAreaCore } from "@lattice-ui/core-scroll-area";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
 
@@ -22,6 +23,8 @@ export type ScrollAreaContextValue = {
   notifyScrollActivity: () => void;
   showVerticalScrollbar: boolean;
   showHorizontalScrollbar: boolean;
+  /** The core, for the parts that need its specs rather than the measured values. */
+  core: ScrollAreaCore;
 };
 
 export type ScrollAreaProps = {

@@ -580,6 +580,21 @@ importers:
 
   packages/core/runtime: {}
 
+  packages/core/scroll-area:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/slider:
+    dependencies:
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/switch:
     dependencies:
       '@lattice-ui/core-motion':
@@ -594,6 +609,18 @@ importers:
       '@lattice-ui/core-focus':
         specifier: workspace:*
         version: link:../focus
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/text-field:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/textarea:
+    dependencies:
       '@lattice-ui/core-runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -918,6 +945,9 @@ importers:
 
   packages/react/scroll-area:
     dependencies:
+      '@lattice-ui/core-scroll-area':
+        specifier: workspace:*
+        version: link:../../core/scroll-area
       '@lattice-ui/react-runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -956,6 +986,9 @@ importers:
 
   packages/react/slider:
     dependencies:
+      '@lattice-ui/core-slider':
+        specifier: workspace:*
+        version: link:../../core/slider
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1047,6 +1080,9 @@ importers:
 
   packages/react/text-field:
     dependencies:
+      '@lattice-ui/core-text-field':
+        specifier: workspace:*
+        version: link:../../core/text-field
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1063,6 +1099,9 @@ importers:
 
   packages/react/textarea:
     dependencies:
+      '@lattice-ui/core-textarea':
+        specifier: workspace:*
+        version: link:../../core/textarea
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1282,6 +1321,38 @@ importers:
         specifier: 0.6.1
         version: 0.6.1
 
+  packages/vide/scroll-area:
+    dependencies:
+      '@lattice-ui/core-scroll-area':
+        specifier: workspace:*
+        version: link:../../core/scroll-area
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/slider:
+    dependencies:
+      '@lattice-ui/core-slider':
+        specifier: workspace:*
+        version: link:../../core/slider
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
   packages/vide/switch:
     dependencies:
       '@lattice-ui/core-motion':
@@ -1312,6 +1383,38 @@ importers:
       '@lattice-ui/vide-motion':
         specifier: workspace:*
         version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/text-field:
+    dependencies:
+      '@lattice-ui/core-text-field':
+        specifier: workspace:*
+        version: link:../../core/text-field
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/textarea:
+    dependencies:
+      '@lattice-ui/core-textarea':
+        specifier: workspace:*
+        version: link:../../core/textarea
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
       '@lattice-ui/vide-runtime':
         specifier: workspace:*
         version: link:../runtime

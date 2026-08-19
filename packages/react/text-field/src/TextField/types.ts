@@ -1,3 +1,4 @@
+import type { TextFieldCore } from "@lattice-ui/core-text-field";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
 
@@ -13,7 +14,8 @@ export type TextFieldContextValue = {
   required: boolean;
   invalid: boolean;
   name?: string;
-  inputRef: React.MutableRefObject<TextBox | undefined>;
+  /** The core, for the parts that build an input or act on the field rather than read its value. */
+  core: TextFieldCore;
 };
 
 export type TextFieldProps = {

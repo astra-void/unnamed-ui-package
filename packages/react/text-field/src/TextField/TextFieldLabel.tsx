@@ -1,35 +1,13 @@
-import { composeEvents, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { applyElementSpec, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
 import { useTextFieldContext } from "./context";
 import type { TextFieldLabelProps } from "./types";
 
 const OWN_PROPS = ["asChild", "children"] as const;
 
-// See TextFieldInput: only the Roblox instance defaults are neutralized, never appearance.
-const NEUTRAL_PROPS = {
-  AutoButtonColor: false,
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-  Text: "",
-};
-
 export function TextFieldLabel(props: TextFieldLabelProps) {
-  const textFieldContext = useTextFieldContext();
-  const disabled = textFieldContext.disabled;
-
-  const handleActivated = React.useCallback(() => {
-    if (disabled) {
-      return;
-    }
-
-    textFieldContext.inputRef.current?.CaptureFocus();
-  }, [disabled, textFieldContext.inputRef]);
-
+  const core = useTextFieldContext().core;
   const passthrough = getPassthroughProps<TextButton>(props, OWN_PROPS);
-  const behaviorProps = {
-    Active: !disabled,
-    Selectable: !disabled,
-    Event: composeEvents(passthrough.Event, { Activated: handleActivated }),
-  };
+  const merged = applyElementSpec(core.labelSpec(), passthrough, { neutral: props.asChild !== true });
 
   if (props.asChild) {
     const child = props.children;
@@ -38,16 +16,8 @@ export function TextFieldLabel(props: TextFieldLabelProps) {
     }
 
     // No neutral defaults here: the rendered element belongs to the consumer.
-    return (
-      <Slot {...toSlotProps(passthrough)} {...behaviorProps}>
-        {child}
-      </Slot>
-    );
+    return <Slot {...toSlotProps(merged)}>{child}</Slot>;
   }
 
-  return (
-    <textbutton {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
-      {props.children}
-    </textbutton>
-  );
+  return <textbutton {...merged}>{props.children}</textbutton>;
 }

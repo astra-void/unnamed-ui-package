@@ -1,47 +1,43 @@
-import { React, useControllableState } from "@lattice-ui/react-runtime";
+import { createTextarea } from "@lattice-ui/core-textarea";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { TextareaContextProvider } from "./context";
 import type { TextareaProps } from "./types";
 
 export function TextareaRoot(props: TextareaProps) {
-  const [value, setValueState] = useControllableState<string>({
-    value: props.value,
-    defaultValue: props.defaultValue ?? "",
-    onChange: props.onValueChange,
-  });
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const disabled = props.disabled === true;
-  const readOnly = props.readOnly === true;
-  const required = props.required === true;
-  const invalid = props.invalid === true;
-  const autoResize = props.autoResize ?? true;
-  const minRows = math.max(1, props.minRows ?? 3);
-  const maxRows = props.maxRows !== undefined ? math.max(minRows, props.maxRows) : undefined;
-
-  const inputRef = React.useRef<TextBox>();
-
-  const setValue = React.useCallback(
-    (nextValue: string) => {
-      if (disabled || readOnly) {
-        return;
-      }
-
-      setValueState(nextValue);
-    },
-    [disabled, readOnly, setValueState],
+  const core = useLatticeCore((rx) =>
+    createTextarea(rx, {
+      value: () => propsRef.current.value,
+      defaultValue: propsRef.current.defaultValue ?? "",
+      disabled: () => propsRef.current.disabled,
+      readOnly: () => propsRef.current.readOnly,
+      required: () => propsRef.current.required,
+      invalid: () => propsRef.current.invalid,
+      name: () => propsRef.current.name,
+      autoResize: () => propsRef.current.autoResize,
+      minRows: () => propsRef.current.minRows,
+      maxRows: () => propsRef.current.maxRows,
+      onValueChange: (value) => propsRef.current.onValueChange?.(value),
+      onValueCommit: (value) => propsRef.current.onValueCommit?.(value),
+    }),
   );
 
-  const commitValue = React.useCallback(
-    (nextValue: string) => {
-      props.onValueCommit?.(nextValue);
-    },
-    [props.onValueCommit],
-  );
+  const value = core.value();
+  const disabled = core.disabled();
+  const readOnly = core.readOnly();
+  const required = core.required();
+  const invalid = core.invalid();
+  const autoResize = core.autoResize();
+  const minRows = core.minRows();
+  const maxRows = core.maxRows();
 
   const contextValue = React.useMemo(
     () => ({
       value,
-      setValue,
-      commitValue,
+      setValue: core.setValue,
+      commitValue: core.commitValue,
       disabled,
       readOnly,
       required,
@@ -50,12 +46,10 @@ export function TextareaRoot(props: TextareaProps) {
       autoResize,
       minRows,
       maxRows,
-      inputRef,
+      core,
     }),
-    [autoResize, commitValue, disabled, invalid, maxRows, minRows, props.name, readOnly, required, setValue, value],
+    [autoResize, core, disabled, invalid, maxRows, minRows, props.name, readOnly, required, value],
   );
 
   return <TextareaContextProvider value={contextValue}>{props.children}</TextareaContextProvider>;
 }
-
-export { TextareaRoot as Textarea };

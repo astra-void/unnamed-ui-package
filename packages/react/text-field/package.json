@@ -23,6 +23,7 @@
     "watch": "rbxtsc -p tsconfig.json -w"
   },
   "dependencies": {
+    "@lattice-ui/core-text-field": "workspace:*",
     "@lattice-ui/react-focus": "workspace:*",
     "@lattice-ui/react-runtime": "workspace:*"
   },
