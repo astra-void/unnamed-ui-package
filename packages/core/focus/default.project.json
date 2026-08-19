@@ -1,0 +1,9 @@
+{
+  "name": "core-focus",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

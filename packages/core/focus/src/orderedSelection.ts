@@ -1,12 +1,20 @@
-import type { React } from "@lattice-ui/react-runtime";
 import { focusGuiObject as focusManagedGuiObject, getFocusedGuiObject } from "./focusManager";
+
+/**
+ * Somewhere to read an instance from.
+ *
+ * Structurally a React ref, which is what every caller passes today, and equally what a Vide
+ * adapter can hand over as `{ get current() { … } }` — so the shape stays a ref without the type
+ * coming from a framework.
+ */
+export type FocusRef = { readonly current: GuiObject | undefined };
 
 export type OrderedSelectionDirection = -1 | 1;
 
 export type OrderedSelectionEntry = {
   id: number;
   order: number;
-  ref: React.MutableRefObject<GuiObject | undefined>;
+  ref: FocusRef;
   getDisabled?: () => boolean;
   getVisible?: () => boolean;
 };

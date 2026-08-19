@@ -1,14 +1,6 @@
-import { React } from "@lattice-ui/react-runtime";
+import { createFocusNode, type NavDirection } from "@lattice-ui/core-focus";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { useFocusScopeId } from "./context";
-import { type NavDirection, registerFocusNode, unregisterFocusNode } from "./focusManager";
-
-function useLatest<T>(value: T): React.MutableRefObject<T> {
-  const ref = React.useRef(value);
-  React.useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
-}
 
 export type UseFocusNodeOptions = {
   ref: React.MutableRefObject<GuiObject | undefined>;
@@ -30,45 +22,41 @@ export type UseFocusNodeOptions = {
   onActivate?: () => void;
 };
 
+/**
+ * React binding for a focus node.
+ *
+ * Registration lives in `@lattice-ui/core-focus`; this hook keeps the options it reads current and
+ * re-registers when the node's scope changes, since a node's scope is part of its identity.
+ */
 export function useFocusNode(options: UseFocusNodeOptions): React.MutableRefObject<number | undefined> {
   const inheritedScopeId = useFocusScopeId();
   const scopeId = options.scopeId ?? inheritedScopeId;
+
+  const optionsRef = React.useRef(options);
+  optionsRef.current = options;
   const nodeIdRef = React.useRef<number>();
 
-  const disabledRef = useLatest(options.disabled === true);
-  const getDisabledRef = useLatest(options.getDisabled);
-  const getVisibleRef = useLatest(options.getVisible);
-  const syncToRobloxRef = useLatest(options.syncToRoblox !== false);
-  const getCapturesDirectionalRef = useLatest(options.getCapturesDirectional);
-  const onFocusChangeRef = useLatest(options.onFocusChange);
-  const onActivateRef = useLatest(options.onActivate);
+  const core = useLatticeCore((rx) =>
+    createFocusNode(rx, {
+      getGuiObject: () => optionsRef.current.ref.current,
+      disabled: () => optionsRef.current.disabled === true || optionsRef.current.getDisabled?.() === true,
+      getVisible: () => optionsRef.current.getVisible?.(),
+      syncToRoblox: () => optionsRef.current.syncToRoblox,
+      getCapturesDirectional: (direction) => optionsRef.current.getCapturesDirectional?.(direction) === true,
+      onFocusChange: (focused) => optionsRef.current.onFocusChange?.(focused),
+      onActivate: () => optionsRef.current.onActivate?.(),
+    }),
+  );
 
   React.useEffect(() => {
-    const nodeId = registerFocusNode({
-      scopeId,
-      getGuiObject: () => options.ref.current,
-      getDisabled: () => disabledRef.current || getDisabledRef.current?.() === true,
-      getVisible: () => getVisibleRef.current?.(),
-      getSyncToRoblox: () => syncToRobloxRef.current,
-      getCapturesDirectional: (direction) => getCapturesDirectionalRef.current?.(direction) === true,
-      onFocusChange: (focused) => onFocusChangeRef.current?.(focused),
-      activate: () => {
-        const activate = onActivateRef.current;
-        if (!activate) {
-          return false;
-        }
+    core.register(scopeId);
+    nodeIdRef.current = core.nodeId();
 
-        activate();
-        return true;
-      },
-    });
-
-    nodeIdRef.current = nodeId;
     return () => {
-      unregisterFocusNode(nodeId);
+      core.unregister();
       nodeIdRef.current = undefined;
     };
-  }, [options.ref, scopeId]);
+  }, [core, options.ref, scopeId]);
 
   return nodeIdRef;
 }

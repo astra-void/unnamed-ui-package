@@ -1,5 +1,5 @@
+import type { NavOrientation, NavStrategy } from "@lattice-ui/core-focus";
 import type { React } from "@lattice-ui/react-runtime";
-import type { NavOrientation, NavStrategy } from "../focusManager";
 
 export type FocusScopeProps = {
   active?: boolean;

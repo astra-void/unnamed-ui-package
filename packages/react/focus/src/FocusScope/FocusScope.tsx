@@ -1,104 +1,64 @@
-import { getSlotChild, React, Slot } from "@lattice-ui/react-runtime";
+import { createFocusScope } from "@lattice-ui/core-focus";
+import { getSlotChild, React, Slot, useLatticeCore } from "@lattice-ui/react-runtime";
 import { FocusScopeProvider, useFocusLayerOrder, useFocusScopeId } from "../context";
-import {
-  createFocusScopeId,
-  registerFocusScope,
-  releaseNavigation,
-  retainNavigation,
-  syncFocusScope,
-  unregisterFocusScope,
-} from "../focusManager";
 import type { FocusScopeProps } from "./types";
 
-function toGuiObject(instance: Instance | undefined) {
-  if (!instance?.IsA("GuiObject")) {
-    return undefined;
-  }
-
-  return instance;
-}
-
-function useLatest<T>(value: T) {
-  const ref = React.useRef(value);
-  React.useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
-}
-
+/**
+ * React binding for a focus scope.
+ *
+ * Registration, the scope's settings and holding the navigation binds open live in
+ * `@lattice-ui/core-focus`; what stays here is the element the scope covers and the context that
+ * tells descendants which scope they belong to.
+ */
 export function FocusScope(props: FocusScopeProps) {
   const parentScopeId = useFocusScopeId();
   const layerOrder = useFocusLayerOrder();
   const active = props.active ?? true;
-  const trapped = props.trapped === true;
-  const shouldRestoreFocus = props.restoreFocus !== false;
-  const navStrategy = props.navStrategy ?? "spatial";
-  const navOrientation = props.navOrientation ?? "vertical";
-  const navWrap = props.navWrap === true;
 
-  const scopeIdRef = React.useRef(0);
-  if (scopeIdRef.current === 0) {
-    scopeIdRef.current = createFocusScopeId();
-  }
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
+  const layerOrderRef = React.useRef(layerOrder);
+  layerOrderRef.current = layerOrder;
 
-  const scopeRootRef = React.useRef<GuiObject>();
-  const activeRef = useLatest(active);
-  const trappedRef = useLatest(trapped);
-  const restoreFocusRef = useLatest(shouldRestoreFocus);
-  const layerOrderRef = useLatest(layerOrder);
-  const navStrategyRef = useLatest(navStrategy);
-  const navOrientationRef = useLatest(navOrientation);
-  const navWrapRef = useLatest(navWrap);
-
-  const setScopeRoot = React.useCallback((instance: Instance | undefined) => {
-    scopeRootRef.current = toGuiObject(instance);
-    if (scopeIdRef.current !== 0) {
-      syncFocusScope(scopeIdRef.current);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    const scopeId = scopeIdRef.current;
-    registerFocusScope(scopeId, {
+  const core = useLatticeCore((rx) =>
+    createFocusScope(rx, {
       parentScopeId,
-      getRoot: () => scopeRootRef.current,
-      getActive: () => activeRef.current,
-      getTrapped: () => trappedRef.current,
-      getRestoreFocus: () => restoreFocusRef.current,
-      getLayerOrder: () => layerOrderRef.current,
-      getNavStrategy: () => navStrategyRef.current,
-      getNavOrientation: () => navOrientationRef.current,
-      getNavWrap: () => navWrapRef.current,
-    });
+      active: () => propsRef.current.active,
+      trapped: () => propsRef.current.trapped,
+      restoreFocus: () => propsRef.current.restoreFocus,
+      layerOrder: () => layerOrderRef.current,
+      navStrategy: () => propsRef.current.navStrategy,
+      navOrientation: () => propsRef.current.navOrientation,
+      navWrap: () => propsRef.current.navWrap,
+    }),
+  );
 
-    return () => {
-      unregisterFocusScope(scopeId);
-    };
+  const setScopeRoot = React.useCallback(
+    (instance: Instance | undefined) => {
+      core.setRoot(instance);
+    },
+    [core],
+  );
+
+  React.useEffect(() => {
+    core.start();
+  }, [core]);
+
+  // Every scope setting the manager reads through a getter still has to be pushed at, because a
+  // changed prop is not something the core can observe: `sync` is what re-reads them and what
+  // retains or releases navigation on the active edge.
+  React.useEffect(() => {
+    core.sync();
   }, [
-    activeRef,
-    layerOrderRef,
-    navOrientationRef,
-    navStrategyRef,
-    navWrapRef,
-    parentScopeId,
-    restoreFocusRef,
-    trappedRef,
+    active,
+    core,
+    layerOrder,
+    props.navOrientation,
+    props.navStrategy,
+    props.navWrap,
+    props.restoreFocus,
+    props.trapped,
   ]);
-
-  React.useEffect(() => {
-    syncFocusScope(scopeIdRef.current);
-  }, [active, layerOrder, shouldRestoreFocus, trapped]);
-
-  React.useEffect(() => {
-    if (!active) {
-      return;
-    }
-
-    retainNavigation();
-    return () => {
-      releaseNavigation();
-    };
-  }, [active]);
 
   const content = props.asChild ? (
     (() => {
@@ -121,5 +81,5 @@ export function FocusScope(props: FocusScopeProps) {
     </frame>
   );
 
-  return <FocusScopeProvider scopeId={scopeIdRef.current}>{content}</FocusScopeProvider>;
+  return <FocusScopeProvider scopeId={core.scopeId}>{content}</FocusScopeProvider>;
 }
