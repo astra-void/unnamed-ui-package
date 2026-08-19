@@ -28,4 +28,6 @@ run-in-roblox.log
 .serena
 digest.txt
 
-docs
+# Local docs site output stays untracked; architecture notes are tracked.
+docs/*
+!docs/architecture/

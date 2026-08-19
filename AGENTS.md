@@ -13,6 +13,11 @@ It contains:
   - `apps/loom-preview`: typecheck-only preview integration workspace
   - `apps/test-harness`: Roblox TestEZ harness for package-level behavior checks
 
+A second framework layer (Vide) is planned alongside `react`, driven by framework-free `core-*`
+packages. The architecture, the contract between cores and adapters, and the phased plan live in
+`docs/architecture/multi-framework.md`. Read it before adding a layer, adding a `core-*` package, or
+changing package structure.
+
 Primary goals of changes in this repository:
 
 - preserve stable package boundaries
