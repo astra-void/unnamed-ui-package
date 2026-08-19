@@ -1,0 +1,9 @@
+{
+  "name": "vide-runtime",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

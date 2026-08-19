@@ -1,0 +1,9 @@
+{
+  "name": "vide-popover",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}
