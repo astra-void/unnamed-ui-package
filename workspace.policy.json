@@ -23,17 +23,39 @@
     },
     "scripts": {
       "build": "rbxtsc -p tsconfig.json",
-      "watch": "rbxtsc -p tsconfig.json -w",
-      "typecheck": "tsc -p tsconfig.typecheck.json"
+      "lint": "biome check src",
+      "lint:fix": "biome check src --write --unsafe",
+      "typecheck": "tsc -p tsconfig.typecheck.json",
+      "watch": "rbxtsc -p tsconfig.json -w"
     }
   },
-  "defaultPeerDependencies": {
-    "@rbxts/react": "^17.3.7-ts.1",
-    "@rbxts/react-roblox": "^17.3.7-ts.1"
-  },
-  "defaultDevDependencies": {
-    "@rbxts/react": "17.3.7-ts.1",
-    "@rbxts/react-roblox": "17.3.7-ts.1"
+  "layers": {
+    "core": {
+      "tsconfigBase": "tsconfig.base.json",
+      "peerDependencies": {},
+      "devDependencies": {}
+    },
+    "react": {
+      "tsconfigBase": "tsconfig.react.json",
+      "peerDependencies": {
+        "@rbxts/react": "^17.3.7-ts.1",
+        "@rbxts/react-roblox": "^17.3.7-ts.1"
+      },
+      "devDependencies": {
+        "@rbxts/react": "17.3.7-ts.1",
+        "@rbxts/react-roblox": "17.3.7-ts.1"
+      }
+    },
+    "vide": {
+      "tsconfigBase": "tsconfig.vide.json",
+      "hoistedLinks": true,
+      "peerDependencies": {
+        "@rbxts/vide": "^0.6.1"
+      },
+      "devDependencies": {
+        "@rbxts/vide": "0.6.1"
+      }
+    }
   },
   "toolingPackages": [
     "lattice-ui"

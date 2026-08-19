@@ -61,14 +61,34 @@ interface ChangesetsPolicy {
   access?: string;
 }
 
+/**
+ * Per-framework-layer policy. Peer and dev dependencies cannot be workspace-wide: a `vide/*` package
+ * must not carry React peers, and `core/*` packages are framework-free and carry neither.
+ * `tsconfigBase` is the repository-root tsconfig a package in this layer must extend, which is what
+ * keeps a layer's JSX factory from leaking into another layer.
+ */
+export interface LayerPolicy {
+  tsconfigBase?: string;
+  /**
+   * Whether packages in this layer need `scripts/ensure-hoisted-links.mjs` and the prebuild hook that
+   * runs it. roblox-ts derives a module's scope from its path relative to the *package's* own
+   * `node_modules`, so a package importing `@rbxts/*` directly cannot see the hoisted root install
+   * (`nodeLinker: hoisted`) and fails with "You cannot use modules directly under node_modules".
+   * Every `vide/*` package imports `@rbxts/vide`; in the `react` layer only the few packages that
+   * import `@rbxts/*` themselves opt in, so this stays off there.
+   */
+  hoistedLinks?: boolean;
+  peerDependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
+
 export interface WorkspacePolicy {
   internalScope?: string;
   internalDependencyVersion?: string;
   lockedVersion?: string;
   lockedstep?: LockedstepPolicy;
   packageDefaults?: PackageDefaultsPolicy;
-  defaultPeerDependencies?: Record<string, string>;
-  defaultDevDependencies?: Record<string, string>;
+  layers?: Record<string, LayerPolicy>;
   toolingPackages?: string[];
   requiredFiles?: string[];
   changesets?: ChangesetsPolicy;
@@ -174,6 +194,20 @@ export function getPolicy(): WorkspacePolicy {
   }
 
   return readJson<WorkspacePolicy>(policyPath);
+}
+
+/** The framework layer directory a package lives in: `react/checkbox` -> `react`. */
+export function getPackageLayer(entry: WorkspaceEntry): string {
+  return entry.dirName.split("/")[0] ?? "";
+}
+
+/** Policy for a layer, or an empty policy for layers that declare none (such as `tools`). */
+export function getLayerPolicy(policy: WorkspacePolicy, layer: string): LayerPolicy {
+  return policy.layers?.[layer] ?? {};
+}
+
+export function listLayers(policy: WorkspacePolicy): string[] {
+  return Object.keys(policy.layers ?? {}).sort((left, right) => left.localeCompare(right));
 }
 
 export function isToolingPackage(policy: WorkspacePolicy, packageName: string): boolean {

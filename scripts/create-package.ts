@@ -6,9 +6,11 @@ import {
   createTypecheckTsconfig,
   ensureDir,
   getInternalPackageNames,
+  getLayerPolicy,
   getLockedVersion,
   getPolicy,
   listApps,
+  listLayers,
   listPackages,
   normalizePackageManifest,
   ROOT_DIR,
@@ -16,7 +18,10 @@ import {
   writeJson,
 } from "./workspace-utils.ts";
 
-const LAYERS = ["react"] as const;
+const policy = getPolicy();
+// Layers are declared in workspace.policy.json so the scaffolder, the checker and the syncer cannot
+// disagree about which layers exist.
+const LAYERS = listLayers(policy);
 
 function printUsage() {
   console.log(
@@ -89,7 +94,7 @@ function normalizeInternalName(name: string) {
 
 function canonicalLayer(value: string) {
   const normalized = value.trim();
-  if (!(LAYERS as readonly string[]).includes(normalized)) {
+  if (!LAYERS.includes(normalized)) {
     throw new Error(`Invalid --layer value "${value}". Use ${LAYERS.join("|")}.`);
   }
   return normalized;
@@ -119,7 +124,6 @@ const layer = canonicalLayer(args.layer);
 const packageName = `@lattice-ui/${layer}-${args.name}`;
 const packages = listPackages();
 const apps = listApps();
-const policy = getPolicy();
 
 const existingPackageNames = getInternalPackageNames(packages);
 if (existingPackageNames.has(packageName)) {
@@ -157,11 +161,19 @@ const defaultScripts = policy.packageDefaults?.scripts ?? {
   watch: "rbxtsc -p tsconfig.json -w",
   typecheck: "tsc -p tsconfig.typecheck.json",
 };
-const defaultDevDependencies = policy.defaultDevDependencies ?? {};
-const defaultPeerDependencies = policy.defaultPeerDependencies ?? {};
+const layerPolicy = getLayerPolicy(policy, layer);
+const defaultDevDependencies = layerPolicy.devDependencies ?? {};
+const defaultPeerDependencies = layerPolicy.peerDependencies ?? {};
 
 ensureDir(packageDir);
 ensureDir(`${packageDir}/src`);
+
+const hoistedLinkScripts = layerPolicy.hoistedLinks
+  ? {
+      prebuild: "node ./scripts/ensure-hoisted-links.mjs",
+      prewatch: "node ./scripts/ensure-hoisted-links.mjs",
+    }
+  : {};
 
 const packageManifest = normalizePackageManifest({
   name: packageName,
@@ -172,7 +184,7 @@ const packageManifest = normalizePackageManifest({
   source: policy.packageDefaults?.source ?? "src/index.ts",
   files: policy.packageDefaults?.files ?? ["default.project.json", "out", "src", "README.md"],
   repository: policy.packageDefaults?.repository,
-  scripts: sortRecord({ ...defaultScripts }),
+  scripts: sortRecord({ ...defaultScripts, ...hoistedLinkScripts }),
   dependencies:
     dependencyNames.length > 0
       ? sortRecord(Object.fromEntries(dependencyNames.map((dependencyName) => [dependencyName, dependencySpec])))
@@ -184,7 +196,11 @@ const packageManifest = normalizePackageManifest({
 writeJson(`${packageDir}/package.json`, packageManifest);
 
 writeJson(`${packageDir}/default.project.json`, {
-  name: args.name,
+  // The scoped package name minus the scope. This is the instance name a consumer's synced
+  // `node_modules/@lattice-ui` tree uses, so it has to be unique across every published package —
+  // the bare directory name stopped being unique the moment a second layer existed
+  // (`react/checkbox` and `core/checkbox` would both have claimed "checkbox").
+  name: `${layer}-${args.name}`,
   tree: {
     $path: "out",
     out: {
@@ -194,7 +210,7 @@ writeJson(`${packageDir}/default.project.json`, {
 });
 
 writeJson(`${packageDir}/tsconfig.json`, {
-  extends: "../../../tsconfig.base.json",
+  extends: `../../../${layerPolicy.tsconfigBase ?? "tsconfig.base.json"}`,
   compilerOptions: {
     rootDir: "src",
     outDir: "out",
@@ -212,6 +228,14 @@ writeJson(`${packageDir}/tsconfig.json`, {
 
 // Placeholder: workspace-sync rewrites this with the full workspace paths map below.
 writeJson(`${packageDir}/tsconfig.typecheck.json`, createTypecheckTsconfig([]));
+
+if (layerPolicy.hoistedLinks) {
+  ensureDir(`${packageDir}/scripts`);
+  fs.copyFileSync(
+    `${ROOT_DIR}/scripts/templates/ensure-hoisted-links.mjs`,
+    `${packageDir}/scripts/ensure-hoisted-links.mjs`,
+  );
+}
 
 fs.writeFileSync(`${packageDir}/src/index.ts`, "export {};\n", "utf8");
 fs.writeFileSync(

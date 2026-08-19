@@ -1,0 +1,10 @@
+{
+  // JSX settings for the `vide` layer, per @rbxts/vide's documented configuration.
+  // See docs/architecture/multi-framework.md.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "Vide.jsx",
+    "jsxFragmentFactory": "Vide.Fragment"
+  }
+}

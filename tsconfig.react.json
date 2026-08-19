@@ -1,0 +1,10 @@
+{
+  // JSX settings for the `react` layer. `tsconfig.base.json` stays framework-neutral so that
+  // `core/*` (no JSX) and `vide/*` (Vide.jsx) can share it. See docs/architecture/multi-framework.md.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "React.createElement",
+    "jsxFragmentFactory": "React.Fragment"
+  }
+}

@@ -27,6 +27,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.2.0(jiti@2.6.1))
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:packages/core/runtime
       '@lattice-ui/react-checkbox':
         specifier: workspace:*
         version: link:packages/react/checkbox
@@ -72,6 +75,9 @@ importers:
       '@lattice-ui/react-tooltip':
         specifier: workspace:*
         version: link:packages/react/tooltip
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:packages/vide/runtime
       '@rbxts/compiler-types':
         specifier: 3.0.0-types.0
         version: 3.0.0-types.0
@@ -84,6 +90,9 @@ importers:
       '@rbxts/types':
         specifier: ^1.0.912
         version: 1.0.914
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -485,6 +494,15 @@ importers:
       '@lattice-ui/react-tooltip':
         specifier: workspace:*
         version: link:../../packages/react/tooltip
+      '@lattice-ui/vide-checkbox':
+        specifier: workspace:*
+        version: link:../../packages/vide/checkbox
+      '@lattice-ui/vide-popover':
+        specifier: workspace:*
+        version: link:../../packages/vide/popover
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../../packages/vide/runtime
     devDependencies:
       '@rbxts/react':
         specifier: 17.3.7-ts.1
@@ -495,6 +513,42 @@ importers:
       '@rbxts/testez':
         specifier: 0.4.2-ts.0
         version: 0.4.2-ts.0
+
+  packages/core/checkbox:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/layer:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/motion:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/services':
+        specifier: ^1.6.0
+        version: 1.6.0
+
+  packages/core/popover:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/popper:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/runtime: {}
 
   packages/react/accordion:
     dependencies:
@@ -533,6 +587,9 @@ importers:
 
   packages/react/checkbox:
     dependencies:
+      '@lattice-ui/core-checkbox':
+        specifier: workspace:*
+        version: link:../../core/checkbox
       '@lattice-ui/react-layer':
         specifier: workspace:*
         version: link:../layer
@@ -631,6 +688,9 @@ importers:
 
   packages/react/layer:
     dependencies:
+      '@lattice-ui/core-layer':
+        specifier: workspace:*
+        version: link:../../core/layer
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -672,6 +732,9 @@ importers:
 
   packages/react/motion:
     dependencies:
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../../core/motion
       '@lattice-ui/react-runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -688,6 +751,9 @@ importers:
 
   packages/react/popover:
     dependencies:
+      '@lattice-ui/core-popover':
+        specifier: workspace:*
+        version: link:../../core/popover
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -713,6 +779,9 @@ importers:
 
   packages/react/popper:
     dependencies:
+      '@lattice-ui/core-popper':
+        specifier: workspace:*
+        version: link:../../core/popper
       '@lattice-ui/react-motion':
         specifier: workspace:*
         version: link:../motion
@@ -766,6 +835,10 @@ importers:
         version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
 
   packages/react/runtime:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../../core/runtime
     devDependencies:
       '@rbxts/react':
         specifier: 17.3.7-ts.1
@@ -984,6 +1057,85 @@ importers:
         version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
 
   packages/tools/cli: {}
+
+  packages/vide/checkbox:
+    dependencies:
+      '@lattice-ui/core-checkbox':
+        specifier: workspace:*
+        version: link:../../core/checkbox
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../../core/motion
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../../core/runtime
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/motion:
+    dependencies:
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../../core/motion
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../../core/runtime
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/popover:
+    dependencies:
+      '@lattice-ui/core-layer':
+        specifier: workspace:*
+        version: link:../../core/layer
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../../core/motion
+      '@lattice-ui/core-popover':
+        specifier: workspace:*
+        version: link:../../core/popover
+      '@lattice-ui/core-popper':
+        specifier: workspace:*
+        version: link:../../core/popper
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../../core/runtime
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/runtime:
+    dependencies:
+      '@lattice-ui/core-layer':
+        specifier: workspace:*
+        version: link:../../core/layer
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../../core/runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
 
 packages:
 
@@ -1514,6 +1666,9 @@ packages:
 
   '@rbxts/types@1.0.914':
     resolution: {integrity: sha512-Mvi1ETvzFWL14uV79BWop3tCSpEjpw//umzS/1fIpdfydr2Eys3KJJKBAll864xBPAb97s8TMUX+1V4eWBz0sA==}
+
+  '@rbxts/vide@0.6.1':
+    resolution: {integrity: sha512-syFqx+HYXy0TauDCGLhc68K2cAlfgYookIJSRtJZ01W7mUI+EKyj80x2L91dQxos3BwAAGJqBD/ovWU4M//+Lg==}
 
   '@roblox-ts/luau-ast@2.0.0':
     resolution: {integrity: sha512-cmMi093IdwBOLVxwuordhM8AmtbyTIyRpsTbB0D/JauidW4SXsQRQowSwWjHo4QP0DRJBXvOIlxtqEQi50uNzQ==}
@@ -3540,6 +3695,8 @@ snapshots:
   '@rbxts/testez@0.4.2-ts.0': {}
 
   '@rbxts/types@1.0.914': {}
+
+  '@rbxts/vide@0.6.1': {}
 
   '@roblox-ts/luau-ast@2.0.0': {}
 

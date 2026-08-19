@@ -6,7 +6,9 @@ import {
   dependencyFields,
   fileExists,
   getInternalPackageNames,
+  getLayerPolicy,
   getLockedVersion,
+  getPackageLayer,
   getPolicy,
   isToolingPackage,
   jsonEqual,
@@ -53,7 +55,6 @@ const internalNames = getInternalPackageNames(packages);
 const expectedDependencySpec = policy.internalDependencyVersion ?? "workspace:*";
 const lockedVersion = getLockedVersion(policy, packages);
 const requiredFiles = policy.requiredFiles ?? ["src/index.ts", "tsconfig.json", "tsconfig.typecheck.json"];
-const defaultPeerDependencies = policy.defaultPeerDependencies ?? {};
 const requiredScripts = policy.packageDefaults?.scripts ?? {};
 const typecheckPathPackages = packages.filter((pkg) => !isToolingPackage(policy, pkg.manifest.name));
 const expectedTypecheckTsconfig = createTypecheckTsconfig(typecheckPathPackages);
@@ -90,6 +91,7 @@ if (typeof policy.lockedstep?.major === "number") {
 
 for (const pkg of packages) {
   const toolingPackage = isToolingPackage(policy, pkg.manifest.name);
+  const layerPolicy = getLayerPolicy(policy, getPackageLayer(pkg));
 
   if (!toolingPackage) {
     for (const requiredFile of requiredFiles) {
@@ -135,9 +137,22 @@ for (const pkg of packages) {
       }
     }
 
-    for (const [peerName, peerVersion] of Object.entries(defaultPeerDependencies)) {
+    for (const [peerName, peerVersion] of Object.entries(layerPolicy.peerDependencies ?? {})) {
       if (pkg.manifest.peerDependencies?.[peerName] !== peerVersion) {
         errors.push(`${pkg.manifest.name} must define peerDependencies.${peerName} as "${peerVersion}".`);
+      }
+    }
+
+    // A package that extends the wrong layer base silently compiles JSX with the other framework's
+    // factory, so this is checked rather than left to a build failure nobody reads.
+    if (layerPolicy.tsconfigBase) {
+      const tsconfigPath = path.join(pkg.dirPath, "tsconfig.json");
+      if (fileExists(tsconfigPath)) {
+        const expectedExtends = `../../../${layerPolicy.tsconfigBase}`;
+        const tsconfig = readJson<{ extends?: unknown }>(tsconfigPath);
+        if (tsconfig.extends !== expectedExtends) {
+          errors.push(`${pkg.manifest.name} tsconfig.json must extend "${expectedExtends}".`);
+        }
       }
     }
   }
@@ -177,9 +192,32 @@ for (const pkg of packages) {
  * through its built `out/`, so only CI — which typechecks before building — sees the failure.
  */
 const pathMapFiles = ["tsconfig.eslint.json", ...apps.map((app) => path.join("apps", app.dirName, "tsconfig.json"))];
-const expectedPathNames = packages
-  .filter((pkg) => !isToolingPackage(policy, pkg.manifest.name))
-  .map((pkg) => pkg.manifest.name);
+const pathMapPackages = packages.filter((pkg) => !isToolingPackage(policy, pkg.manifest.name));
+
+/**
+ * Which layers an app may map to source.
+ *
+ * A tsconfig carries exactly one JSX factory, so an app that compiles React cannot also pull a Vide
+ * package's `.tsx` into its program — it has to resolve that one through its built `out/` instead.
+ * `core` is safe everywhere because it is framework-free and compiles no JSX. `tsconfig.eslint.json`
+ * is exempt: it lints every layer's source and never emits.
+ */
+function getMappableLayers(configPath: string, config: { extends?: unknown }): string[] | undefined {
+  if (!configPath.startsWith("apps/")) {
+    return undefined;
+  }
+
+  const extendsPath = typeof config.extends === "string" ? path.basename(config.extends) : undefined;
+  const layer = Object.keys(policy.layers ?? {}).find(
+    (candidate) => getLayerPolicy(policy, candidate).tsconfigBase === extendsPath,
+  );
+
+  if (layer === undefined) {
+    return undefined;
+  }
+
+  return layer === "core" ? [layer] : [layer, "core"];
+}
 
 for (const relativePath of pathMapFiles) {
   const absolutePath = path.join(ROOT_DIR, relativePath);
@@ -187,15 +225,33 @@ for (const relativePath of pathMapFiles) {
     continue;
   }
 
-  const config = readJson<{ compilerOptions?: { paths?: Record<string, unknown> } }>(absolutePath);
+  const config = readJson<{ extends?: unknown; compilerOptions?: { paths?: Record<string, unknown> } }>(absolutePath);
   const paths = config.compilerOptions?.paths;
   if (!paths) {
     continue;
   }
 
-  const missing = expectedPathNames.filter((name) => paths[name] === undefined);
+  const mappableLayers = getMappableLayers(relativePath, config);
+  const expected = pathMapPackages.filter(
+    (pkg) => mappableLayers === undefined || mappableLayers.includes(getPackageLayer(pkg)),
+  );
+
+  const missing = expected.map((pkg) => pkg.manifest.name).filter((name) => paths[name] === undefined);
   if (missing.length > 0) {
     errors.push(`${relativePath} is missing paths entries for: ${missing.join(", ")}.`);
+  }
+
+  if (mappableLayers !== undefined) {
+    const foreign = pathMapPackages
+      .filter((pkg) => !mappableLayers.includes(getPackageLayer(pkg)))
+      .map((pkg) => pkg.manifest.name)
+      .filter((name) => paths[name] !== undefined);
+
+    if (foreign.length > 0) {
+      errors.push(
+        `${relativePath} maps another layer's source, which its JSX factory cannot compile: ${foreign.join(", ")}.`,
+      );
+    }
   }
 }
 

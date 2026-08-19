@@ -13,6 +13,12 @@
   ],
   "fixed": [
     [
+      "@lattice-ui/core-checkbox",
+      "@lattice-ui/core-layer",
+      "@lattice-ui/core-motion",
+      "@lattice-ui/core-popover",
+      "@lattice-ui/core-popper",
+      "@lattice-ui/core-runtime",
       "@lattice-ui/react-accordion",
       "@lattice-ui/react-avatar",
       "@lattice-ui/react-checkbox",
@@ -40,6 +46,10 @@
       "@lattice-ui/react-toast",
       "@lattice-ui/react-toggle-group",
       "@lattice-ui/react-tooltip",
+      "@lattice-ui/vide-checkbox",
+      "@lattice-ui/vide-motion",
+      "@lattice-ui/vide-popover",
+      "@lattice-ui/vide-runtime",
       "lattice-ui"
     ]
   ],

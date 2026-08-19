@@ -1,10 +1,15 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.react.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "out",
     "declaration": true,
-    "typeRoots": ["./node_modules/@rbxts", "../../../node_modules/@rbxts"],
+    "typeRoots": [
+      "./node_modules/@rbxts",
+      "../../../node_modules/@rbxts",
+      "./node_modules/@lattice-ui",
+      "../../../node_modules/@lattice-ui"
+    ],
     "types": ["types", "compiler-types"]
   },
   "include": ["src"]

@@ -1,9 +1,19 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.react.json",
   "compilerOptions": {
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
+      "@lattice-ui/core-checkbox": ["packages/core/checkbox/src/index.ts"],
+      "@lattice-ui/core-layer": ["packages/core/layer/src/index.ts"],
+      "@lattice-ui/core-motion": ["packages/core/motion/src/index.ts"],
+      "@lattice-ui/core-popper": ["packages/core/popper/src/index.ts"],
+      "@lattice-ui/core-popover": ["packages/core/popover/src/index.ts"],
+      "@lattice-ui/core-runtime": ["packages/core/runtime/src/index.ts"],
+      "@lattice-ui/vide-runtime": ["packages/vide/runtime/src/index.ts"],
+      "@lattice-ui/vide-popover": ["packages/vide/popover/src/index.ts"],
+      "@lattice-ui/vide-motion": ["packages/vide/motion/src/index.ts"],
+      "@lattice-ui/vide-checkbox": ["packages/vide/checkbox/src/index.ts"],
       "@lattice-ui/react-accordion": ["packages/react/accordion/src/index.ts"],
       "@lattice-ui/react-avatar": ["packages/react/avatar/src/index.ts"],
       "@lattice-ui/react-checkbox": ["packages/react/checkbox/src/index.ts"],

@@ -8,7 +8,9 @@ import {
   ensureDir,
   fileExists,
   getInternalPackageNames,
+  getLayerPolicy,
   getLockedVersion,
+  getPackageLayer,
   getPolicy,
   isToolingPackage,
   jsonEqual,
@@ -79,12 +81,12 @@ const internalNames = getInternalPackageNames(packages);
 const lockedVersion = getLockedVersion(policy, packages);
 const defaults = policy.packageDefaults ?? {};
 const defaultScripts = defaults.scripts ?? {};
-const defaultPeerDependencies = policy.defaultPeerDependencies ?? {};
 const internalDependencySpec = policy.internalDependencyVersion ?? "workspace:*";
 
 let manifestUpdates = 0;
 for (const pkg of packages) {
   const toolingPackage = isToolingPackage(policy, pkg.manifest.name);
+  const layerPeerDependencies = getLayerPolicy(policy, getPackageLayer(pkg)).peerDependencies ?? {};
   const nextManifest: PackageManifest = structuredClone(pkg.manifest);
 
   nextManifest.version = lockedVersion;
@@ -124,10 +126,15 @@ for (const pkg of packages) {
 
   if (!toolingPackage) {
     nextManifest.peerDependencies = nextManifest.peerDependencies ?? {};
-    for (const [peerName, peerVersion] of Object.entries(defaultPeerDependencies)) {
+    for (const [peerName, peerVersion] of Object.entries(layerPeerDependencies)) {
       nextManifest.peerDependencies[peerName] = peerVersion;
     }
-    nextManifest.peerDependencies = sortRecord(nextManifest.peerDependencies);
+    // `core/*` declares no peers; leaving an empty object behind is noise in the published manifest.
+    nextManifest.peerDependencies =
+      Object.keys(nextManifest.peerDependencies).length > 0 ? sortRecord(nextManifest.peerDependencies) : undefined;
+    if (nextManifest.peerDependencies === undefined) {
+      delete nextManifest.peerDependencies;
+    }
   } else if (
     nextManifest.peerDependencies &&
     typeof nextManifest.peerDependencies === "object" &&
