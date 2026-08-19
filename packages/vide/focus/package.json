@@ -1,5 +1,5 @@
 {
-  "name": "@lattice-ui/vide-popover",
+  "name": "@lattice-ui/vide-focus",
   "version": "0.8.1",
   "private": false,
   "main": "out/init.luau",
@@ -26,13 +26,6 @@
   },
   "dependencies": {
     "@lattice-ui/core-focus": "workspace:*",
-    "@lattice-ui/core-layer": "workspace:*",
-    "@lattice-ui/core-motion": "workspace:*",
-    "@lattice-ui/core-popover": "workspace:*",
-    "@lattice-ui/core-popper": "workspace:*",
-    "@lattice-ui/core-runtime": "workspace:*",
-    "@lattice-ui/vide-focus": "workspace:*",
-    "@lattice-ui/vide-motion": "workspace:*",
     "@lattice-ui/vide-runtime": "workspace:*"
   },
   "devDependencies": {

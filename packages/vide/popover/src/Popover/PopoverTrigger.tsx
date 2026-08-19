@@ -1,3 +1,4 @@
+import { useFocusNode } from "@lattice-ui/vide-focus";
 import {
   applyElementSpec,
   applySlotProps,
@@ -12,6 +13,15 @@ const OWN_PROPS = ["asChild", "disabled", "children"] as const;
 
 export function PopoverTrigger(props: PopoverTriggerProps) {
   const core = usePopoverContext();
+
+  // The trigger is a focus node so dismissal has somewhere to restore to, but it stays out of
+  // Roblox's own selection sweep — navigation reaches it through the manager.
+  useFocusNode({
+    getGuiObject: core.getTrigger,
+    disabled: props.disabled,
+    syncToRoblox: false,
+  });
+
   const passthrough = getPassthroughProps<TextButton>(props, OWN_PROPS);
   const spec = core.triggerSpec({ disabled: props.disabled });
   const merged = applyElementSpec(spec, passthrough, { neutral: props.asChild !== true });

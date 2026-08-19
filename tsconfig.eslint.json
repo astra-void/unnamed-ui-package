@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "paths": {
       "@lattice-ui/core-checkbox": ["packages/core/checkbox/src/index.ts"],
+      "@lattice-ui/core-focus": ["packages/core/focus/src/index.ts"],
       "@lattice-ui/core-layer": ["packages/core/layer/src/index.ts"],
       "@lattice-ui/core-motion": ["packages/core/motion/src/index.ts"],
       "@lattice-ui/core-popper": ["packages/core/popper/src/index.ts"],
@@ -14,6 +15,7 @@
       "@lattice-ui/vide-popover": ["packages/vide/popover/src/index.ts"],
       "@lattice-ui/vide-motion": ["packages/vide/motion/src/index.ts"],
       "@lattice-ui/vide-checkbox": ["packages/vide/checkbox/src/index.ts"],
+      "@lattice-ui/vide-focus": ["packages/vide/focus/src/index.ts"],
       "@lattice-ui/react-accordion": ["packages/react/accordion/src/index.ts"],
       "@lattice-ui/react-avatar": ["packages/react/avatar/src/index.ts"],
       "@lattice-ui/react-checkbox": ["packages/react/checkbox/src/index.ts"],

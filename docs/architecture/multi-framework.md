@@ -352,8 +352,17 @@ More roblox-ts and toolchain constraints found:
   needed `useLatticeCore` or `applyElementSpec` added. A relative `require()` inside a mock factory
   does not resolve under vitest — the factory has to be `async` and use `await import`.
 
-Still on the React side only: **focus** (`FocusScope`, focus navigation). Extracting a focus core is
-the largest remaining piece of the restructure after the primitives themselves.
+**Focus followed** (`@lattice-ui/core-focus`), which was the largest remaining piece. It turned out
+to be the thinnest of them in the end: 1,300 of the package's 2,000 lines — the whole focus manager,
+its navigation resolution and the trapped-scope stack — never imported a framework at all. Only six
+files did, and of those `orderedSelection` needed nothing but a structural `FocusRef` type in place
+of React's `MutableRefObject`.
+
+What did have to be rewritten was the lifecycle around the manager: `createFocusScope` owns
+registration, the scope's settings as getters, and holding the navigation binds open while a scope is
+active; `createFocusNode` owns a node's registration and re-registers when its scope changes, since a
+node's scope is part of its identity to the manager. `@lattice-ui/vide-focus` binds both, and the
+Vide popover now traps and restores focus the way the React one does.
 
 **Motion followed immediately after** (`@lattice-ui/core-motion`). The motion runtime never imported
 a framework, so only the presence state machine had to be rewritten — as a `sync(inputs)` core in the

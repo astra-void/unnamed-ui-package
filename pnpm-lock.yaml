@@ -520,6 +520,12 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/focus:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/layer:
     dependencies:
       '@lattice-ui/core-runtime':
@@ -675,6 +681,9 @@ importers:
 
   packages/react/focus:
     dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../../core/focus
       '@lattice-ui/react-runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -1080,6 +1089,19 @@ importers:
         specifier: 0.6.1
         version: 0.6.1
 
+  packages/vide/focus:
+    dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../../core/focus
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
   packages/vide/motion:
     dependencies:
       '@lattice-ui/core-motion':
@@ -1098,6 +1120,9 @@ importers:
 
   packages/vide/popover:
     dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../../core/focus
       '@lattice-ui/core-layer':
         specifier: workspace:*
         version: link:../../core/layer
@@ -1113,6 +1138,9 @@ importers:
       '@lattice-ui/core-runtime':
         specifier: workspace:*
         version: link:../../core/runtime
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
       '@lattice-ui/vide-motion':
         specifier: workspace:*
         version: link:../motion

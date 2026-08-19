@@ -6,6 +6,7 @@
     "rootDir": "../..",
     "paths": {
       "@lattice-ui/core-checkbox": ["core/checkbox/src/index.ts"],
+      "@lattice-ui/core-focus": ["core/focus/src/index.ts"],
       "@lattice-ui/core-layer": ["core/layer/src/index.ts"],
       "@lattice-ui/core-motion": ["core/motion/src/index.ts"],
       "@lattice-ui/core-popover": ["core/popover/src/index.ts"],
@@ -39,6 +40,7 @@
       "@lattice-ui/react-toggle-group": ["react/toggle-group/src/index.ts"],
       "@lattice-ui/react-tooltip": ["react/tooltip/src/index.ts"],
       "@lattice-ui/vide-checkbox": ["vide/checkbox/src/index.ts"],
+      "@lattice-ui/vide-focus": ["vide/focus/src/index.ts"],
       "@lattice-ui/vide-motion": ["vide/motion/src/index.ts"],
       "@lattice-ui/vide-popover": ["vide/popover/src/index.ts"],
       "@lattice-ui/vide-runtime": ["vide/runtime/src/index.ts"]

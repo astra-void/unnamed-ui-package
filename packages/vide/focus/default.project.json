@@ -1,0 +1,9 @@
+{
+  "name": "vide-focus",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { createDismissableLayer, createPresence } from "@lattice-ui/core-layer";
 import type { PresenceMotionConfig } from "@lattice-ui/core-motion";
 import { createPopper } from "@lattice-ui/core-popper";
+import { FocusLayerProvider, FocusScope } from "@lattice-ui/vide-focus";
 import { createPresenceMotionBinding, useMotionPolicy } from "@lattice-ui/vide-motion";
 import {
   applyElementSpec,
@@ -169,12 +170,18 @@ export function PopoverContent(props: PopoverContentProps) {
         Size={UDim2.fromScale(1, 1)}
         ZIndex={1}
       >
-        {props.forceMount === true
-          ? renderPositioned()
-          : Vide.show(
-              () => presence.mounted(),
-              () => renderPositioned(),
-            )}
+        <FocusLayerProvider layerOrder={() => layer.stackOrder()}>
+          {() => (
+            <FocusScope active={() => core.open()} restoreFocus={true} trapped={() => core.modal()}>
+              {props.forceMount === true
+                ? renderPositioned()
+                : Vide.show(
+                    () => presence.mounted(),
+                    () => renderPositioned(),
+                  )}
+            </FocusScope>
+          )}
+        </FocusLayerProvider>
       </frame>
     </screengui>
   );

@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "paths": {
       "@lattice-ui/core-checkbox": ["../../packages/core/checkbox/src/index.ts"],
+      "@lattice-ui/core-focus": ["../../packages/core/focus/src/index.ts"],
       "@lattice-ui/core-layer": ["../../packages/core/layer/src/index.ts"],
       "@lattice-ui/core-motion": ["../../packages/core/motion/src/index.ts"],
       "@lattice-ui/core-popper": ["../../packages/core/popper/src/index.ts"],
