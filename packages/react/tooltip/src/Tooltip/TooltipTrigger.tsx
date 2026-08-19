@@ -1,93 +1,37 @@
-import { composeEvents, composeRefs, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
-import { DEFAULT_TOOLTIP_TRIGGER_ACTIVITY_STATE, updateTooltipTriggerActivity } from "./activity";
+import {
+  applyElementSpec,
+  getPassthroughProps,
+  React,
+  Slot,
+  toSlotProps,
+  useLatticeCore,
+} from "@lattice-ui/react-runtime";
 import { useTooltipContext } from "./context";
 import type { TooltipTriggerProps } from "./types";
 
 const OWN_PROPS = ["asChild", "disabled", "children"] as const;
 
-// Roblox instance defaults are themselves a look: a bare `textbutton` renders an opaque grey box
-// labelled "Button". Neutralize only that, and leave every real appearance decision (colors, size,
-// fonts, text) to the consumer. Passthrough props are spread after these, so they stay overridable.
-const NEUTRAL_PROPS = {
-  AutoButtonColor: false,
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-  Text: "",
-};
-
-function toGuiObject(instance: Instance | undefined) {
-  if (!instance?.IsA("GuiObject")) {
-    return undefined;
-  }
-
-  return instance;
-}
-
 export function TooltipTrigger(props: TooltipTriggerProps) {
-  const tooltipContext = useTooltipContext();
-  const activityStateRef = React.useRef(DEFAULT_TOOLTIP_TRIGGER_ACTIVITY_STATE);
+  const core = useTooltipContext().core;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const setTriggerRef = React.useCallback(
-    (instance: Instance | undefined) => {
-      tooltipContext.triggerRef.current = toGuiObject(instance);
-    },
-    [tooltipContext.triggerRef],
-  );
+  // Built once, so hover and focus accumulate on one activity state rather than resetting each
+  // render.
+  const trigger = useLatticeCore(() => core.createTrigger({ disabled: () => propsRef.current.disabled }));
 
-  const applyActivity = React.useCallback(
-    (kind: "hover" | "focus", active: boolean) => {
-      const result = updateTooltipTriggerActivity(activityStateRef.current, kind, active);
-      activityStateRef.current = result.state;
-
-      if (props.disabled) {
-        if (!active) {
-          tooltipContext.close();
-        }
-        return;
-      }
-
-      if (result.action === "open") {
-        if (kind === "focus") {
-          tooltipContext.setOpen(true);
-        } else {
-          tooltipContext.openWithDelay();
-        }
-        return;
-      }
-
-      if (result.action === "close") {
-        tooltipContext.close();
-      }
-    },
-    [props.disabled, tooltipContext],
-  );
-
+  // A trigger disabled while its tooltip is up has to drop both the tooltip and the activity that
+  // opened it, or re-enabling would reopen from a stale state.
   React.useEffect(() => {
-    if (!props.disabled) {
+    if (props.disabled !== true) {
       return;
     }
 
-    activityStateRef.current = DEFAULT_TOOLTIP_TRIGGER_ACTIVITY_STATE;
-    tooltipContext.close();
-  }, [props.disabled, tooltipContext]);
-
-  const eventHandlers = React.useMemo(
-    () => ({
-      MouseEnter: () => applyActivity("hover", true),
-      MouseLeave: () => applyActivity("hover", false),
-      SelectionGained: () => applyActivity("focus", true),
-      SelectionLost: () => applyActivity("focus", false),
-    }),
-    [applyActivity],
-  );
+    trigger.reset();
+  }, [props.disabled, trigger]);
 
   const passthrough = getPassthroughProps<TextButton>(props, OWN_PROPS);
-  const behaviorProps = {
-    Active: props.disabled !== true,
-    Event: composeEvents(passthrough.Event, eventHandlers),
-    Selectable: props.disabled !== true,
-    ref: composeRefs<Instance>(passthrough.ref as never, setTriggerRef),
-  };
+  const merged = applyElementSpec(trigger.spec(), passthrough, { neutral: props.asChild !== true });
 
   if (props.asChild) {
     const child = props.children;
@@ -96,16 +40,8 @@ export function TooltipTrigger(props: TooltipTriggerProps) {
     }
 
     // No neutral defaults here: the rendered element belongs to the consumer.
-    return (
-      <Slot {...toSlotProps(passthrough)} {...behaviorProps}>
-        {child}
-      </Slot>
-    );
+    return <Slot {...toSlotProps(merged)}>{child}</Slot>;
   }
 
-  return (
-    <textbutton {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
-      {props.children}
-    </textbutton>
-  );
+  return <textbutton {...merged}>{props.children}</textbutton>;
 }

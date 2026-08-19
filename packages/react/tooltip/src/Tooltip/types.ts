@@ -1,3 +1,4 @@
+import type { TooltipCore } from "@lattice-ui/core-tooltip";
 import type { LayerInteractEvent } from "@lattice-ui/react-layer";
 import type { PresenceMotionConfig as MotionConfig } from "@lattice-ui/react-motion";
 import type { PopperPlacement } from "@lattice-ui/react-popper";
@@ -11,8 +12,8 @@ export type TooltipContextValue = {
   setOpen: TooltipSetOpen;
   openWithDelay: () => void;
   close: () => void;
-  triggerRef: React.MutableRefObject<GuiObject | undefined>;
-  contentRef: React.MutableRefObject<GuiObject | undefined>;
+  /** The core, for the parts that build a trigger or position against the instances. */
+  core: TooltipCore;
 };
 
 export type TooltipProviderContextValue = {

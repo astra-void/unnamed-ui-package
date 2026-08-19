@@ -514,6 +514,15 @@ importers:
         specifier: 0.4.2-ts.0
         version: 0.4.2-ts.0
 
+  packages/core/accordion:
+    dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/avatar:
     dependencies:
       '@lattice-ui/core-runtime':
@@ -634,8 +643,17 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/tooltip:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/react/accordion:
     dependencies:
+      '@lattice-ui/core-accordion':
+        specifier: workspace:*
+        version: link:../../core/accordion
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1153,6 +1171,9 @@ importers:
 
   packages/react/tooltip:
     dependencies:
+      '@lattice-ui/core-tooltip':
+        specifier: workspace:*
+        version: link:../../core/tooltip
       '@lattice-ui/react-layer':
         specifier: workspace:*
         version: link:../layer
@@ -1174,6 +1195,25 @@ importers:
         version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
 
   packages/tools/cli: {}
+
+  packages/vide/accordion:
+    dependencies:
+      '@lattice-ui/core-accordion':
+        specifier: workspace:*
+        version: link:../../core/accordion
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
 
   packages/vide/avatar:
     dependencies:
@@ -1431,6 +1471,28 @@ importers:
       '@lattice-ui/vide-focus':
         specifier: workspace:*
         version: link:../focus
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/tooltip:
+    dependencies:
+      '@lattice-ui/core-layer':
+        specifier: workspace:*
+        version: link:../../core/layer
+      '@lattice-ui/core-popper':
+        specifier: workspace:*
+        version: link:../../core/popper
+      '@lattice-ui/core-tooltip':
+        specifier: workspace:*
+        version: link:../../core/tooltip
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
       '@lattice-ui/vide-runtime':
         specifier: workspace:*
         version: link:../runtime

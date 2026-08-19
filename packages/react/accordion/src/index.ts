@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-accordion";
+
 import { AccordionContent } from "./Accordion/AccordionContent";
 import { AccordionHeader } from "./Accordion/AccordionHeader";
 import { AccordionItem } from "./Accordion/AccordionItem";
@@ -12,8 +14,6 @@ export const Accordion = {
   Content: AccordionContent,
 } as const;
 
-export type { AccordionType } from "./Accordion/state";
-export { nextAccordionValues, normalizeAccordionValue } from "./Accordion/state";
 export type {
   AccordionContentProps,
   AccordionContextValue,

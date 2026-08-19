@@ -74,8 +74,10 @@ function TooltipContentImpl(props: {
   const contentBoundaryRef = React.useRef<GuiObject>();
 
   const popper = usePopper({
-    anchorRef: tooltipContext.triggerRef,
-    contentRef: tooltipContext.contentRef,
+    // The instances live in the core, so the popper reads them from there rather than from refs
+    // this component would have to keep in sync.
+    getAnchor: tooltipContext.core.getTrigger,
+    getContent: tooltipContext.core.getContent,
     alignOffset: props.alignOffset,
     collisionPadding: props.collisionPadding,
     sideOffset: props.sideOffset,
@@ -96,11 +98,11 @@ function TooltipContentImpl(props: {
   const setContentRef = React.useCallback(
     (instance: Instance | undefined) => {
       const guiObject = toGuiObject(instance);
-      tooltipContext.contentRef.current = guiObject;
+      tooltipContext.core.setContent(guiObject);
       contentBoundaryRef.current = guiObject;
       motion.ref.current = guiObject;
     },
-    [motion.ref, tooltipContext.contentRef],
+    [motion.ref, tooltipContext.core],
   );
 
   const handleDismiss = React.useCallback(() => {

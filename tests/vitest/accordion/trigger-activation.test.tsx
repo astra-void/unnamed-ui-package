@@ -56,6 +56,8 @@ vi.mock("@lattice-ui/react-motion", () => ({
 }));
 
 import { AccordionTrigger } from "../../../packages/react/accordion/src/Accordion/AccordionTrigger";
+import { createAccordion } from "../../../packages/core/accordion/src/Accordion/createAccordion";
+import { createStandaloneReactivity } from "../../../packages/core/runtime/src/reactivity";
 import {
   AccordionContextProvider,
   AccordionItemContextProvider,
@@ -94,16 +96,29 @@ function renderTrigger(options: {
   disabled?: boolean;
   child: React.ReactElement;
 }) {
-  const accordionContext: AccordionContextValue = {
+  // A real core rather than a stub: the activation guard that collapses one activation's paired
+  // events lives inside the item, so a stubbed context would test nothing.
+  const value = options.itemValue ?? "section";
+  const core = createAccordion(createStandaloneReactivity(), {
     type: "single",
-    openValues: options.open ? [options.itemValue ?? "section"] : [],
-    toggleItem: options.toggleItem ?? (() => {}),
-  };
-  const itemContext: AccordionItemContextValue = {
-    value: options.itemValue ?? "section",
-    open: options.open ?? false,
-    disabled: options.disabled ?? false,
-  };
+    collapsible: true,
+    defaultValue: options.open ? value : "",
+    onValueChange: (next) => options.toggleItem?.(typeIs(next, "string") ? next : (next as string[])[0]),
+  });
+  const item = core.createItem({ value, disabled: () => options.disabled === true });
+
+  const accordionContext = {
+    type: core.type(),
+    openValues: core.openValues(),
+    toggleItem: core.toggleItem,
+    core,
+  } as AccordionContextValue;
+  const itemContext = {
+    value,
+    open: item.open(),
+    disabled: item.disabled(),
+    item,
+  } as AccordionItemContextValue;
 
   return render(
     React.createElement(

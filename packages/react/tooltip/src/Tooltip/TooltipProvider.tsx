@@ -1,3 +1,4 @@
+import { createTooltipPolicy } from "@lattice-ui/core-tooltip";
 import { React } from "@lattice-ui/react-runtime";
 import { TooltipProviderContext } from "./context";
 import type { TooltipProviderContextValue, TooltipProviderProps } from "./types";

@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-tooltip";
+
 import { TooltipContent } from "./Tooltip/TooltipContent";
 import { TooltipPortal } from "./Tooltip/TooltipPortal";
 import { TooltipProvider } from "./Tooltip/TooltipProvider";

@@ -5,6 +5,9 @@
     "baseUrl": "../..",
     "rootDir": "../..",
     "paths": {
+      "@lattice-ui/core-accordion": [
+        "core/accordion/src/index.ts"
+      ],
       "@lattice-ui/core-avatar": [
         "core/avatar/src/index.ts"
       ],
@@ -55,6 +58,9 @@
       ],
       "@lattice-ui/core-toggle-group": [
         "core/toggle-group/src/index.ts"
+      ],
+      "@lattice-ui/core-tooltip": [
+        "core/tooltip/src/index.ts"
       ],
       "@lattice-ui/react-accordion": [
         "react/accordion/src/index.ts"
@@ -137,6 +143,9 @@
       "@lattice-ui/react-tooltip": [
         "react/tooltip/src/index.ts"
       ],
+      "@lattice-ui/vide-accordion": [
+        "vide/accordion/src/index.ts"
+      ],
       "@lattice-ui/vide-avatar": [
         "vide/avatar/src/index.ts"
       ],
@@ -181,6 +190,9 @@
       ],
       "@lattice-ui/vide-toggle-group": [
         "vide/toggle-group/src/index.ts"
+      ],
+      "@lattice-ui/vide-tooltip": [
+        "vide/tooltip/src/index.ts"
       ]
     }
   }
