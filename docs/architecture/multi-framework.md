@@ -213,12 +213,16 @@ checkpoint where the contract may be revised before mass migration.
 | 1 | workspace plumbing accepts a second layer | **done** — `packages/core/runtime` and `packages/vide/runtime` exist and the full `check` / `build` / `typecheck` / `lint` suite passes |
 | 2 | vertical slice 1: `checkbox` | **done** — one core drives both layers; the Vide harness spec compiles but has not been executed |
 | 3 | vertical slice 2: `popover` (portal + presence + dismissable + popper) | **done** — contract survived with the §3.5 refinement; focus and motion stayed on the React side |
-| 4 | remaining primitives, in waves A–D | per-wave |
+| 4 | remaining primitives, in waves A–D | **wave A done**; B–D open |
 | 5 | distribution: playground, harness suite, CLI framework dimension, docs, publish | `@lattice-ui/vide-*` on npm |
 
 Phase 4 waves:
 
-- **A** — switch, toggle-group, progress, avatar, radio-group, tabs
+- **A** — switch, toggle-group, progress, avatar, radio-group, tabs — **done**. Two constraints came
+  out of it: an item's activation guard has to outlive a render, so a group builds its items through
+  a factory rather than describing them with a per-render spec; and roblox-ts compiles no property
+  getters, so ordered selection takes a `getGuiObject` alongside a `ref` (an adapter holding
+  instances in a source cannot fake a ref object). Response motion moved to the core here too.
 - **B** — text-field, textarea, slider, scroll-area
 - **C** — dialog, tooltip, menu, context-menu, select, combobox, toast, accordion
 - **D** — style, system (most React-context-shaped; may ship for Vide later or not at all)
