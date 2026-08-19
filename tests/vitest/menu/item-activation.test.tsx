@@ -59,6 +59,8 @@ vi.mock("@lattice-ui/react-focus", async () => {
 });
 
 import { MenuItem } from "../../../packages/react/menu/src/Menu/MenuItem";
+import { createMenu } from "../../../packages/core/menu/src/Menu/createMenu";
+import { createStandaloneReactivity } from "../../../packages/core/runtime/src/reactivity";
 import { MenuContextProvider, useMenuItemContext } from "../../../packages/react/menu/src/Menu/context";
 import type { MenuContextValue } from "../../../packages/react/menu/src/Menu/types";
 
@@ -101,15 +103,24 @@ function renderItem(options: {
   });
   Probe.displayName = "Probe";
 
+  // A real core: the item's highlight state and the activation guard that collapses one selection's
+  // paired events both live inside it, so a stubbed context would test nothing.
+  const core = createMenu(createStandaloneReactivity(), {
+    defaultOpen: true,
+    onOpenChange: (open) => {
+      if (!open) {
+        options.setOpen?.(false);
+      }
+    },
+  });
+
   const menuContext = {
-    open: true,
-    setOpen: options.setOpen ?? (() => {}),
-    modal: true,
-    triggerRef: { current: undefined },
-    contentRef: { current: undefined },
-    registerItem: () => () => {},
-    focusFirstItem: () => {},
-    restoreTriggerFocus: () => {},
+    open: core.open(),
+    setOpen: core.setOpen,
+    modal: core.modal(),
+    focusFirstItem: core.focusFirstItem,
+    restoreTriggerFocus: core.restoreTriggerFocus,
+    core,
   } as unknown as MenuContextValue;
 
   const result = render(

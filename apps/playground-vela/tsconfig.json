@@ -23,6 +23,7 @@
       "@lattice-ui/core-accordion": ["../../packages/core/accordion/src/index.ts"],
       "@lattice-ui/core-tooltip": ["../../packages/core/tooltip/src/index.ts"],
       "@lattice-ui/core-dialog": ["../../packages/core/dialog/src/index.ts"],
+      "@lattice-ui/core-menu": ["../../packages/core/menu/src/index.ts"],
       "@lattice-ui/core-runtime": ["../../packages/core/runtime/src/index.ts"],
       "@lattice-ui/react-accordion": ["../../packages/react/accordion/src/index.ts"],
       "@lattice-ui/react-avatar": ["../../packages/react/avatar/src/index.ts"],

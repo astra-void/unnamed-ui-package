@@ -1,79 +1,58 @@
-import { focusGuiObject, focusOrderedSelectionEntry, getFirstOrderedSelectionEntry } from "@lattice-ui/react-focus";
-import { React, useControllableState } from "@lattice-ui/react-runtime";
+import { createMenu } from "@lattice-ui/core-menu";
+import { focusGuiObject } from "@lattice-ui/react-focus";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { MenuContextProvider } from "./context";
-import type { MenuItemRegistration, MenuProps } from "./types";
+import type { MenuProps } from "./types";
 
 export function Menu(props: MenuProps) {
-  const [open, setOpenState] = useControllableState<boolean>({
-    value: props.open,
-    defaultValue: props.defaultOpen ?? false,
-    onChange: props.onOpenChange,
-  });
-  const modal = props.modal ?? true;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const triggerRef = React.useRef<GuiObject>();
-  const contentRef = React.useRef<GuiObject>();
-  const itemEntriesRef = React.useRef<Array<MenuItemRegistration>>([]);
-  const [registryRevision, setRegistryRevision] = React.useState(0);
-
-  const setOpen = React.useCallback(
-    (nextOpen: boolean) => {
-      setOpenState(nextOpen);
-    },
-    [setOpenState],
+  const core = useLatticeCore((rx) =>
+    createMenu(rx, {
+      open: () => propsRef.current.open,
+      defaultOpen: propsRef.current.defaultOpen ?? false,
+      modal: () => propsRef.current.modal,
+      onOpenChange: (open) => propsRef.current.onOpenChange?.(open),
+      focusInstance: focusGuiObject,
+    }),
   );
 
-  const registerItem = React.useCallback((item: MenuItemRegistration) => {
-    itemEntriesRef.current.push(item);
-    setRegistryRevision((revision) => revision + 1);
+  const open = core.open();
+  const modal = core.modal();
 
-    return () => {
-      const index = itemEntriesRef.current.findIndex((entry) => entry.id === item.id);
-      if (index >= 0) {
-        itemEntriesRef.current.remove(index);
-        setRegistryRevision((revision) => revision + 1);
-      }
-    };
-  }, []);
-
-  const focusFirstItem = React.useCallback(() => {
-    focusOrderedSelectionEntry(getFirstOrderedSelectionEntry(itemEntriesRef.current));
-  }, []);
-
-  const restoreTriggerFocus = React.useCallback(() => {
-    focusGuiObject(triggerRef.current);
-  }, []);
-
+  // Opening moves focus onto the first enabled item. Items register as they mount, so this runs
+  // again on the commit after they arrive.
   React.useEffect(() => {
     if (!open) {
       return;
     }
 
-    focusFirstItem();
-  }, [focusFirstItem, open, registryRevision]);
+    core.focusFirstItem();
+  }, [core, open]);
 
   const wasOpenRef = React.useRef(open);
   React.useEffect(() => {
     if (wasOpenRef.current && !open) {
-      restoreTriggerFocus();
-      task.defer(restoreTriggerFocus);
+      // Once now and once deferred: the content is still tearing down in this frame, and focus set
+      // before it goes lands back on nothing.
+      core.restoreTriggerFocus();
+      task.defer(() => core.restoreTriggerFocus());
     }
 
     wasOpenRef.current = open;
-  }, [open, restoreTriggerFocus]);
+  }, [core, open]);
 
   const contextValue = React.useMemo(
     () => ({
       open,
-      setOpen,
+      setOpen: core.setOpen,
       modal,
-      triggerRef,
-      contentRef,
-      registerItem,
-      focusFirstItem,
-      restoreTriggerFocus,
+      focusFirstItem: core.focusFirstItem,
+      restoreTriggerFocus: core.restoreTriggerFocus,
+      core,
     }),
-    [focusFirstItem, modal, open, registerItem, restoreTriggerFocus, setOpen],
+    [core, modal, open],
   );
 
   return <MenuContextProvider value={contextValue}>{props.children}</MenuContextProvider>;

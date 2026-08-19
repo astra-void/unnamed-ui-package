@@ -23,6 +23,9 @@
       "@lattice-ui/core-layer": [
         "core/layer/src/index.ts"
       ],
+      "@lattice-ui/core-menu": [
+        "core/menu/src/index.ts"
+      ],
       "@lattice-ui/core-motion": [
         "core/motion/src/index.ts"
       ],
@@ -160,6 +163,9 @@
       ],
       "@lattice-ui/vide-focus": [
         "vide/focus/src/index.ts"
+      ],
+      "@lattice-ui/vide-menu": [
+        "vide/menu/src/index.ts"
       ],
       "@lattice-ui/vide-motion": [
         "vide/motion/src/index.ts"

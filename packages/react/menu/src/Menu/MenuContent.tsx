@@ -77,8 +77,9 @@ function MenuContentImpl(props: {
   const contentBoundaryRef = React.useRef<GuiObject>();
 
   const popper = usePopper({
-    anchorRef: menuContext.triggerRef,
-    contentRef: menuContext.contentRef,
+    // The instances live in the core, so the popper reads them from there.
+    getAnchor: menuContext.core.getTrigger,
+    getContent: menuContext.core.getContent,
     alignOffset: props.alignOffset,
     collisionPadding: props.collisionPadding,
     sideOffset: props.sideOffset,
@@ -97,11 +98,11 @@ function MenuContentImpl(props: {
   const setContentRef = React.useCallback(
     (instance: Instance | undefined) => {
       const guiObject = toGuiObject(instance);
-      menuContext.contentRef.current = guiObject;
+      menuContext.core.setContent(guiObject);
       contentBoundaryRef.current = guiObject;
       motion.ref.current = guiObject;
     },
-    [menuContext.contentRef, motion.ref],
+    [menuContext.core, motion.ref],
   );
 
   const handleDismiss = React.useCallback(() => {
@@ -164,7 +165,7 @@ function MenuContentImpl(props: {
       onInteractOutside={props.onInteractOutside}
       onPointerDownOutside={props.onPointerDownOutside}
       contentBoundaryRef={contentBoundaryRef}
-      insideRefs={[menuContext.triggerRef]}
+      insideRoots={menuContext.core.getInsideRoots}
     >
       <FocusScope
         active={open}

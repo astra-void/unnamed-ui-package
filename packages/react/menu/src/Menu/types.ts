@@ -1,3 +1,4 @@
+import type { MenuCore, MenuSelectEvent } from "@lattice-ui/core-menu";
 import type { LayerInteractEvent } from "@lattice-ui/react-layer";
 import type { PresenceMotionConfig as MotionConfig } from "@lattice-ui/react-motion";
 import type { PopperPlacement } from "@lattice-ui/react-popper";
@@ -6,22 +7,14 @@ import type React from "@rbxts/react";
 
 export type MenuSetOpen = (open: boolean) => void;
 
-export type MenuItemRegistration = {
-  id: number;
-  order: number;
-  ref: React.MutableRefObject<GuiObject | undefined>;
-  getDisabled: () => boolean;
-};
-
 export type MenuContextValue = {
   open: boolean;
   setOpen: MenuSetOpen;
   modal: boolean;
-  triggerRef: React.MutableRefObject<GuiObject | undefined>;
-  contentRef: React.MutableRefObject<GuiObject | undefined>;
-  registerItem: (item: MenuItemRegistration) => () => void;
   focusFirstItem: () => void;
   restoreTriggerFocus: () => void;
+  /** The core, for the parts that build an item or position against the instances. */
+  core: MenuCore;
 };
 
 export type MenuProps = {
@@ -63,10 +56,7 @@ export type MenuContentProps = {
   children?: React.ReactNode;
 } & PassthroughProps<Frame>;
 
-export type MenuSelectEvent = {
-  defaultPrevented: boolean;
-  preventDefault: () => void;
-};
+export type { MenuSelectEvent };
 
 export type MenuItemProps = {
   asChild?: boolean;
