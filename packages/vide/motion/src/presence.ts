@@ -1,4 +1,12 @@
-import { createPresenceMotion, type PresenceMotionConfig, type PresenceMotionCore } from "@lattice-ui/core-motion";
+import {
+  createPresenceMotion,
+  createResponseMotion,
+  type MotionStateTargets,
+  type PresenceMotionConfig,
+  type PresenceMotionCore,
+  type ResponseMotionConfig,
+  type ResponseMotionCore,
+} from "@lattice-ui/core-motion";
 import { type Derivable, type Reactivity, read, Vide } from "@lattice-ui/vide-runtime";
 
 export interface PresenceMotionBindingOptions<T extends Instance = Instance> {
@@ -34,6 +42,42 @@ export function createPresenceMotionBinding<T extends Instance = Instance>(
       config: read(options.config ?? undefined) ?? {},
       forceMount: read(options.forceMount ?? false) === true,
       ready: read(options.ready ?? undefined),
+      disableAllMotion: options.disableAllMotion?.() ?? false,
+    };
+
+    Vide.untrack(() => {
+      core.sync(inputs);
+    });
+  });
+
+  return core;
+}
+
+export interface ResponseMotionBindingOptions<T extends Instance = Instance> {
+  getInstance: () => T | undefined;
+  active: Derivable<boolean>;
+  properties: Derivable<MotionStateTargets>;
+  config?: Derivable<ResponseMotionConfig | undefined>;
+  disableAllMotion?: () => boolean;
+}
+
+/**
+ * Drives the response motion core from Vide sources.
+ *
+ * Same shape as the presence binding, and untracked for the same reason: `sync` reaches into a host
+ * whose reads are none of this effect's business.
+ */
+export function createResponseMotionBinding<T extends Instance = Instance>(
+  rx: Reactivity,
+  options: ResponseMotionBindingOptions<T>,
+): ResponseMotionCore<T> {
+  const core = createResponseMotion<T>(rx, { getInstance: options.getInstance });
+
+  rx.effect(() => {
+    const inputs = {
+      active: read(options.active),
+      properties: read(options.properties),
+      config: read(options.config ?? undefined),
       disableAllMotion: options.disableAllMotion?.() ?? false,
     };
 

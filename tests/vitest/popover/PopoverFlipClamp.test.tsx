@@ -33,6 +33,7 @@ globalThis.game = {
 };
 
 vi.mock("@lattice-ui/react-runtime", async () => ({
+  applyElementSpec: (await import("../../../packages/react/runtime/src/elementSpec")).applyElementSpec,
   React: require("react"),
   useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
 }));

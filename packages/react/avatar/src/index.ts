@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-avatar";
+
 import { AvatarFallback } from "./Avatar/AvatarFallback";
 import { AvatarImage } from "./Avatar/AvatarImage";
 import { AvatarRoot } from "./Avatar/AvatarRoot";
@@ -8,6 +10,4 @@ export const Avatar = {
   Fallback: AvatarFallback,
 } as const;
 
-export type { AvatarStatus } from "./Avatar/state";
-export { resolveAvatarFallbackVisible } from "./Avatar/state";
 export type { AvatarContextValue, AvatarFallbackProps, AvatarImageProps, AvatarProps } from "./Avatar/types";

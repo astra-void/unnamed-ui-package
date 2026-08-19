@@ -9,6 +9,7 @@ export * from "./runtime/host";
 export * from "./runtime/presence";
 export * from "./runtime/presenceController";
 export * from "./runtime/response";
+export * from "./runtime/responseController";
 export * from "./runtime/spec";
 export * from "./targets/instance";
 export * from "./targets/offset";

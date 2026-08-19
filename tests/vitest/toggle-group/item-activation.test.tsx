@@ -28,6 +28,10 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   }
 
   return {
+
+    useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
+
+    applyElementSpec: (await import("../../../packages/react/runtime/src/elementSpec")).applyElementSpec,
     composeEvents: runtimeProps.composeEvents,
     getPassthroughProps: runtimeProps.getPassthroughProps,
     toSlotProps: runtimeProps.toSlotProps,
@@ -51,6 +55,8 @@ vi.mock("@lattice-ui/react-motion", () => ({
   useResponseMotion: () => ({ current: undefined }),
 }));
 
+import { createToggleGroup } from "../../../packages/core/toggle-group/src/ToggleGroup/createToggleGroup";
+import { createStandaloneReactivity } from "../../../packages/core/runtime/src/reactivity";
 import { ToggleGroupContextProvider } from "../../../packages/react/toggle-group/src/ToggleGroup/context";
 import { ToggleGroupItem } from "../../../packages/react/toggle-group/src/ToggleGroup/ToggleGroupItem";
 import type { ToggleGroupContextValue } from "../../../packages/react/toggle-group/src/ToggleGroup/types";
@@ -80,14 +86,22 @@ function captureChildProps() {
   return { Probe, getProps: () => received ?? {} };
 }
 
-function makeContext(overrides: Partial<ToggleGroupContextValue> = {}): ToggleGroupContextValue {
-  return {
+// A real core rather than a stub: the activation guard that collapses one activation's paired
+// events lives inside it, so a stubbed context would test nothing.
+function makeContext(overrides: { disabled?: boolean; onValueChange?: (value: string | undefined) => void } = {}) {
+  const core = createToggleGroup(createStandaloneReactivity(), {
     type: "single",
-    disabled: false,
-    isPressed: () => false,
-    toggleValue: vi.fn(),
-    ...overrides,
-  };
+    disabled: () => overrides.disabled === true,
+    onValueChange: overrides.onValueChange,
+  });
+
+  return {
+    type: core.type(),
+    disabled: core.disabled(),
+    isPressed: core.isPressed,
+    toggleValue: core.toggleValue,
+    core,
+  } as ToggleGroupContextValue;
 }
 
 function renderItem(context: ToggleGroupContextValue, itemProps: Record<string, unknown>, child: React.ReactElement) {
@@ -117,9 +131,9 @@ describe("ToggleGroupItem gamepad activation", () => {
   });
 
   it("toggles once when one activation fires Activated and InputBegan", async () => {
-    const toggleValue = vi.fn();
+    const onValueChange = vi.fn();
     const { Probe, getProps } = captureChildProps();
-    renderItem(makeContext({ toggleValue }), { value: "italic" }, React.createElement(Probe));
+    renderItem(makeContext({ onValueChange }), { value: "italic" }, React.createElement(Probe));
 
     const events = getProps().Event as EventTable;
     act(() => {
@@ -127,8 +141,8 @@ describe("ToggleGroupItem gamepad activation", () => {
       events.InputBegan({}, { KeyCode: RETURN });
     });
 
-    expect(toggleValue).toHaveBeenCalledTimes(1);
-    expect(toggleValue).toHaveBeenCalledWith("italic");
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenCalledWith("italic");
 
     await act(async () => {
       await flushDefer();
@@ -136,13 +150,13 @@ describe("ToggleGroupItem gamepad activation", () => {
     act(() => {
       events.Activated();
     });
-    expect(toggleValue).toHaveBeenCalledTimes(2);
+    expect(onValueChange).toHaveBeenCalledTimes(2);
   });
 
   it("does nothing when disabled", () => {
-    const toggleValue = vi.fn();
+    const onValueChange = vi.fn();
     const { Probe, getProps } = captureChildProps();
-    renderItem(makeContext({ disabled: true, toggleValue }), { value: "italic" }, React.createElement(Probe));
+    renderItem(makeContext({ disabled: true, onValueChange }), { value: "italic" }, React.createElement(Probe));
 
     const events = getProps().Event as EventTable;
     act(() => {
@@ -150,6 +164,6 @@ describe("ToggleGroupItem gamepad activation", () => {
       events.InputBegan({}, { KeyCode: RETURN });
     });
 
-    expect(toggleValue).not.toHaveBeenCalled();
+    expect(onValueChange).not.toHaveBeenCalled();
   });
 });

@@ -5,6 +5,9 @@
     "baseUrl": "../..",
     "rootDir": "../..",
     "paths": {
+      "@lattice-ui/core-avatar": [
+        "core/avatar/src/index.ts"
+      ],
       "@lattice-ui/core-checkbox": [
         "core/checkbox/src/index.ts"
       ],
@@ -23,8 +26,23 @@
       "@lattice-ui/core-popper": [
         "core/popper/src/index.ts"
       ],
+      "@lattice-ui/core-progress": [
+        "core/progress/src/index.ts"
+      ],
+      "@lattice-ui/core-radio-group": [
+        "core/radio-group/src/index.ts"
+      ],
       "@lattice-ui/core-runtime": [
         "core/runtime/src/index.ts"
+      ],
+      "@lattice-ui/core-switch": [
+        "core/switch/src/index.ts"
+      ],
+      "@lattice-ui/core-tabs": [
+        "core/tabs/src/index.ts"
+      ],
+      "@lattice-ui/core-toggle-group": [
+        "core/toggle-group/src/index.ts"
       ],
       "@lattice-ui/react-accordion": [
         "react/accordion/src/index.ts"
@@ -107,6 +125,9 @@
       "@lattice-ui/react-tooltip": [
         "react/tooltip/src/index.ts"
       ],
+      "@lattice-ui/vide-avatar": [
+        "vide/avatar/src/index.ts"
+      ],
       "@lattice-ui/vide-checkbox": [
         "vide/checkbox/src/index.ts"
       ],
@@ -119,8 +140,23 @@
       "@lattice-ui/vide-popover": [
         "vide/popover/src/index.ts"
       ],
+      "@lattice-ui/vide-progress": [
+        "vide/progress/src/index.ts"
+      ],
+      "@lattice-ui/vide-radio-group": [
+        "vide/radio-group/src/index.ts"
+      ],
       "@lattice-ui/vide-runtime": [
         "vide/runtime/src/index.ts"
+      ],
+      "@lattice-ui/vide-switch": [
+        "vide/switch/src/index.ts"
+      ],
+      "@lattice-ui/vide-tabs": [
+        "vide/tabs/src/index.ts"
+      ],
+      "@lattice-ui/vide-toggle-group": [
+        "vide/toggle-group/src/index.ts"
       ]
     }
   }

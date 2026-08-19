@@ -3,24 +3,31 @@ import { focusGuiObject as focusManagedGuiObject, getFocusedGuiObject } from "./
 /**
  * Somewhere to read an instance from.
  *
- * Structurally a React ref, which is what every caller passes today, and equally what a Vide
- * adapter can hand over as `{ get current() { … } }` — so the shape stays a ref without the type
- * coming from a framework.
+ * Structurally a React ref, which is what every caller passes today, without the type coming from a
+ * framework. A caller that has no ref object passes `getGuiObject` instead: roblox-ts compiles no
+ * property getters, so a Vide adapter cannot fake one.
  */
 export type FocusRef = { readonly current: GuiObject | undefined };
+
+/** The instance an entry stands for, however the caller supplies it. */
+export function getOrderedSelectionInstance(entry: OrderedSelectionEntry): GuiObject | undefined {
+  return entry.getGuiObject !== undefined ? entry.getGuiObject() : entry.ref?.current;
+}
 
 export type OrderedSelectionDirection = -1 | 1;
 
 export type OrderedSelectionEntry = {
   id: number;
   order: number;
-  ref: FocusRef;
+  ref?: FocusRef;
+  /** Alternative to `ref` for callers that keep the instance somewhere else. */
+  getGuiObject?: () => GuiObject | undefined;
   getDisabled?: () => boolean;
   getVisible?: () => boolean;
 };
 
 function isEntryVisible(entry: OrderedSelectionEntry) {
-  const target = entry.ref.current;
+  const target = getOrderedSelectionInstance(entry);
   if (!target) {
     return false;
   }
@@ -39,7 +46,7 @@ export function getOrderedSelectionEntries<T extends OrderedSelectionEntry>(entr
 }
 
 export function isOrderedSelectionEntryAvailable(entry: OrderedSelectionEntry) {
-  const target = entry.ref.current;
+  const target = getOrderedSelectionInstance(entry);
   if (!target) {
     return false;
   }
@@ -71,7 +78,7 @@ export function getCurrentOrderedSelectionEntry<T extends OrderedSelectionEntry>
   }
 
   return getOrderedSelectionEntries(entries).find(
-    (entry) => entry.ref.current === current && isOrderedSelectionEntryAvailable(entry),
+    (entry) => getOrderedSelectionInstance(entry) === current && isOrderedSelectionEntryAvailable(entry),
   );
 }
 
@@ -99,5 +106,5 @@ export function getRelativeOrderedSelectionEntry<T extends OrderedSelectionEntry
 }
 
 export function focusOrderedSelectionEntry(entry: OrderedSelectionEntry | undefined): void {
-  focusManagedGuiObject(entry?.ref.current);
+  focusManagedGuiObject(entry !== undefined ? getOrderedSelectionInstance(entry) : undefined);
 }

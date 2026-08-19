@@ -14,9 +14,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("@lattice-ui/react-runtime", async () => {
   const react = await import("react");
   const strictContext = await import("../../../packages/react/runtime/src/context");
+  const reactivity = await import("../../../packages/react/runtime/src/reactivity");
 
   return {
+
+    applyElementSpec: (await import("../../../packages/react/runtime/src/elementSpec")).applyElementSpec,
     React: react.default,
+    useLatticeCore: reactivity.useLatticeCore,
     createStrictContext: strictContext.createStrictContext,
   };
 });

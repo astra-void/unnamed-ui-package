@@ -1,0 +1,9 @@
+{
+  "name": "vide-avatar",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import type { RadioGroupCore, RadioGroupItemCore } from "@lattice-ui/core-radio-group";
 import type { PresenceMotionConfig } from "@lattice-ui/react-motion";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
@@ -19,13 +20,15 @@ export type RadioGroupContextValue = {
   disabled: boolean;
   required: boolean;
   orientation: RadioGroupOrientation;
-  registerItem: (item: RadioGroupItemRegistration) => () => void;
   moveSelection: (fromValue: string, direction: -1 | 1) => void;
+  /** The core, for the parts that build an item rather than read the group's state. */
+  core: RadioGroupCore;
 };
 
 export type RadioGroupItemContextValue = {
   checked: boolean;
   disabled: boolean;
+  item: RadioGroupItemCore;
 };
 
 export type RadioGroupProps = {

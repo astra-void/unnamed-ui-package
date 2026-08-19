@@ -15,6 +15,10 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   const strictContext = await import("../../../packages/react/runtime/src/context");
 
   return {
+
+    useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
+
+    applyElementSpec: (await import("../../../packages/react/runtime/src/elementSpec")).applyElementSpec,
     React: react.default,
     useControllableState: controllable.useControllableState,
     createStrictContext: strictContext.createStrictContext,

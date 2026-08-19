@@ -1,12 +1,15 @@
+import type { SwitchCore, SwitchSetChecked } from "@lattice-ui/core-switch";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
 
-export type SwitchSetChecked = (checked: boolean) => void;
+export type { SwitchSetChecked };
 
 export type SwitchContextValue = {
   checked: boolean;
   setChecked: SwitchSetChecked;
   disabled: boolean;
+  /** The core, for the parts that need its geometry rather than a rendered value. */
+  core: SwitchCore;
 };
 
 export type SwitchProps = {

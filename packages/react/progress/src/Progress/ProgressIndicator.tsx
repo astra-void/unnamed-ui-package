@@ -30,16 +30,10 @@ const CHILD_FILL_PROPS = {
 export function ProgressIndicator(props: ProgressIndicatorProps) {
   const progressContext = useProgressContext();
 
-  const widthScale = progressContext.indeterminate ? 0.35 : progressContext.ratio;
+  // The fill geometry is computed from state, so it comes from the core rather than from here.
+  const geometry = progressContext.core.indicator.geometry();
 
-  const motionRef = useResponseMotion<Frame>(
-    true,
-    {
-      active: { Size: UDim2.fromScale(widthScale, 1) },
-      inactive: { Size: UDim2.fromScale(widthScale, 1) },
-    },
-    props.transition ?? createProgressResponseRecipe(),
-  );
+  const motionRef = useResponseMotion<Frame>(true, geometry, props.transition ?? createProgressResponseRecipe());
 
   const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 

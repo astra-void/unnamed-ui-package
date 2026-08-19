@@ -1,0 +1,9 @@
+{
+  "name": "core-tabs",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

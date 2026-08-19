@@ -1,29 +1,30 @@
-import { React, useControllableState } from "@lattice-ui/react-runtime";
+import { createProgress } from "@lattice-ui/core-progress";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { ProgressContextProvider } from "./context";
-import { clampProgressValue, resolveProgressRatio } from "./math";
 import type { ProgressProps } from "./types";
 
 export function ProgressRoot(props: ProgressProps) {
-  const max = math.max(1, props.max ?? 100);
-  const indeterminate = props.indeterminate === true;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const [value] = useControllableState<number>({
-    value: props.value,
-    defaultValue: props.defaultValue ?? 0,
-    onChange: props.onValueChange,
-  });
+  const core = useLatticeCore((rx) =>
+    createProgress(rx, {
+      value: () => propsRef.current.value,
+      defaultValue: propsRef.current.defaultValue ?? 0,
+      max: () => propsRef.current.max,
+      indeterminate: () => propsRef.current.indeterminate,
+      onValueChange: (value) => propsRef.current.onValueChange?.(value),
+    }),
+  );
 
-  const clampedValue = clampProgressValue(value, max);
-  const ratio = resolveProgressRatio(clampedValue, max, indeterminate);
+  const value = core.value();
+  const max = core.max();
+  const ratio = core.ratio();
+  const indeterminate = core.indeterminate();
 
   const contextValue = React.useMemo(
-    () => ({
-      value: clampedValue,
-      max,
-      ratio,
-      indeterminate,
-    }),
-    [clampedValue, indeterminate, max, ratio],
+    () => ({ value, max, ratio, indeterminate, core }),
+    [core, indeterminate, max, ratio, value],
   );
 
   return <ProgressContextProvider value={contextValue}>{props.children}</ProgressContextProvider>;

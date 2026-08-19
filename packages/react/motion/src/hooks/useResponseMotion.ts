@@ -1,14 +1,13 @@
-import {
-  MotionHost,
-  type MotionStateTargets,
-  type ResponseMotionConfig,
-  settleResponse,
-} from "@lattice-ui/core-motion";
-import { React } from "@lattice-ui/react-runtime";
+import { createResponseMotion, type MotionStateTargets, type ResponseMotionConfig } from "@lattice-ui/core-motion";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { useMotionPolicy } from "../core/policy";
 
-const MAX_MOUNT_ATTEMPTS = 120;
-
+/**
+ * React binding for the response motion core.
+ *
+ * The host handling and the mount-retry loop live in `@lattice-ui/core-motion`; the dependency list
+ * here is what tells the core that the active state, the targets or the policy moved.
+ */
 export function useResponseMotion<T extends Instance = Instance>(
   active: boolean,
   properties: MotionStateTargets,
@@ -16,63 +15,12 @@ export function useResponseMotion<T extends Instance = Instance>(
 ): React.MutableRefObject<T | undefined> {
   const ref = React.useRef<T>();
   const policy = useMotionPolicy();
-  const isFirstMount = React.useRef(true);
-  const motionHostRef = React.useRef<MotionHost>();
-  const setupGenerationRef = React.useRef(0);
 
-  React.useEffect(() => {
-    return () => {
-      motionHostRef.current?.stop();
-      motionHostRef.current = undefined;
-    };
-  }, []);
+  const core = useLatticeCore((rx) => createResponseMotion<T>(rx, { getInstance: () => ref.current }));
 
   React.useLayoutEffect(() => {
-    setupGenerationRef.current += 1;
-    const generation = setupGenerationRef.current;
-    let mountAttempts = 0;
-
-    const applyMotion = () => {
-      if (setupGenerationRef.current !== generation) {
-        return;
-      }
-
-      const instance = ref.current;
-      if (!instance) {
-        if (mountAttempts < MAX_MOUNT_ATTEMPTS) {
-          mountAttempts += 1;
-          task.delay(0, applyMotion);
-        }
-        return;
-      }
-
-      if (!motionHostRef.current || motionHostRef.current.instance !== instance) {
-        motionHostRef.current?.stop();
-        motionHostRef.current = new MotionHost(instance, config?.target);
-        isFirstMount.current = true;
-      } else {
-        motionHostRef.current.setTargetContract(config?.target);
-      }
-
-      const motion = motionHostRef.current;
-      const goals = active ? properties.active : properties.inactive;
-
-      if (isFirstMount.current) {
-        isFirstMount.current = false;
-        motion.sync(goals, "response", "initial", config?.target);
-        return;
-      }
-
-      if (policy.disableAllMotion) {
-        motion.sync(goals, "response", "settle", config?.target);
-        return;
-      }
-
-      settleResponse(motion, goals, config?.settle, config?.target);
-    };
-
-    applyMotion();
-  }, [active, properties, config, policy.disableAllMotion]);
+    core.sync({ active, properties, config, disableAllMotion: policy.disableAllMotion });
+  }, [active, config, core, policy.disableAllMotion, properties]);
 
   return ref;
 }

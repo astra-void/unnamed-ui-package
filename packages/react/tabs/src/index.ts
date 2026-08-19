@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-tabs";
+
 import { TabsContent } from "./Tabs/TabsContent";
 import { TabsList } from "./Tabs/TabsList";
 import { TabsRoot } from "./Tabs/TabsRoot";

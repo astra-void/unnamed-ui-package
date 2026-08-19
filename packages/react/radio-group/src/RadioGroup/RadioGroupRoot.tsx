@@ -1,79 +1,39 @@
-import {
-  findOrderedSelectionEntry,
-  focusOrderedSelectionEntry,
-  getRelativeOrderedSelectionEntry,
-} from "@lattice-ui/react-focus";
-import { React, useControllableState } from "@lattice-ui/react-runtime";
+import { createRadioGroup } from "@lattice-ui/core-radio-group";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { RadioGroupContextProvider } from "./context";
-import type { RadioGroupItemRegistration, RadioGroupProps } from "./types";
+import type { RadioGroupProps } from "./types";
 
 export function RadioGroupRoot(props: RadioGroupProps) {
-  const orientation = props.orientation ?? "vertical";
-  const [value, setValueState] = useControllableState<string | undefined>({
-    value: props.value,
-    defaultValue: props.defaultValue,
-    onChange: (nextValue) => {
-      if (nextValue !== undefined) {
-        props.onValueChange?.(nextValue);
-      }
-    },
-  });
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const disabled = props.disabled === true;
-  const required = props.required === true;
-  const itemEntriesRef = React.useRef<Array<RadioGroupItemRegistration>>([]);
-  const [, setRegistryRevision] = React.useState(0);
-
-  const setValue = React.useCallback(
-    (nextValue: string) => {
-      if (disabled) {
-        return;
-      }
-
-      setValueState(nextValue);
-    },
-    [disabled, setValueState],
+  const core = useLatticeCore((rx) =>
+    createRadioGroup(rx, {
+      value: () => propsRef.current.value,
+      defaultValue: propsRef.current.defaultValue,
+      disabled: () => propsRef.current.disabled,
+      required: () => propsRef.current.required,
+      orientation: () => propsRef.current.orientation,
+      onValueChange: (value) => propsRef.current.onValueChange?.(value),
+    }),
   );
 
-  const registerItem = React.useCallback((item: RadioGroupItemRegistration) => {
-    itemEntriesRef.current.push(item);
-    setRegistryRevision((revision) => revision + 1);
-
-    return () => {
-      const index = itemEntriesRef.current.findIndex((entry) => entry.id === item.id);
-      if (index >= 0) {
-        itemEntriesRef.current.remove(index);
-        setRegistryRevision((revision) => revision + 1);
-      }
-    };
-  }, []);
-
-  const moveSelection = React.useCallback(
-    (fromValue: string, direction: -1 | 1) => {
-      const currentItem =
-        findOrderedSelectionEntry(itemEntriesRef.current, (item) => item.value === fromValue) ?? undefined;
-      const nextItem = getRelativeOrderedSelectionEntry(itemEntriesRef.current, currentItem?.id, direction);
-      if (!nextItem) {
-        return;
-      }
-
-      focusOrderedSelectionEntry(nextItem);
-      setValue(nextItem.value);
-    },
-    [setValue],
-  );
+  const value = core.value();
+  const disabled = core.disabled();
+  const required = core.required();
+  const orientation = core.orientation();
 
   const contextValue = React.useMemo(
     () => ({
       value,
-      setValue,
+      setValue: core.setValue,
       disabled,
       required,
       orientation,
-      registerItem,
-      moveSelection,
+      moveSelection: core.moveSelection,
+      core,
     }),
-    [disabled, moveSelection, orientation, registerItem, required, setValue, value],
+    [core, disabled, orientation, required, value],
   );
 
   return <RadioGroupContextProvider value={contextValue}>{props.children}</RadioGroupContextProvider>;

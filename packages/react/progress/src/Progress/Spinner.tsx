@@ -1,15 +1,17 @@
-import { composeRefs, getPassthroughProps, getSlotChild, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { createSpinner } from "@lattice-ui/core-progress";
+import {
+  applyElementSpec,
+  composeRefs,
+  getPassthroughProps,
+  getSlotChild,
+  React,
+  Slot,
+  toSlotProps,
+  useLatticeCore,
+} from "@lattice-ui/react-runtime";
 import type { SpinnerProps } from "./types";
 
-const RunService = game.GetService("RunService");
-
 const OWN_PROPS = ["spinning", "speedDegPerSecond", "asChild", "children"] as const;
-
-// See ProgressIndicator: only the Roblox instance defaults are neutralized, never appearance.
-const NEUTRAL_PROPS = {
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-};
 
 function toGuiObject(instance: Instance | undefined) {
   if (!instance?.IsA("GuiObject")) {
@@ -20,39 +22,30 @@ function toGuiObject(instance: Instance | undefined) {
 }
 
 export function Spinner(props: SpinnerProps) {
-  const spinning = props.spinning ?? true;
-  const speedDegPerSecond = props.speedDegPerSecond ?? 180;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const spinnerRef = React.useRef<GuiObject>();
-
-  const setSpinnerRef = React.useCallback((instance: Instance | undefined) => {
-    spinnerRef.current = toGuiObject(instance);
-  }, []);
+  const core = useLatticeCore((rx) =>
+    createSpinner(rx, {
+      spinning: () => propsRef.current.spinning,
+      speedDegPerSecond: () => propsRef.current.speedDegPerSecond,
+    }),
+  );
 
   React.useEffect(() => {
-    if (!spinning) {
-      return;
-    }
+    core.start();
+  }, [core]);
 
-    const connection = RunService.Heartbeat.Connect((deltaSeconds) => {
-      const spinner = spinnerRef.current;
-      if (!spinner) {
-        return;
-      }
-
-      spinner.Rotation += speedDegPerSecond * deltaSeconds;
-    });
-
-    return () => {
-      connection.Disconnect();
-    };
-  }, [spinning, speedDegPerSecond]);
+  const setSpinnerRef = React.useCallback(
+    (instance: Instance | undefined) => {
+      core.setInstance(toGuiObject(instance));
+    },
+    [core],
+  );
 
   const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
-  const ref = composeRefs<GuiObject>(passthrough.ref as never, setSpinnerRef);
-  const behaviorProps = {
-    Visible: spinning,
-  };
+  const merged = applyElementSpec(core.spec(), passthrough, { neutral: props.asChild !== true });
+  merged.ref = composeRefs<GuiObject>(merged.ref as never, setSpinnerRef);
 
   if (props.asChild) {
     const child = props.children;
@@ -61,16 +54,8 @@ export function Spinner(props: SpinnerProps) {
     }
 
     // No neutral defaults here: the rendered element belongs to the consumer.
-    return (
-      <Slot {...toSlotProps(passthrough)} {...behaviorProps} ref={ref as never}>
-        {child}
-      </Slot>
-    );
+    return <Slot {...toSlotProps(merged)}>{child}</Slot>;
   }
 
-  return (
-    <frame {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps} ref={ref}>
-      {props.children}
-    </frame>
-  );
+  return <frame {...merged}>{props.children}</frame>;
 }

@@ -1,0 +1,9 @@
+{
+  "name": "core-progress",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

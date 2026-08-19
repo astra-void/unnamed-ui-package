@@ -1,3 +1,4 @@
+import { createTabsContentName } from "@lattice-ui/core-tabs";
 import { Presence } from "@lattice-ui/react-layer";
 import { type PresenceMotionConfig, usePresenceMotionController } from "@lattice-ui/react-motion";
 import {
@@ -10,7 +11,6 @@ import {
   toSlotProps,
 } from "@lattice-ui/react-runtime";
 import { useTabsContext } from "./context";
-import { createTabsContentName } from "./internals/ids";
 import type { TabsContentProps } from "./types";
 
 const OWN_PROPS = ["transition", "value", "forceMount", "asChild", "children"] as const;

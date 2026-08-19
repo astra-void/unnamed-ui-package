@@ -105,6 +105,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   }
 
   return {
+
+    applyElementSpec: (await import("../../../packages/react/runtime/src/elementSpec")).applyElementSpec,
     useLatticeCore: runtimeReactivity.useLatticeCore,
     composeEvents: runtimeProps.composeEvents,
     getPassthroughProps: runtimeProps.getPassthroughProps,

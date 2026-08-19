@@ -1,3 +1,4 @@
+import type { ToggleGroupCore } from "@lattice-ui/core-toggle-group";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
 
@@ -31,6 +32,8 @@ export type ToggleGroupContextValue = {
   disabled: boolean;
   isPressed: (itemValue: string) => boolean;
   toggleValue: (itemValue: string) => void;
+  /** The core, for the parts that build an item rather than read the group's state. */
+  core: ToggleGroupCore;
 };
 
 export type ToggleGroupItemProps = {

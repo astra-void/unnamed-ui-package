@@ -1,3 +1,4 @@
+import type { TabsCore } from "@lattice-ui/core-tabs";
 import type { PresenceMotionConfig } from "@lattice-ui/react-motion";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
@@ -17,8 +18,9 @@ export type TabsContextValue = {
   value?: string;
   orientation: TabsOrientation;
   setValue: TabsSetValue;
-  registerTrigger: (trigger: TabsTriggerRegistration) => () => void;
   moveSelection: (fromValue: string, direction: -1 | 1) => void;
+  /** The core, for the parts that build a trigger or a panel rather than read the value. */
+  core: TabsCore;
 };
 
 export type TabsProps = {

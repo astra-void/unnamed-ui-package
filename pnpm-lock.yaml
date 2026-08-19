@@ -514,6 +514,12 @@ importers:
         specifier: 0.4.2-ts.0
         version: 0.4.2-ts.0
 
+  packages/core/avatar:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/checkbox:
     dependencies:
       '@lattice-ui/core-runtime':
@@ -554,7 +560,52 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/progress:
+    dependencies:
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/radio-group:
+    dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/runtime: {}
+
+  packages/core/switch:
+    dependencies:
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/tabs:
+    dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/core/toggle-group:
+    dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
 
   packages/react/accordion:
     dependencies:
@@ -580,6 +631,9 @@ importers:
 
   packages/react/avatar:
     dependencies:
+      '@lattice-ui/core-avatar':
+        specifier: workspace:*
+        version: link:../../core/avatar
       '@lattice-ui/react-runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -807,6 +861,9 @@ importers:
 
   packages/react/progress:
     dependencies:
+      '@lattice-ui/core-progress':
+        specifier: workspace:*
+        version: link:../../core/progress
       '@lattice-ui/react-motion':
         specifier: workspace:*
         version: link:../motion
@@ -823,6 +880,9 @@ importers:
 
   packages/react/radio-group:
     dependencies:
+      '@lattice-ui/core-radio-group':
+        specifier: workspace:*
+        version: link:../../core/radio-group
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -928,6 +988,9 @@ importers:
 
   packages/react/switch:
     dependencies:
+      '@lattice-ui/core-switch':
+        specifier: workspace:*
+        version: link:../../core/switch
       '@lattice-ui/react-motion':
         specifier: workspace:*
         version: link:../motion
@@ -959,6 +1022,9 @@ importers:
 
   packages/react/tabs:
     dependencies:
+      '@lattice-ui/core-tabs':
+        specifier: workspace:*
+        version: link:../../core/tabs
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1029,6 +1095,9 @@ importers:
 
   packages/react/toggle-group:
     dependencies:
+      '@lattice-ui/core-toggle-group':
+        specifier: workspace:*
+        version: link:../../core/toggle-group
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1066,6 +1135,19 @@ importers:
         version: 17.3.7-ts.1(@rbxts/react@17.3.7-ts.1)
 
   packages/tools/cli: {}
+
+  packages/vide/avatar:
+    dependencies:
+      '@lattice-ui/core-avatar':
+        specifier: workspace:*
+        version: link:../../core/avatar
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
 
   packages/vide/checkbox:
     dependencies:
@@ -1152,6 +1234,41 @@ importers:
         specifier: 0.6.1
         version: 0.6.1
 
+  packages/vide/progress:
+    dependencies:
+      '@lattice-ui/core-progress':
+        specifier: workspace:*
+        version: link:../../core/progress
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/radio-group:
+    dependencies:
+      '@lattice-ui/core-radio-group':
+        specifier: workspace:*
+        version: link:../../core/radio-group
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
   packages/vide/runtime:
     dependencies:
       '@lattice-ui/core-layer':
@@ -1160,6 +1277,60 @@ importers:
       '@lattice-ui/core-runtime':
         specifier: workspace:*
         version: link:../../core/runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/switch:
+    dependencies:
+      '@lattice-ui/core-motion':
+        specifier: workspace:*
+        version: link:../../core/motion
+      '@lattice-ui/core-switch':
+        specifier: workspace:*
+        version: link:../../core/switch
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/tabs:
+    dependencies:
+      '@lattice-ui/core-tabs':
+        specifier: workspace:*
+        version: link:../../core/tabs
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/toggle-group:
+    dependencies:
+      '@lattice-ui/core-toggle-group':
+        specifier: workspace:*
+        version: link:../../core/toggle-group
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
     devDependencies:
       '@rbxts/vide':
         specifier: 0.6.1
