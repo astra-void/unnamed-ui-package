@@ -1,101 +1,30 @@
-import { React } from "@lattice-ui/react-runtime";
-import { DEFAULT_PRESENCE_EXIT_FALLBACK_MS } from "../internals/constants";
+import { createPresence } from "@lattice-ui/core-layer";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import type { PresenceProps } from "./types";
 
-function cancelFallbackTask(taskRef: React.MutableRefObject<thread | undefined>, currentThread?: thread) {
-  const fallbackTask = taskRef.current;
-  taskRef.current = undefined;
-
-  if (!fallbackTask || fallbackTask === currentThread) {
-    return;
-  }
-
-  const [hasStatus, status] = pcall(() => coroutine.status(fallbackTask));
-  if (hasStatus && status === "dead") {
-    return;
-  }
-
-  pcall(() => {
-    task.cancel(fallbackTask);
-  });
-}
-
+/**
+ * React binding for the presence core.
+ *
+ * The timing — staying mounted through an exit, and the fallback that ends one that never reports
+ * completion — lives in `@lattice-ui/core-layer`. This component pushes `present` in and renders.
+ */
 export function Presence(props: PresenceProps) {
-  const [mounted, setMounted] = React.useState(props.present);
-  const [isPresent, setIsPresent] = React.useState(props.present);
-  const mountedRef = React.useRef(mounted);
-  const presentRef = React.useRef(props.present);
-  const fallbackTaskRef = React.useRef<thread>();
-  const exitRequestRef = React.useRef(0);
-  const onExitCompleteRef = React.useRef(props.onExitComplete);
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
+
+  const core = useLatticeCore((rx) =>
+    createPresence(rx, {
+      initialPresent: propsRef.current.present,
+      exitFallbackMs: propsRef.current.exitFallbackMs,
+      onExitComplete: () => propsRef.current.onExitComplete?.(),
+    }),
+  );
 
   React.useEffect(() => {
-    onExitCompleteRef.current = props.onExitComplete;
-  }, [props.onExitComplete]);
+    core.setPresent(props.present);
+  }, [core, props.present]);
 
-  React.useEffect(() => {
-    mountedRef.current = mounted;
-  }, [mounted]);
-
-  React.useEffect(() => {
-    presentRef.current = props.present;
-  }, [props.present]);
-
-  const completeExit = React.useCallback((exitRequest?: number) => {
-    if (exitRequest !== undefined && exitRequest !== exitRequestRef.current) {
-      return;
-    }
-
-    if (presentRef.current) {
-      return;
-    }
-
-    if (!mountedRef.current) {
-      return;
-    }
-
-    cancelFallbackTask(fallbackTaskRef, coroutine.running());
-
-    mountedRef.current = false;
-    setMounted(false);
-    onExitCompleteRef.current?.();
-  }, []);
-
-  React.useEffect(() => {
-    if (props.present) {
-      cancelFallbackTask(fallbackTaskRef, coroutine.running());
-      exitRequestRef.current += 1;
-
-      if (!mountedRef.current) {
-        mountedRef.current = true;
-        setMounted(true);
-      }
-      setIsPresent(true);
-      return;
-    }
-
-    if (!mountedRef.current) {
-      return;
-    }
-
-    setIsPresent(false);
-    cancelFallbackTask(fallbackTaskRef, coroutine.running());
-
-    const timeoutMs = props.exitFallbackMs ?? DEFAULT_PRESENCE_EXIT_FALLBACK_MS;
-    const exitRequest = exitRequestRef.current + 1;
-    exitRequestRef.current = exitRequest;
-    fallbackTaskRef.current = task.delay(timeoutMs / 1000, () => {
-      completeExit(exitRequest);
-    });
-  }, [completeExit, props.exitFallbackMs, props.present]);
-
-  React.useEffect(() => {
-    return () => {
-      cancelFallbackTask(fallbackTaskRef, coroutine.running());
-    };
-  }, []);
-
-  if (!mounted) {
+  if (!core.mounted()) {
     return undefined;
   }
 
@@ -105,7 +34,7 @@ export function Presence(props: PresenceProps) {
   }
 
   return render({
-    isPresent,
-    onExitComplete: completeExit,
+    isPresent: core.isPresent(),
+    onExitComplete: core.completeExit,
   });
 }

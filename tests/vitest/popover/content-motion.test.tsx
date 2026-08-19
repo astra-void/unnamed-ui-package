@@ -102,6 +102,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   const runtimeProps = await import("../../../packages/react/runtime/src/props");
   const runtimeSlot = await import("../../../packages/react/runtime/src/slot");
   const runtimeRefs = await import("../../../packages/react/runtime/src/refs");
+  const runtimeElementSpec = await import("../../../packages/react/runtime/src/elementSpec");
+  const runtimeReactivity = await import("../../../packages/react/runtime/src/reactivity");
   const React = require("react");
   const createElement = React.createElement.bind(React);
 
@@ -173,6 +175,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   }
 
   return {
+    applyElementSpec: runtimeElementSpec.applyElementSpec,
+    useLatticeCore: runtimeReactivity.useLatticeCore,
     composeEvents: runtimeProps.composeEvents,
     getSlotChild: runtimeSlot.getSlotChild,
     mergeSlotModifiers: runtimeSlot.mergeSlotModifiers,
@@ -189,6 +193,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
 
 vi.mock("@lattice-ui/react-focus", () => ({
   FocusScope: ({ children }: { children?: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  focusGuiObject: () => {},
+  useFocusNode: () => ({ current: undefined }),
 }));
 
 vi.mock("@lattice-ui/react-layer", () => {

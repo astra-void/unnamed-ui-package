@@ -1,8 +1,11 @@
+import {
+  MotionHost,
+  type MotionStateTargets,
+  type ResponseMotionConfig,
+  settleResponse,
+} from "@lattice-ui/core-motion";
 import { React } from "@lattice-ui/react-runtime";
 import { useMotionPolicy } from "../core/policy";
-import type { MotionStateTargets, ResponseMotionConfig } from "../core/types";
-import { MotionHost } from "../runtime/host";
-import { settleResponse } from "../runtime/response";
 
 const MAX_MOUNT_ATTEMPTS = 120;
 

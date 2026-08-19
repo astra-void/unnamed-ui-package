@@ -76,6 +76,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   }
 
   return {
+    applyElementSpec: (await import("../../../packages/react/runtime/src/elementSpec")).applyElementSpec,
+    useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
     composeEvents: runtimeProps.composeEvents,
     getSlotChild: runtimeSlot.getSlotChild,
     mergeSlotModifiers: runtimeSlot.mergeSlotModifiers,
@@ -92,6 +94,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
 
 vi.mock("@lattice-ui/react-focus", () => ({
   FocusScope: ({ children }: { children?: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  focusGuiObject: () => {},
+  useFocusNode: () => ({ current: undefined }),
 }));
 
 vi.mock("@lattice-ui/react-layer", () => ({

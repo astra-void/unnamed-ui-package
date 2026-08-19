@@ -1,37 +1,15 @@
+import type { ComputePopperResult, PopperPositioningOptions } from "@lattice-ui/core-popper";
 import type React from "@rbxts/react";
 
-export type PopperPlacement = "top" | "bottom" | "left" | "right";
-
-export type PopperPositioningOptions = {
-  placement?: PopperPlacement;
-  sideOffset?: number;
-  alignOffset?: number;
-  collisionPadding?: number;
-};
-
-export type NormalizedPopperPositioningOptions = {
-  placement: PopperPlacement;
-  sideOffset: number;
-  alignOffset: number;
-  collisionPadding: number;
-};
-
-export type ComputePopperInput = PopperPositioningOptions & {
-  anchorPosition: Vector2;
-  anchorSize: Vector2;
-  contentSize: Vector2;
-  viewportRect: Rect;
-};
-
-export type ComputePopperResult = {
-  position: UDim2;
-  anchorPoint: Vector2;
-  placement: PopperPlacement;
-};
-
 export type UsePopperOptions = PopperPositioningOptions & {
-  anchorRef: React.RefObject<GuiObject> | React.MutableRefObject<GuiObject | undefined>;
-  contentRef: React.RefObject<GuiObject> | React.MutableRefObject<GuiObject | undefined>;
+  anchorRef?: React.RefObject<GuiObject> | React.MutableRefObject<GuiObject | undefined>;
+  contentRef?: React.RefObject<GuiObject> | React.MutableRefObject<GuiObject | undefined>;
+  /**
+   * Where to read the instances from, for callers that keep them somewhere other than a React ref —
+   * a behavior core, for instance. Takes precedence over the matching ref.
+   */
+  getAnchor?: () => GuiObject | undefined;
+  getContent?: () => GuiObject | undefined;
   enabled?: boolean;
 };
 

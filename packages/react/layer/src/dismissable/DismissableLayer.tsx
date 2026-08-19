@@ -1,117 +1,53 @@
+import { createDismissableLayer } from "@lattice-ui/core-layer";
 import { FocusLayerProvider } from "@lattice-ui/react-focus";
-import { React } from "@lattice-ui/react-runtime";
-import { DEFAULT_LAYER_IGNORE_GUI_INSET } from "../internals/constants";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { Portal } from "../portal/Portal";
 import { usePortalContext } from "../portal/PortalProvider";
-import { isOutsidePointerEvent } from "./events";
-import { promoteLayer, registerLayer, unregisterLayer } from "./layerStack";
-import type { DismissableLayerProps, LayerInteractEvent } from "./types";
+import type { DismissableLayerProps } from "./types";
 
-const GuiService = game.GetService("GuiService");
-
-function useLatest<T>(value: T) {
-  const ref = React.useRef(value);
-  React.useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
-}
-
+/**
+ * React binding for the dismissable layer core.
+ *
+ * Stack registration, promotion on open and the outside-pointer test live in
+ * `@lattice-ui/core-layer`; what remains here is the ScreenGui, the optional input blocker and the
+ * canvas the content sits on.
+ */
 export function DismissableLayer(props: DismissableLayerProps) {
   const enabled = props.enabled ?? true;
-  const shouldBlockOutsidePointer = enabled && (props.modal === true || props.disableOutsidePointerEvents === true);
-  const layerIgnoresGuiInset = DEFAULT_LAYER_IGNORE_GUI_INSET;
-  const [layerInsetTopLeft] = GuiService.GetGuiInset();
-  const contentWrapperPosition = layerIgnoresGuiInset
-    ? UDim2.fromOffset(layerInsetTopLeft.X, layerInsetTopLeft.Y)
-    : UDim2.fromScale(0, 0);
-
   const portalContext = usePortalContext();
   const contentWrapperRef = React.useRef<Frame>();
-  const registrationIdRef = React.useRef<number>();
-  const [stackOrder, setStackOrder] = React.useState(0);
 
-  const enabledRef = useLatest(enabled);
-  const contentBoundaryRef = useLatest(props.contentBoundaryRef);
-  const insideRefsRef = useLatest(props.insideRefs ?? []);
-  const onDismissRef = useLatest(props.onDismiss);
-  const onPointerDownOutsideRef = useLatest(props.onPointerDownOutside);
-  const onInteractOutsideRef = useLatest(props.onInteractOutside);
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
+  const containerRef = React.useRef(portalContext.container);
+  containerRef.current = portalContext.container;
 
-  const callPointerDownOutside = React.useCallback((event: LayerInteractEvent) => {
-    onPointerDownOutsideRef.current?.(event);
-  }, []);
-
-  const callInteractOutside = React.useCallback((event: LayerInteractEvent) => {
-    onInteractOutsideRef.current?.(event);
-  }, []);
-
-  const callDismiss = React.useCallback(() => {
-    onDismissRef.current?.();
-  }, []);
+  const core = useLatticeCore((rx) =>
+    createDismissableLayer(rx, {
+      initialEnabled: propsRef.current.enabled ?? true,
+      modal: propsRef.current.modal,
+      disableOutsidePointerEvents: propsRef.current.disableOutsidePointerEvents,
+      getContentBoundary: () => propsRef.current.contentBoundaryRef?.current,
+      getFallbackBoundary: () => contentWrapperRef.current,
+      getInsideRoots: () =>
+        propsRef.current.insideRoots?.() ?? (propsRef.current.insideRefs ?? []).map((ref) => ref.current),
+      getPortalContainer: () => containerRef.current,
+      onDismiss: () => propsRef.current.onDismiss?.(),
+      onPointerDownOutside: (event) => propsRef.current.onPointerDownOutside?.(event),
+      onInteractOutside: (event) => propsRef.current.onInteractOutside?.(event),
+    }),
+  );
 
   React.useEffect(() => {
-    const registration = registerLayer({
-      getEnabled: () => enabledRef.current,
-      isPointerOutside: (inputObject) => {
-        const boundaryRef = contentBoundaryRef.current;
-        // When the consumer provides a boundary ref it points at real content;
-        // otherwise we fall back to the internal full-screen positioning canvas,
-        // which is hit at every position and must not count as content itself.
-        const usingProvidedBoundary = boundaryRef !== undefined;
-        const contentBoundary = usingProvidedBoundary ? boundaryRef.current : contentWrapperRef.current;
-        if (!contentBoundary) {
-          return false;
-        }
+    core.start();
+  }, [core]);
 
-        const insideRoots = insideRefsRef.current.map((ref) => ref.current);
-        return isOutsidePointerEvent(inputObject, portalContext.container, contentBoundary, {
-          insideRoots,
-          layerIgnoresGuiInset,
-          boundaryMatchesSelf: usingProvidedBoundary,
-        });
-      },
-      onPointerDownOutside: callPointerDownOutside,
-      onInteractOutside: callInteractOutside,
-      onDismiss: callDismiss,
-    });
-
-    registrationIdRef.current = registration.id;
-    setStackOrder(registration.mountOrder);
-
-    return () => {
-      registrationIdRef.current = undefined;
-      unregisterLayer(registration.id);
-    };
-  }, [
-    callDismiss,
-    callInteractOutside,
-    callPointerDownOutside,
-    enabledRef,
-    contentBoundaryRef,
-    insideRefsRef,
-    layerIgnoresGuiInset,
-    portalContext.container,
-  ]);
-
-  // Declared after the registration effect so mount runs register → promote.
-  // Re-promotes on every open so z-order and dismissal order follow open
-  // order (layers stay permanently mounted with enabled={open}).
   React.useEffect(() => {
-    if (!enabled) {
-      return;
-    }
+    core.setEnabled(enabled);
+  }, [core, enabled]);
 
-    const registrationId = registrationIdRef.current;
-    if (registrationId === undefined) {
-      return;
-    }
-
-    const nextOrder = promoteLayer(registrationId);
-    if (nextOrder !== undefined) {
-      setStackOrder(nextOrder);
-    }
-  }, [enabled]);
+  const stackOrder = core.stackOrder();
+  const layerIgnoresGuiInset = core.ignoresGuiInset();
 
   return (
     <Portal>
@@ -127,7 +63,7 @@ export function DismissableLayer(props: DismissableLayerProps) {
         ScreenInsets={layerIgnoresGuiInset ? Enum.ScreenInsets.None : Enum.ScreenInsets.CoreUISafeInsets}
         ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
       >
-        {shouldBlockOutsidePointer ? (
+        {core.blocksOutsidePointer() ? (
           <textbutton
             Active={true}
             AutoButtonColor={false}
@@ -145,7 +81,7 @@ export function DismissableLayer(props: DismissableLayerProps) {
         <frame
           BackgroundTransparency={1}
           BorderSizePixel={0}
-          Position={contentWrapperPosition}
+          Position={core.contentWrapperPosition()}
           Size={UDim2.fromScale(1, 1)}
           ref={contentWrapperRef}
           ZIndex={1}

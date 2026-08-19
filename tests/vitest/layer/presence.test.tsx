@@ -15,11 +15,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // test here (Presence, constants) is the real implementation.
 vi.mock("@lattice-ui/react-runtime", async () => {
   const react = await import("react");
-  return { React: react.default };
+  const reactivity = await import("../../../packages/react/runtime/src/reactivity");
+  return { React: react.default, useLatticeCore: reactivity.useLatticeCore };
 });
 
 import { Presence } from "../../../packages/react/layer/src/presence/Presence";
-import { DEFAULT_PRESENCE_EXIT_FALLBACK_MS } from "../../../packages/react/layer/src/internals/constants";
+import { DEFAULT_PRESENCE_EXIT_FALLBACK_MS } from "../../../packages/core/layer/src/internals/constants";
 
 const LONGEST_DEFAULT_EXIT_MS = 300;
 

@@ -71,14 +71,16 @@ function PopoverContentImpl(props: {
   children?: React.ReactNode;
   passthrough: PassthroughProps<Frame>;
 }) {
-  const popoverContext = usePopoverContext();
-  const open = popoverContext.open;
+  const core = usePopoverContext().core;
+  const open = core.open();
   const shouldMeasure = open || props.motionPresent || props.onExitComplete !== undefined;
   const contentBoundaryRef = React.useRef<GuiObject>();
 
   const popper = usePopper({
-    anchorRef: popoverContext.anchorRef,
-    contentRef: popoverContext.contentRef,
+    // The instances live in the core, so the popper reads them from there instead of from refs
+    // this component would otherwise have to keep in sync.
+    getAnchor: core.getAnchor,
+    getContent: core.getContent,
     alignOffset: props.alignOffset,
     collisionPadding: props.collisionPadding,
     sideOffset: props.sideOffset,
@@ -99,16 +101,16 @@ function PopoverContentImpl(props: {
   const setContentRef = React.useCallback(
     (instance: Instance | undefined) => {
       const guiObject = toGuiObject(instance);
-      popoverContext.contentRef.current = guiObject;
+      core.setContent(guiObject);
       contentBoundaryRef.current = guiObject;
       motion.ref.current = guiObject;
     },
-    [motion.ref, popoverContext.contentRef],
+    [core, motion.ref],
   );
 
   const handleDismiss = React.useCallback(() => {
-    popoverContext.setOpen(false);
-  }, [popoverContext.setOpen]);
+    core.setOpen(false);
+  }, [core]);
 
   const shouldRender = motion.mounted;
   const contentVisible = shouldRender && (motion.present || motion.phase !== "exited");
@@ -156,14 +158,14 @@ function PopoverContentImpl(props: {
   return (
     <DismissableLayer
       enabled={open}
-      modal={popoverContext.modal}
+      modal={core.modal()}
       onDismiss={handleDismiss}
       onInteractOutside={props.onInteractOutside}
       onPointerDownOutside={props.onPointerDownOutside}
       contentBoundaryRef={contentBoundaryRef}
-      insideRefs={[popoverContext.triggerRef, popoverContext.anchorRef]}
+      insideRoots={core.getInsideRoots}
     >
-      <FocusScope active={open} restoreFocus={true} trapped={popoverContext.modal}>
+      <FocusScope active={open} restoreFocus={true} trapped={core.modal()}>
         {/* Popper-driven placement wrapper: geometry comes from measurement, not from styling. */}
         <frame
           {...NEUTRAL_PROPS}
@@ -180,8 +182,7 @@ function PopoverContentImpl(props: {
 }
 
 export function PopoverContent(props: PopoverContentProps) {
-  const popoverContext = usePopoverContext();
-  const open = popoverContext.open;
+  const open = usePopoverContext().open;
   const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
 
   if (props.forceMount) {

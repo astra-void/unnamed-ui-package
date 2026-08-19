@@ -1,10 +1,9 @@
+import type { CheckboxSetChecked, CheckedState } from "@lattice-ui/core-checkbox";
 import type { PresenceMotionConfig } from "@lattice-ui/react-motion";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
 
-export type CheckedState = boolean | "indeterminate";
-
-export type CheckboxSetChecked = (checked: CheckedState) => void;
+export type { CheckboxSetChecked, CheckedState };
 
 export type CheckboxContextValue = {
   checked: CheckedState;

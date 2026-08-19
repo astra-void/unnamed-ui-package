@@ -16,6 +16,7 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   const react = await import("react");
   const controllable = await import("../../../packages/react/runtime/src/useControllableState");
   const strictContext = await import("../../../packages/react/runtime/src/context");
+  const reactivity = await import("../../../packages/react/runtime/src/reactivity");
 
   function Slot(props: { children?: React.ReactNode } & Record<string, unknown>) {
     const { children, ...slotProps } = props;
@@ -30,6 +31,7 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   }
 
   return {
+    useLatticeCore: reactivity.useLatticeCore,
     composeEvents: runtimeProps.composeEvents,
     getSlotChild: runtimeSlot.getSlotChild,
     mergeSlotModifiers: runtimeSlot.mergeSlotModifiers,

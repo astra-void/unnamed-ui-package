@@ -5,8 +5,9 @@ import { act, render } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@lattice-ui/react-runtime", () => ({
+vi.mock("@lattice-ui/react-runtime", async () => ({
   React: require("react"),
+  useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
   createStrictContext: <T,>(_name: string) => {
     const React = require("react");
     const Context = React.createContext<T | undefined>(undefined);

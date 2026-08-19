@@ -1,37 +1,27 @@
-import { React, useControllableState } from "@lattice-ui/react-runtime";
+import { createPopover } from "@lattice-ui/core-popover";
+import { focusGuiObject } from "@lattice-ui/react-focus";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { PopoverContextProvider } from "./context";
 import type { PopoverProps } from "./types";
 
 export function Popover(props: PopoverProps) {
-  const [open, setOpenState] = useControllableState<boolean>({
-    value: props.open,
-    defaultValue: props.defaultOpen ?? false,
-    onChange: props.onOpenChange,
-  });
-  const modal = props.modal ?? false;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const triggerRef = React.useRef<GuiObject>();
-  const anchorRef = React.useRef<GuiObject>();
-  const contentRef = React.useRef<GuiObject>();
-
-  const setOpen = React.useCallback(
-    (nextOpen: boolean) => {
-      setOpenState(nextOpen);
-    },
-    [setOpenState],
-  );
-
-  const contextValue = React.useMemo(
-    () => ({
-      open,
-      setOpen,
-      modal,
-      triggerRef,
-      anchorRef,
-      contentRef,
+  const core = useLatticeCore((rx) =>
+    createPopover(rx, {
+      open: () => propsRef.current.open,
+      defaultOpen: propsRef.current.defaultOpen ?? false,
+      modal: () => propsRef.current.modal,
+      onOpenChange: (open) => propsRef.current.onOpenChange?.(open),
+      focusInstance: focusGuiObject,
     }),
-    [modal, open, setOpen],
   );
+
+  const open = core.open();
+  const modal = core.modal();
+
+  const contextValue = React.useMemo(() => ({ core, open, modal }), [core, modal, open]);
 
   return <PopoverContextProvider value={contextValue}>{props.children}</PopoverContextProvider>;
 }

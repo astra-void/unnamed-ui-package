@@ -52,6 +52,7 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   const runtimeProps = await import("../../../packages/react/runtime/src/props");
   const runtimeRefs = await import("../../../packages/react/runtime/src/refs");
   const runtimeSlot = await import("../../../packages/react/runtime/src/slot");
+  const runtimeReactivity = await import("../../../packages/react/runtime/src/reactivity");
   const React = require("react");
 
   function Slot(props: { children?: React.ReactNode; ref?: React.Ref<unknown> } & Record<string, unknown>) {
@@ -104,6 +105,7 @@ vi.mock("@lattice-ui/react-runtime", async () => {
   }
 
   return {
+    useLatticeCore: runtimeReactivity.useLatticeCore,
     composeEvents: runtimeProps.composeEvents,
     getPassthroughProps: runtimeProps.getPassthroughProps,
     toSlotProps: runtimeProps.toSlotProps,

@@ -51,8 +51,9 @@ const { runService } = vi.hoisted(() => {
   return { runService };
 });
 
-vi.mock("@lattice-ui/react-runtime", () => ({
+vi.mock("@lattice-ui/react-runtime", async () => ({
   React: require("react"),
+  useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
 }));
 
 import { createSurfaceRevealRecipe, MotionProvider, usePresenceMotion, useResponseMotion } from "@lattice-ui/react-motion";

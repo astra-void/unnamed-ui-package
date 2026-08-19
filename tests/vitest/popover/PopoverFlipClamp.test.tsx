@@ -32,7 +32,10 @@ globalThis.game = {
   },
 };
 
-vi.mock("@lattice-ui/react-runtime", () => ({ React: require("react") }));
+vi.mock("@lattice-ui/react-runtime", async () => ({
+  React: require("react"),
+  useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
+}));
 
 import { usePopper } from "../../../packages/react/popper/src/usePopper";
 

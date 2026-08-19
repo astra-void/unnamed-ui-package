@@ -1,248 +1,53 @@
-import React from "@rbxts/react";
-import { computePopper } from "./compute";
-import { subscribeAnchor, subscribeContent, subscribeViewport } from "./observers";
-import { normalizePopperPositioningOptions } from "./options";
-import type { ComputePopperResult, UsePopperOptions, UsePopperResult } from "./types";
-
-const WorkspaceService = game.GetService("Workspace");
-const RunService = game.GetService("RunService");
-const GuiService = game.GetService("GuiService");
-const ZERO_VECTOR2 = new Vector2(0, 0);
-
-function readGuiRef(ref: UsePopperOptions["anchorRef"] | UsePopperOptions["contentRef"]): GuiObject | undefined {
-  return ref.current;
-}
-
-function getDefaultComputedResult(placement: UsePopperOptions["placement"]): ComputePopperResult {
-  return {
-    anchorPoint: new Vector2(0, 0),
-    placement: placement ?? "bottom",
-    position: UDim2.fromOffset(0, 0),
-  };
-}
-
-function areVector2Equal(a: Vector2, b: Vector2) {
-  return a.X === b.X && a.Y === b.Y;
-}
-
-function hasMeasuredContentSize(contentSize: Vector2) {
-  return contentSize.X > 0 || contentSize.Y > 0;
-}
-
-function _findNearestScreenGui(node: GuiObject | undefined) {
-  let current: Instance | undefined = node;
-  while (current) {
-    if (current.IsA("ScreenGui")) {
-      return current;
-    }
-    current = current.Parent;
-  }
-
-  return undefined;
-}
-
-function areResultsEqual(a: ComputePopperResult, b: ComputePopperResult) {
-  return (
-    a.placement === b.placement &&
-    a.anchorPoint.X === b.anchorPoint.X &&
-    a.anchorPoint.Y === b.anchorPoint.Y &&
-    a.position.X.Scale === b.position.X.Scale &&
-    a.position.X.Offset === b.position.X.Offset &&
-    a.position.Y.Scale === b.position.Y.Scale &&
-    a.position.Y.Offset === b.position.Y.Offset
-  );
-}
+import { createPopper } from "@lattice-ui/core-popper";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
+import type { UsePopperOptions, UsePopperResult } from "./types";
 
 /**
- * Resolves the valid AbsolutePosition-space rect for a ScreenGui.
+ * React binding for `@lattice-ui/core-popper`.
  *
- * AbsolutePosition is measured from the top-left of the inset-adjusted area:
- * - IgnoreGuiInset=true: the gui spans the full screen, so its content starts
- *   ABOVE the origin — valid range is [-inset, AbsoluteSize - inset].
- * - IgnoreGuiInset=false: the gui starts below the topbar at the origin —
- *   valid range is [0, AbsoluteSize] (AbsoluteSize already excludes the inset).
- *
- * Exported for tests.
+ * Everything that measures, observes and computes lives in the core; this hook exists to hand it
+ * React's refs as getters, to start it on mount, and to expose its state as the plain values a
+ * render pass wants.
  */
-export function resolveScreenGuiViewportRect(
-  ignoreGuiInset: boolean,
-  absoluteSize: Vector2,
-  topLeftInset: Vector2,
-): Rect {
-  const min = ignoreGuiInset ? new Vector2(-topLeftInset.X, -topLeftInset.Y) : new Vector2(0, 0);
-  return new Rect(min, new Vector2(min.X + absoluteSize.X, min.Y + absoluteSize.Y));
-}
-
-function getViewportRect(node: GuiObject | undefined): Rect {
-  // Try to find the nearest ScreenGui or PluginGui ancestor to use its absolute size as bounds.
-  // This is more accurate for portals than assuming the camera viewport size,
-  // especially for studio plugins or non-fullscreen guis.
-  if (node) {
-    let current: Instance | undefined = node;
-    while (current) {
-      if (current.IsA("ScreenGui")) {
-        const [topLeftInset] = GuiService.GetGuiInset();
-        return resolveScreenGuiViewportRect(current.IgnoreGuiInset, current.AbsoluteSize, topLeftInset);
-      }
-      current = current.Parent;
-    }
-  }
-
-  // Fallback to camera viewport size if no container is found.
-  const viewportSize = WorkspaceService.CurrentCamera?.ViewportSize ?? new Vector2(1920, 1080);
-  return new Rect(new Vector2(0, 0), viewportSize);
-}
-
 export function usePopper(options: UsePopperOptions): UsePopperResult {
-  const enabled = options.enabled ?? true;
-  const normalizedOptions = React.useMemo(
-    () => normalizePopperPositioningOptions(options),
-    [options.alignOffset, options.collisionPadding, options.placement, options.sideOffset],
-  );
-  const [computedResult, setComputedResult] = React.useState<ComputePopperResult>(() =>
-    getDefaultComputedResult(normalizedOptions.placement),
-  );
-  const [contentSize, setContentSize] = React.useState<Vector2>(ZERO_VECTOR2);
-  const [isPositioned, setIsPositioned] = React.useState(false);
+  const optionsRef = React.useRef(options);
+  optionsRef.current = options;
 
-  const update = React.useCallback(() => {
-    if (!enabled) {
-      return;
-    }
-
-    const anchor = readGuiRef(options.anchorRef);
-    const content = readGuiRef(options.contentRef);
-    if (!anchor) {
-      setContentSize((current) => (areVector2Equal(current, ZERO_VECTOR2) ? current : ZERO_VECTOR2));
-      setIsPositioned(false);
-      return;
-    }
-
-    if (!content) {
-      setContentSize((current) => (areVector2Equal(current, ZERO_VECTOR2) ? current : ZERO_VECTOR2));
-      const viewportRect = getViewportRect(anchor);
-      const nextResult = computePopper({
-        anchorPosition: anchor.AbsolutePosition,
-        anchorSize: anchor.AbsoluteSize,
-        contentSize: ZERO_VECTOR2,
-        alignOffset: normalizedOptions.alignOffset,
-        collisionPadding: normalizedOptions.collisionPadding,
-        placement: normalizedOptions.placement,
-        sideOffset: normalizedOptions.sideOffset,
-        viewportRect,
-      });
-
-      setComputedResult((currentResult) => (areResultsEqual(currentResult, nextResult) ? currentResult : nextResult));
-      setIsPositioned(false);
-      return;
-    }
-
-    const measuredContentSize = content.AbsoluteSize;
-    setContentSize((current) => (areVector2Equal(current, measuredContentSize) ? current : measuredContentSize));
-
-    const viewportRect = getViewportRect(content ?? anchor);
-    const nextResult = computePopper({
-      anchorPosition: anchor.AbsolutePosition,
-      anchorSize: anchor.AbsoluteSize,
-      contentSize: measuredContentSize,
-      alignOffset: normalizedOptions.alignOffset,
-      collisionPadding: normalizedOptions.collisionPadding,
-      placement: normalizedOptions.placement,
-      sideOffset: normalizedOptions.sideOffset,
-      viewportRect,
-    });
-
-    setComputedResult((currentResult) => (areResultsEqual(currentResult, nextResult) ? currentResult : nextResult));
-    setIsPositioned(hasMeasuredContentSize(measuredContentSize));
-  }, [
-    enabled,
-    normalizedOptions.alignOffset,
-    normalizedOptions.collisionPadding,
-    normalizedOptions.placement,
-    normalizedOptions.sideOffset,
-    options.anchorRef,
-    options.contentRef,
-  ]);
-
-  React.useLayoutEffect(() => {
-    update();
-  }, [update]);
-
-  React.useLayoutEffect(() => {
-    if (!enabled) {
-      setIsPositioned(false);
-      setContentSize((current) => (areVector2Equal(current, ZERO_VECTOR2) ? current : ZERO_VECTOR2));
-    }
-  }, [enabled]);
-
-  React.useLayoutEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    let disconnectAnchor: (() => void) | undefined;
-    let disconnectContent: (() => void) | undefined;
-    let disconnectViewport: (() => void) | undefined;
-    let observedAnchor: GuiObject | undefined;
-    let observedContent: GuiObject | undefined;
-
-    const detachObservers = () => {
-      disconnectAnchor?.();
-      disconnectAnchor = undefined;
-
-      disconnectContent?.();
-      disconnectContent = undefined;
-
-      disconnectViewport?.();
-      disconnectViewport = undefined;
-
-      observedAnchor = undefined;
-      observedContent = undefined;
-    };
-
-    const syncObservers = () => {
-      const anchor = readGuiRef(options.anchorRef);
-      const content = readGuiRef(options.contentRef);
-
-      if (!anchor || !content) {
-        if (observedAnchor || observedContent) {
-          detachObservers();
-          update();
-        }
-        return;
-      }
-
-      if (anchor === observedAnchor && content === observedContent) {
-        return;
-      }
-
-      detachObservers();
-
-      disconnectAnchor = subscribeAnchor(anchor, update);
-      disconnectContent = subscribeContent(content, update);
-      disconnectViewport = subscribeViewport(content, update);
-      observedAnchor = anchor;
-      observedContent = content;
-      update();
-    };
-
-    update();
-    syncObservers();
-    const syncConnection = RunService.Heartbeat.Connect(syncObservers);
-
-    return () => {
-      syncConnection.Disconnect();
-      detachObservers();
-    };
-  }, [enabled, options.anchorRef, options.contentRef, update]);
-
-  return React.useMemo(
-    () => ({
-      ...computedResult,
-      contentSize,
-      isPositioned,
-      update,
+  const core = useLatticeCore((rx) =>
+    createPopper(rx, {
+      getAnchor: () => optionsRef.current.getAnchor?.() ?? optionsRef.current.anchorRef?.current,
+      getContent: () => optionsRef.current.getContent?.() ?? optionsRef.current.contentRef?.current,
+      enabled: () => optionsRef.current.enabled,
+      placement: () => optionsRef.current.placement,
+      sideOffset: () => optionsRef.current.sideOffset,
+      alignOffset: () => optionsRef.current.alignOffset,
+      collisionPadding: () => optionsRef.current.collisionPadding,
     }),
-    [computedResult, contentSize, isPositioned, update],
+  );
+
+  // Layout effect, as before: measurement should settle in the same commit the content mounted in
+  // rather than a frame later.
+  React.useLayoutEffect(() => {
+    core.start();
+  }, [core]);
+
+  // Positioning options are plain props: nothing about them is reactive, so React's dependency list
+  // is what tells the core they changed. The core's own Heartbeat would catch it a frame later.
+  React.useLayoutEffect(() => {
+    core.sync();
+  }, [core, options.alignOffset, options.collisionPadding, options.enabled, options.placement, options.sideOffset]);
+
+  const position = core.position();
+  const anchorPoint = core.anchorPoint();
+  const placement = core.placement();
+  const contentSize = core.contentSize();
+  const isPositioned = core.isPositioned();
+  const update = core.update;
+
+  // The core only writes a source when the value actually changed, so these identities are stable
+  // across renders and this memo keeps the result object stable for consumers' dependency arrays.
+  return React.useMemo(
+    () => ({ position, anchorPoint, placement, contentSize, isPositioned, update }),
+    [anchorPoint, contentSize, isPositioned, placement, position, update],
   );
 }

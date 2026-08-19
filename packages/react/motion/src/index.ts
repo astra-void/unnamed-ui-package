@@ -1,11 +1,12 @@
+// The core's exports come first; the hooks below intentionally shadow `PresenceMotionControllerOptions`
+// with the React-shaped one, so that name is re-exported explicitly rather than by wildcard.
+
+export * from "@lattice-ui/core-motion";
 export * from "./core/policy";
-export * from "./core/tokens";
-export * from "./core/types";
 export * from "./hooks/useFeedbackEffect";
-export * from "./hooks/usePresenceMotion";
+export type {
+  PresenceMotionController,
+  PresenceMotionControllerOptions,
+} from "./hooks/usePresenceMotion";
+export { usePresenceMotion, usePresenceMotionController } from "./hooks/usePresenceMotion";
 export * from "./hooks/useResponseMotion";
-export * from "./recipes/feedback";
-export * from "./recipes/presence";
-export * from "./recipes/response";
-export * from "./targets/instance";
-export * from "./targets/offset";

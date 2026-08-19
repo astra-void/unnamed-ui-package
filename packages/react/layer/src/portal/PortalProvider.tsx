@@ -1,5 +1,5 @@
+import { DEFAULT_DISPLAY_ORDER_BASE } from "@lattice-ui/core-layer";
 import { createStrictContext, React } from "@lattice-ui/react-runtime";
-import { DEFAULT_DISPLAY_ORDER_BASE } from "../internals/constants";
 import type { PortalContextValue, PortalProviderProps } from "./types";
 
 const [PortalContextProvider, usePortalContext] = createStrictContext<PortalContextValue>("PortalProvider");

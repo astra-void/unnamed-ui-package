@@ -24,6 +24,9 @@
     "typecheck": "tsc -p tsconfig.typecheck.json",
     "watch": "rbxtsc -p tsconfig.json -w"
   },
+  "dependencies": {
+    "@lattice-ui/core-runtime": "workspace:*"
+  },
   "devDependencies": {
     "@rbxts/react": "17.3.7-ts.1",
     "@rbxts/react-roblox": "17.3.7-ts.1"

@@ -1,3 +1,4 @@
+import type { PopoverCore } from "@lattice-ui/core-popover";
 import type { LayerInteractEvent } from "@lattice-ui/react-layer";
 import type { PresenceMotionConfig as MotionConfig } from "@lattice-ui/react-motion";
 import type { PopperPlacement } from "@lattice-ui/react-popper";
@@ -6,13 +7,17 @@ import type React from "@rbxts/react";
 
 export type PopoverSetOpen = (open: boolean) => void;
 
+/**
+ * Internal context.
+ *
+ * It carries the core itself so effects can reach live state, plus this render's snapshot of the
+ * values React needs while rendering — the value identity has to change when `open` does, or
+ * consumers that are not descendants of a re-rendering parent never hear about it.
+ */
 export type PopoverContextValue = {
+  core: PopoverCore;
   open: boolean;
-  setOpen: PopoverSetOpen;
   modal: boolean;
-  triggerRef: React.MutableRefObject<GuiObject | undefined>;
-  anchorRef: React.MutableRefObject<GuiObject | undefined>;
-  contentRef: React.MutableRefObject<GuiObject | undefined>;
 };
 
 export type PopoverProps = {

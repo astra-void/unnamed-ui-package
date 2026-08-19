@@ -1,14 +1,15 @@
+import { createCheckbox } from "@lattice-ui/core-checkbox";
 import {
-  composeEvents,
+  applyElementSpec,
   getPassthroughProps,
   getSlotChild,
   React,
   Slot,
   toSlotProps,
-  useControllableState,
+  useLatticeCore,
 } from "@lattice-ui/react-runtime";
 import { CheckboxContextProvider } from "./context";
-import type { CheckboxProps, CheckedState } from "./types";
+import type { CheckboxProps } from "./types";
 
 const OWN_PROPS = [
   "checked",
@@ -20,70 +21,42 @@ const OWN_PROPS = [
   "children",
 ] as const;
 
-// Roblox instance defaults are themselves a look: a bare `textbutton` renders an opaque grey box
-// labelled "Button". Neutralize only that, and leave every real appearance decision (colors, size,
-// fonts, text) to the consumer. Passthrough props are spread after these, so they stay overridable.
-const NEUTRAL_PROPS = {
-  AutoButtonColor: false,
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-  Text: "",
-};
-
-function getNextCheckedState(checked: CheckedState) {
-  if (checked === "indeterminate") {
-    return true;
-  }
-
-  return !checked;
-}
-
 export function CheckboxRoot(props: CheckboxProps) {
-  const [checked, setCheckedState] = useControllableState<CheckedState>({
-    value: props.checked,
-    defaultValue: props.defaultChecked ?? false,
-    onChange: props.onCheckedChange,
-  });
+  // The core reads its inputs through getters, so it always sees this render's props rather than
+  // the ones it was built with. Assigning during render matches how the primitives already keep
+  // callbacks current, and the core never reads a getter while React is rendering.
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const disabled = props.disabled === true;
-  const required = props.required === true;
-
-  const setChecked = React.useCallback(
-    (nextChecked: CheckedState) => {
-      if (disabled) {
-        return;
-      }
-
-      setCheckedState(nextChecked);
-    },
-    [disabled, setCheckedState],
+  const core = useLatticeCore((rx) =>
+    createCheckbox(rx, {
+      checked: () => propsRef.current.checked,
+      defaultChecked: propsRef.current.defaultChecked ?? false,
+      disabled: () => propsRef.current.disabled,
+      required: () => propsRef.current.required,
+      // Stable wrapper: the core captures `onChange` once, but a consumer's handler is a fresh
+      // closure on every render.
+      onCheckedChange: (checked) => propsRef.current.onCheckedChange?.(checked),
+    }),
   );
 
-  const toggle = React.useCallback(() => {
-    if (disabled) {
-      return;
-    }
-
-    setCheckedState(getNextCheckedState(checked));
-  }, [checked, disabled, setCheckedState]);
+  const checked = core.checked();
+  const disabled = core.disabled();
+  const required = core.required();
 
   const contextValue = React.useMemo(
     () => ({
       checked,
-      setChecked,
+      setChecked: core.setChecked,
       disabled,
       required,
     }),
-    [checked, disabled, required, setChecked],
+    [checked, core, disabled, required],
   );
 
   const child = props.children;
   const passthrough = getPassthroughProps<TextButton>(props, OWN_PROPS);
-  const behaviorProps = {
-    Active: !disabled,
-    Event: composeEvents(passthrough.Event, { Activated: toggle }),
-    Selectable: !disabled,
-  };
+  const spec = core.rootSpec();
 
   return (
     <CheckboxContextProvider value={contextValue}>
@@ -94,16 +67,10 @@ export function CheckboxRoot(props: CheckboxProps) {
           }
 
           // No neutral defaults here: the rendered element belongs to the consumer.
-          return (
-            <Slot {...toSlotProps(passthrough)} {...behaviorProps}>
-              {child}
-            </Slot>
-          );
+          return <Slot {...toSlotProps(applyElementSpec(spec, passthrough, { neutral: false }))}>{child}</Slot>;
         })()
       ) : (
-        <textbutton {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
-          {child}
-        </textbutton>
+        <textbutton {...applyElementSpec(spec, passthrough)}>{child}</textbutton>
       )}
     </CheckboxContextProvider>
   );

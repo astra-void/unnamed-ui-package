@@ -25,6 +25,7 @@
     "watch": "rbxtsc -p tsconfig.json -w"
   },
   "dependencies": {
+    "@lattice-ui/core-motion": "workspace:*",
     "@lattice-ui/react-runtime": "workspace:*",
     "@rbxts/services": "^1.6.0"
   },

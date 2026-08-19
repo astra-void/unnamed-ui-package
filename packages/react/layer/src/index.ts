@@ -1,3 +1,4 @@
+export * from "@lattice-ui/core-layer";
 export * from "./dismissable/DismissableLayer";
 export * from "./dismissable/types";
 export * from "./portal/Portal";

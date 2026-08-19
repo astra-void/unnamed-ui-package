@@ -1,6 +1,10 @@
+import {
+  type MotionPolicy,
+  readSystemReducedMotion,
+  resolveMotionPolicy,
+  subscribeSystemReducedMotion,
+} from "@lattice-ui/core-motion";
 import { React } from "@lattice-ui/react-runtime";
-import { GuiService } from "@rbxts/services";
-import type { MotionPolicy } from "./types";
 
 type MotionPolicyContextValue = MotionPolicy & { respectSystemReducedMotion: boolean };
 
@@ -10,29 +14,13 @@ const MotionPolicyContext = React.createContext<MotionPolicyContextValue>({
   respectSystemReducedMotion: true,
 });
 
-function readSystemReducedMotion(): boolean {
-  const [ok, value] = pcall(() => GuiService.ReducedMotionEnabled);
-  return ok && value === true;
-}
-
 export function useSystemReducedMotion(): boolean {
   const [reduced, setReduced] = React.useState(readSystemReducedMotion);
 
   React.useEffect(() => {
     setReduced(readSystemReducedMotion());
 
-    let connection: RBXScriptConnection | undefined;
-    pcall(() => {
-      connection = GuiService.GetPropertyChangedSignal("ReducedMotionEnabled").Connect(() => {
-        setReduced(readSystemReducedMotion());
-      });
-    });
-
-    return () => {
-      if (connection !== undefined) {
-        connection.Disconnect();
-      }
-    };
+    return subscribeSystemReducedMotion(setReduced);
   }, []);
 
   return reduced;
@@ -60,11 +48,16 @@ export function useMotionPolicy(): MotionPolicy {
   const ctx = React.useContext(MotionPolicyContext);
   const systemReducedMotion = useSystemReducedMotion();
 
-  return React.useMemo<MotionPolicy>(() => {
-    const disableAllMotion = ctx.disableAllMotion || (ctx.respectSystemReducedMotion && systemReducedMotion);
-    return {
-      mode: disableAllMotion ? "none" : ctx.mode,
-      disableAllMotion,
-    };
-  }, [ctx.disableAllMotion, ctx.mode, ctx.respectSystemReducedMotion, systemReducedMotion]);
+  return React.useMemo<MotionPolicy>(
+    () =>
+      resolveMotionPolicy(
+        {
+          mode: ctx.mode,
+          disableAllMotion: ctx.disableAllMotion,
+          respectSystemReducedMotion: ctx.respectSystemReducedMotion,
+        },
+        systemReducedMotion,
+      ),
+    [ctx.disableAllMotion, ctx.mode, ctx.respectSystemReducedMotion, systemReducedMotion],
+  );
 }
