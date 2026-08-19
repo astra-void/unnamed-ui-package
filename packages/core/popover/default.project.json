@@ -1,0 +1,9 @@
+{
+  "name": "core-popover",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

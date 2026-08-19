@@ -1,0 +1,9 @@
+{
+  "name": "core-motion",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

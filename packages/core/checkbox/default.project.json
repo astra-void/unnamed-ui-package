@@ -1,0 +1,9 @@
+{
+  "name": "core-checkbox",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

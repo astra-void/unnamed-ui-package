@@ -1,0 +1,9 @@
+{
+  "name": "core-popper",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}
