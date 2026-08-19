@@ -1,0 +1,9 @@
+{
+  "name": "core-dialog",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

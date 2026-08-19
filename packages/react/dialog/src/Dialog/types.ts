@@ -1,3 +1,4 @@
+import type { DialogCore } from "@lattice-ui/core-dialog";
 import type { LayerInteractEvent } from "@lattice-ui/react-layer";
 import type { PresenceMotionConfig } from "@lattice-ui/react-motion";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
@@ -9,7 +10,8 @@ export type DialogContextValue = {
   open: boolean;
   setOpen: DialogSetOpen;
   modal: boolean;
-  triggerRef: React.MutableRefObject<GuiObject | undefined>;
+  /** The core, for the parts that need its specs rather than the open flag. */
+  core: DialogCore;
 };
 
 export type DialogProps = {

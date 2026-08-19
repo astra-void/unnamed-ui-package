@@ -1,7 +1,7 @@
 import { Presence, usePortalContext } from "@lattice-ui/react-layer";
 import { type PresenceMotionConfig, usePresenceMotionController } from "@lattice-ui/react-motion";
 import {
-  composeEvents,
+  applyElementSpec,
   composeRefs,
   getPassthroughProps,
   getSlotChild,
@@ -49,17 +49,13 @@ function DialogOverlayImpl(props: {
   const shouldRender = motion.mounted;
   const overlayVisible = shouldRender && motion.phase !== "exited";
 
-  const handleActivated = React.useCallback(() => {
-    dialogContext.setOpen(false);
-  }, [dialogContext.setOpen]);
-
   const passthrough = props.passthrough;
+  // Active only while open, never selectable, dismissing on activation: all the core's.
+  const overlayProps = applyElementSpec(dialogContext.core.overlaySpec(), passthrough, { neutral: false });
   const behaviorProps = {
-    Active: open,
-    Event: composeEvents(passthrough.Event, { Activated: handleActivated }),
-    Selectable: false,
+    ...overlayProps,
     Visible: overlayVisible,
-    ref: composeRefs<GuiObject>(passthrough.ref as never, motion.ref) as never,
+    ref: composeRefs<GuiObject>(overlayProps.ref as never, motion.ref) as never,
   };
 
   if (props.asChild) {

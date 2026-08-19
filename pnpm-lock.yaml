@@ -535,6 +535,12 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/dialog:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/focus:
     dependencies:
       '@lattice-ui/core-runtime':
@@ -758,6 +764,9 @@ importers:
 
   packages/react/dialog:
     dependencies:
+      '@lattice-ui/core-dialog':
+        specifier: workspace:*
+        version: link:../../core/dialog
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1239,6 +1248,28 @@ importers:
       '@lattice-ui/core-runtime':
         specifier: workspace:*
         version: link:../../core/runtime
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/dialog:
+    dependencies:
+      '@lattice-ui/core-dialog':
+        specifier: workspace:*
+        version: link:../../core/dialog
+      '@lattice-ui/core-layer':
+        specifier: workspace:*
+        version: link:../../core/layer
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
       '@lattice-ui/vide-motion':
         specifier: workspace:*
         version: link:../motion

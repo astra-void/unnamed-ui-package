@@ -70,6 +70,8 @@ vi.mock("@lattice-ui/react-layer", async () => {
 });
 
 import { DialogOverlay } from "../../../packages/react/dialog/src/Dialog/DialogOverlay";
+import { createDialog } from "../../../packages/core/dialog/src/Dialog/createDialog";
+import { createStandaloneReactivity } from "../../../packages/core/runtime/src/reactivity";
 import { DialogContextProvider } from "../../../packages/react/dialog/src/Dialog/context";
 
 afterEach(() => {
@@ -81,10 +83,11 @@ function renderOverlay(overlayProps: Record<string, unknown> = {}) {
     React.createElement(
       DialogContextProvider,
       {
-        value: {
-          open: true,
-          setOpen: () => {},
-        },
+        // A real core: the overlay's behavior props come from it, not from the context's values.
+        value: (() => {
+          const core = createDialog(createStandaloneReactivity(), { defaultOpen: true });
+          return { open: core.open(), setOpen: core.setOpen, modal: core.modal(), core };
+        })(),
       },
       React.createElement(DialogOverlay, overlayProps),
     ),

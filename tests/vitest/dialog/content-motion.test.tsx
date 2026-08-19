@@ -124,6 +124,8 @@ vi.mock("@lattice-ui/react-runtime", async () => {
 
 vi.mock("@lattice-ui/react-focus", () => ({
   FocusScope: ({ children }: { children?: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  focusGuiObject: () => {},
+  useFocusNode: () => ({ current: undefined }),
 }));
 
 vi.mock("@lattice-ui/react-layer", () => {

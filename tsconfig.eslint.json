@@ -34,6 +34,8 @@
       "@lattice-ui/vide-accordion": ["packages/vide/accordion/src/index.ts"],
       "@lattice-ui/core-tooltip": ["packages/core/tooltip/src/index.ts"],
       "@lattice-ui/vide-tooltip": ["packages/vide/tooltip/src/index.ts"],
+      "@lattice-ui/core-dialog": ["packages/core/dialog/src/index.ts"],
+      "@lattice-ui/vide-dialog": ["packages/vide/dialog/src/index.ts"],
       "@lattice-ui/core-runtime": ["packages/core/runtime/src/index.ts"],
       "@lattice-ui/vide-runtime": ["packages/vide/runtime/src/index.ts"],
       "@lattice-ui/vide-popover": ["packages/vide/popover/src/index.ts"],
