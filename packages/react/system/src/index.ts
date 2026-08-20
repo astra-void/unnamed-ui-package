@@ -1,23 +1,10 @@
+export * from "@lattice-ui/core-system";
 export { DensityProvider, useDensity } from "./density/DensityProvider";
-export { applyDensity, density } from "./density/density";
-export type { DensityContextValue, DensityProviderProps, DensityToken } from "./density/types";
+export type { DensityContextValue, DensityProviderProps } from "./density/types";
 export { Grid } from "./layout/Grid";
 export { Row } from "./layout/Row";
 export { Stack } from "./layout/Stack";
-export type {
-  GridProps,
-  LayoutDirection,
-  RowProps,
-  SpaceToken,
-  SpaceValue,
-  StackAlign,
-  StackAutoSize,
-  StackJustify,
-  StackPadding,
-  StackProps,
-} from "./layout/types";
-export type { SurfaceToken } from "./surface/surface";
-export { surface } from "./surface/surface";
+export type { GridProps, RowProps, StackProps } from "./layout/types";
 export type { SurfaceProps } from "./surface/surfacePrimitive";
 export { Surface } from "./surface/surfacePrimitive";
 export { SystemProvider, useSystemTheme } from "./system/SystemProvider";

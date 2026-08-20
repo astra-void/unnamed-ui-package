@@ -5,7 +5,7 @@ export type DensityToken = "compact" | "comfortable" | "spacious";
 export type DensityProviderProps = {
   density?: DensityToken;
   defaultDensity?: DensityToken;
-  onDensityChange?: (next: DensityToken) => void;
+  onDensityChange?: (density: DensityToken) => void;
   children?: React.ReactNode;
 };
 

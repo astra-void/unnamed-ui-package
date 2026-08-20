@@ -1,32 +1,24 @@
-import { createStrictContext, React } from "@lattice-ui/react-runtime";
-import { defaultLightTheme } from "./tokens";
-import type { Theme, ThemeContextValue, ThemeProviderProps } from "./types";
+import { createThemeState, type Theme } from "@lattice-ui/core-style";
+import { createStrictContext, React, useLatticeCore } from "@lattice-ui/react-runtime";
+import type { ThemeContextValue, ThemeProviderProps } from "./types";
 
 const [ThemeContextProvider, useThemeContext] = createStrictContext<ThemeContextValue>("ThemeProvider");
 
 export function ThemeProvider(props: ThemeProviderProps) {
-  const [internalTheme, setInternalTheme] = React.useState(props.defaultTheme ?? defaultLightTheme);
-  const controlled = props.theme !== undefined;
-  const resolvedTheme = props.theme ?? internalTheme;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const setTheme = React.useCallback(
-    (nextTheme: Theme) => {
-      if (!controlled) {
-        setInternalTheme(nextTheme);
-      }
-
-      props.onThemeChange?.(nextTheme);
-    },
-    [controlled, props.onThemeChange],
-  );
-
-  const contextValue = React.useMemo(
-    () => ({
-      theme: resolvedTheme,
-      setTheme,
+  const state = useLatticeCore((rx) =>
+    createThemeState(rx, {
+      theme: () => propsRef.current.theme,
+      defaultTheme: propsRef.current.defaultTheme,
+      onThemeChange: (theme) => propsRef.current.onThemeChange?.(theme),
     }),
-    [resolvedTheme, setTheme],
   );
+
+  const theme = state.theme();
+
+  const contextValue = React.useMemo(() => ({ theme, setTheme: state.setTheme }), [state, theme]);
 
   return <ThemeContextProvider value={contextValue}>{props.children}</ThemeContextProvider>;
 }

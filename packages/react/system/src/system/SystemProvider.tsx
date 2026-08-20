@@ -1,32 +1,29 @@
-import { React, useControllableState } from "@lattice-ui/react-runtime";
-import { defaultLightTheme } from "@lattice-ui/react-style";
+import { createBaseThemeState } from "@lattice-ui/core-system";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { DensityProvider } from "../density/DensityProvider";
 import { SystemBaseThemeContextProvider } from "./baseThemeContext";
 import { useSystemThemeContext } from "./systemThemeContext";
-import type { SystemProviderProps, SystemThemeContextValue } from "./types";
+import type { SystemProviderProps } from "./types";
 
 export function SystemProvider(props: SystemProviderProps) {
-  // SystemProvider owns raw/base theme state. Density is applied in DensityProvider.
-  const [baseThemeValue, setBaseThemeValue] = useControllableState({
-    value: props.theme,
-    defaultValue: props.defaultTheme ?? defaultLightTheme,
-    onChange: props.onThemeChange,
-  });
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const setBaseTheme = React.useCallback<SystemThemeContextValue["setBaseTheme"]>(
-    (nextTheme) => {
-      // Write-path contract: updates should target baseTheme, not resolved theme.
-      setBaseThemeValue(nextTheme);
-    },
-    [setBaseThemeValue],
+  // SystemProvider owns the base theme; density is applied by the DensityProvider below, which a
+  // consumer may also nest to re-derive the same base theme at another density.
+  const state = useLatticeCore((rx) =>
+    createBaseThemeState(rx, {
+      theme: () => propsRef.current.theme,
+      defaultTheme: propsRef.current.defaultTheme,
+      onThemeChange: (theme) => propsRef.current.onThemeChange?.(theme),
+    }),
   );
 
+  const baseTheme = state.baseTheme();
+
   const baseThemeContextValue = React.useMemo(
-    () => ({
-      baseTheme: baseThemeValue,
-      setBaseTheme,
-    }),
-    [baseThemeValue, setBaseTheme],
+    () => ({ baseTheme, setBaseTheme: state.setBaseTheme }),
+    [baseTheme, state],
   );
 
   return (

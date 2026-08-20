@@ -1,0 +1,9 @@
+{
+  "name": "core-style",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

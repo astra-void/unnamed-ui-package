@@ -1,22 +1,24 @@
-import type { Sx, Theme } from "@lattice-ui/react-style";
+import type {
+  LayoutDirection,
+  SpaceValue,
+  StackAlign,
+  StackAutoSize,
+  StackJustify,
+  StackPadding,
+} from "@lattice-ui/core-system";
+import type { Sx } from "@lattice-ui/react-style";
 import type React from "@rbxts/react";
 
-export type LayoutDirection = "vertical" | "horizontal";
-export type StackAlign = "start" | "center" | "end";
-export type StackJustify = "start" | "center" | "end";
-export type StackAutoSize = boolean | "x" | "y" | "xy";
-export type SpaceToken = keyof Theme["space"];
-export type SpaceValue = SpaceToken | number;
-
-export type StackPadding = {
-  padding?: SpaceValue;
-  paddingX?: SpaceValue;
-  paddingY?: SpaceValue;
-  paddingTop?: SpaceValue;
-  paddingRight?: SpaceValue;
-  paddingBottom?: SpaceValue;
-  paddingLeft?: SpaceValue;
-};
+// The vocabulary is the core's; only the React-shaped props are declared here.
+export type {
+  LayoutDirection,
+  SpaceToken,
+  SpaceValue,
+  StackAlign,
+  StackAutoSize,
+  StackJustify,
+  StackPadding,
+} from "@lattice-ui/core-system";
 
 type StyleProps = React.Attributes & Record<string, unknown>;
 

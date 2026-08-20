@@ -1,50 +1,44 @@
-import { createStrictContext, React, useControllableState } from "@lattice-ui/react-runtime";
+import { createDensityState } from "@lattice-ui/core-system";
+import { createStrictContext, React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { ThemeProvider } from "@lattice-ui/react-style";
 import { useSystemBaseThemeContext } from "../system/baseThemeContext";
 import { SystemThemeContextProvider } from "../system/systemThemeContext";
 import type { SystemThemeContextValue } from "../system/types";
-import { applyDensity } from "./density";
-import type { DensityContextValue, DensityProviderProps, DensityToken } from "./types";
+import type { DensityContextValue, DensityProviderProps } from "./types";
 
 const [DensityContextProvider, useDensityContext] = createStrictContext<DensityContextValue>("DensityProvider");
-const DEFAULT_DENSITY: DensityToken = "comfortable";
 
 export function DensityProvider(props: DensityProviderProps) {
   const { baseTheme, setBaseTheme } = useSystemBaseThemeContext();
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const [densityValue, setDensityValue] = useControllableState<DensityToken>({
-    value: props.density,
-    defaultValue: props.defaultDensity ?? DEFAULT_DENSITY,
-    onChange: props.onDensityChange,
-  });
-
-  // Read-path contract: resolvedTheme is derived from baseTheme + current density.
-  const resolvedTheme = React.useMemo(() => applyDensity(baseTheme, densityValue), [baseTheme, densityValue]);
-
-  const setDensity = React.useCallback(
-    (nextDensity: DensityToken) => {
-      setDensityValue(nextDensity);
-    },
-    [setDensityValue],
+  const state = useLatticeCore((rx) =>
+    createDensityState(rx, {
+      density: () => propsRef.current.density,
+      defaultDensity: propsRef.current.defaultDensity,
+      onDensityChange: (density) => propsRef.current.onDensityChange?.(density),
+    }),
   );
 
+  const density = state.density();
+  // Read-path contract: the resolved theme is derived from the base theme and this scope's density.
+  const resolvedTheme = state.resolveTheme(baseTheme);
+
   const densityContextValue = React.useMemo<DensityContextValue>(
-    () => ({
-      density: densityValue,
-      setDensity,
-    }),
-    [densityValue, setDensity],
+    () => ({ density, setDensity: state.setDensity }),
+    [density, state],
   );
 
   const systemThemeContextValue = React.useMemo<SystemThemeContextValue>(
     () => ({
       theme: resolvedTheme,
       baseTheme,
-      density: densityValue,
+      density,
       setBaseTheme,
-      setDensity,
+      setDensity: state.setDensity,
     }),
-    [baseTheme, densityValue, resolvedTheme, setBaseTheme, setDensity],
+    [baseTheme, density, resolvedTheme, setBaseTheme, state],
   );
 
   return (

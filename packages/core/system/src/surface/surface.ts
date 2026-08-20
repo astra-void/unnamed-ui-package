@@ -1,4 +1,4 @@
-import type { Sx } from "@lattice-ui/react-style";
+import type { Sx } from "@lattice-ui/core-style";
 
 type GuiPropRecord = Record<string, unknown>;
 

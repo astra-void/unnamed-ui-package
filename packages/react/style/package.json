@@ -23,6 +23,7 @@
     "watch": "rbxtsc -p tsconfig.json -w"
   },
   "dependencies": {
+    "@lattice-ui/core-style": "workspace:*",
     "@lattice-ui/react-runtime": "workspace:*"
   },
   "devDependencies": {

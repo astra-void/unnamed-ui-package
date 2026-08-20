@@ -28,6 +28,8 @@
       "@lattice-ui/core-select": ["../../packages/core/select/src/index.ts"],
       "@lattice-ui/core-combobox": ["../../packages/core/combobox/src/index.ts"],
       "@lattice-ui/core-toast": ["../../packages/core/toast/src/index.ts"],
+      "@lattice-ui/core-style": ["../../packages/core/style/src/index.ts"],
+      "@lattice-ui/core-system": ["../../packages/core/system/src/index.ts"],
       "@lattice-ui/core-runtime": ["../../packages/core/runtime/src/index.ts"],
       "@lattice-ui/react-accordion": ["../../packages/react/accordion/src/index.ts"],
       "@lattice-ui/react-avatar": ["../../packages/react/avatar/src/index.ts"],

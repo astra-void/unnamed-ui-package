@@ -59,8 +59,14 @@
       "@lattice-ui/core-slider": [
         "core/slider/src/index.ts"
       ],
+      "@lattice-ui/core-style": [
+        "core/style/src/index.ts"
+      ],
       "@lattice-ui/core-switch": [
         "core/switch/src/index.ts"
+      ],
+      "@lattice-ui/core-system": [
+        "core/system/src/index.ts"
       ],
       "@lattice-ui/core-tabs": [
         "core/tabs/src/index.ts"
@@ -209,8 +215,14 @@
       "@lattice-ui/vide-slider": [
         "vide/slider/src/index.ts"
       ],
+      "@lattice-ui/vide-style": [
+        "vide/style/src/index.ts"
+      ],
       "@lattice-ui/vide-switch": [
         "vide/switch/src/index.ts"
+      ],
+      "@lattice-ui/vide-system": [
+        "vide/system/src/index.ts"
       ],
       "@lattice-ui/vide-tabs": [
         "vide/tabs/src/index.ts"

@@ -649,6 +649,12 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/style:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/switch:
     dependencies:
       '@lattice-ui/core-motion':
@@ -657,6 +663,15 @@ importers:
       '@lattice-ui/core-runtime':
         specifier: workspace:*
         version: link:../runtime
+
+  packages/core/system:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@lattice-ui/core-style':
+        specifier: workspace:*
+        version: link:../style
 
   packages/core/tabs:
     dependencies:
@@ -1098,6 +1113,9 @@ importers:
 
   packages/react/style:
     dependencies:
+      '@lattice-ui/core-style':
+        specifier: workspace:*
+        version: link:../../core/style
       '@lattice-ui/react-runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -1130,6 +1148,9 @@ importers:
 
   packages/react/system:
     dependencies:
+      '@lattice-ui/core-system':
+        specifier: workspace:*
+        version: link:../../core/system
       '@lattice-ui/react-runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -1590,6 +1611,19 @@ importers:
         specifier: 0.6.1
         version: 0.6.1
 
+  packages/vide/style:
+    dependencies:
+      '@lattice-ui/core-style':
+        specifier: workspace:*
+        version: link:../../core/style
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
   packages/vide/switch:
     dependencies:
       '@lattice-ui/core-motion':
@@ -1604,6 +1638,22 @@ importers:
       '@lattice-ui/vide-runtime':
         specifier: workspace:*
         version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/system:
+    dependencies:
+      '@lattice-ui/core-system':
+        specifier: workspace:*
+        version: link:../../core/system
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@lattice-ui/vide-style':
+        specifier: workspace:*
+        version: link:../style
     devDependencies:
       '@rbxts/vide':
         specifier: 0.6.1

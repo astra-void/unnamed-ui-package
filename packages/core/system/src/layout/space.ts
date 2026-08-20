@@ -1,4 +1,4 @@
-import type { Theme } from "@lattice-ui/react-style";
+import type { Theme } from "@lattice-ui/core-style";
 import type { SpaceValue, StackPadding } from "./types";
 
 type ResolvedPadding = {

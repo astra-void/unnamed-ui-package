@@ -1,0 +1,9 @@
+{
+  "name": "vide-system",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

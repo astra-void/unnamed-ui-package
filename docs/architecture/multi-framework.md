@@ -213,7 +213,7 @@ checkpoint where the contract may be revised before mass migration.
 | 1 | workspace plumbing accepts a second layer | **done** — `packages/core/runtime` and `packages/vide/runtime` exist and the full `check` / `build` / `typecheck` / `lint` suite passes |
 | 2 | vertical slice 1: `checkbox` | **done** — one core drives both layers; the Vide harness spec compiles but has not been executed |
 | 3 | vertical slice 2: `popover` (portal + presence + dismissable + popper) | **done** — contract survived with the §3.5 refinement; focus and motion stayed on the React side |
-| 4 | remaining primitives, in waves A–D | **waves A, B and C done**; D open |
+| 4 | remaining primitives, in waves A–D | **done** |
 | 5 | distribution: playground, harness suite, CLI framework dimension, docs, publish | `@lattice-ui/vide-*` on npm |
 
 Phase 4 waves:
@@ -239,7 +239,18 @@ Phase 4 waves:
   one gamepad activation fires, a combobox telling its own write to the input apart from the player
   typing, and the label cache that lets a selection still have a name after the popup holding its
   item has closed.
-- **D** — style, system (most React-context-shaped; may ship for Vide later or not at all)
+- **D** — style, system — **done**, and they shipped for Vide after all. What looked like the most
+  framework-shaped wave turned out to be mostly framework-free already: `sx`, the recipe builder,
+  the tokens, the spacing and grid math, the density application and the surface tokens never
+  imported React. What had to move was the controllable theme, the density scope, and the prop
+  pipeline every styled primitive shares — strip what the primitive owns, resolve `sx` against the
+  theme, merge in the order the layer guarantees.
+
+  Two things this wave taught. A nested `DensityProvider` is a real part of the public API, not an
+  internal of `SystemProvider` — collapsing them into one core broke a playground scene, and the
+  base theme and the density scope are separate cores for that reason. And the module-resolution
+  trap reaches inside the core layer too: `core-style` re-exports the contract so `core-system`
+  reaches it there rather than importing `core-runtime` a second time.
 
 ### Phase 1, as built
 
