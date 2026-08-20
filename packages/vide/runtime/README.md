@@ -1,10 +1,15 @@
 # @lattice-ui/vide-runtime
 
-Adapter foundation for the Vide layer of Lattice UI.
+The foundation every other Vide package builds on: the reactivity adapter, the element-spec translation, portals, and slots.
 
-**Status: scaffold.** The Vide layer is under construction; this package is reserved and does not yet
-export anything usable. It will supply the Vide implementation of `@lattice-ui/core-runtime`'s
-`Reactivity` interface, the `ElementSpec` translation into Vide props, actions and events, and the
-`asChild` slotting built on `vide.apply`.
+```bash
+npx lattice-ui add runtime --framework vide
+```
 
-See `docs/architecture/multi-framework.md` in the repository for the design and the phase plan.
+## What this package is
+
+The behavior lives in `@lattice-ui/core-runtime`, which imports no framework at all and is the same code the React layer runs. This package is the Vide half: it builds that core on Vide's reactivity and renders what the core describes.
+
+A Vide component runs once, so a prop that has to follow state is written as a getter rather than read as a value. Pass a source straight in and the part stays bound to it.
+
+See the [root README](../../../README.md) for the coverage matrix and the styling rules that apply to every package.

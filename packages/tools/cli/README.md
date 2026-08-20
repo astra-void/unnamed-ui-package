@@ -16,17 +16,18 @@ lattice <command> [options]
 
 ### Commands
 
-- `lattice create [project-path] [--yes] [--pm <pnpm|npm|yarn>] [--git] [--template rbxts] [--lint] [--no-lint]`
-- `lattice init [--yes] [--dry-run] [--pm <pnpm|npm|yarn>] [--template rbxts] [--lint]`
-- `lattice add [name...] [--preset <preset...>] [--pm <pnpm|npm|yarn>] [--yes] [--dry-run]`
-- `lattice remove [name...] [--preset <preset...>] [--pm <pnpm|npm|yarn>] [--yes] [--dry-run]`
-- `lattice upgrade [name...] [--preset <preset...>] [--pm <pnpm|npm|yarn>] [--yes] [--dry-run]`
-- `lattice doctor [--pm <pnpm|npm|yarn>]`
+- `lattice create [project-path] [--yes] [--pm <pnpm|npm|yarn>] [--framework <react|vide>] [--git] [--template rbxts] [--lint] [--no-lint]`
+- `lattice init [--yes] [--dry-run] [--pm <pnpm|npm|yarn>] [--framework <react|vide>] [--template rbxts] [--lint]`
+- `lattice add [name...] [--preset <preset...>] [--framework <react|vide>] [--pm <pnpm|npm|yarn>] [--yes] [--dry-run]`
+- `lattice remove [name...] [--preset <preset...>] [--framework <react|vide>] [--pm <pnpm|npm|yarn>] [--yes] [--dry-run]`
+- `lattice upgrade [name...] [--preset <preset...>] [--framework <react|vide>] [--pm <pnpm|npm|yarn>] [--yes] [--dry-run]`
+- `lattice doctor [--framework <react|vide>] [--pm <pnpm|npm|yarn>]`
 - `lattice help [command]`
 - `lattice version`
 
 Every command has its own help page. `lattice add --help` and `lattice remove --help` also print the
-full list of available components and presets, so there is no need to start a run to discover them.
+full list of available components and presets, grouped by the frameworks that ship each one, so
+there is no need to start a run to discover them.
 
 ```bash
 lattice add --help
@@ -97,6 +98,29 @@ npx lattice-ui doctor
 ```
 
 When `--pm` is omitted, the CLI resolves a package manager automatically from the project lockfile or installed managers. Use `--pm` to override that choice explicitly. Every command reports which manager it picked and why, e.g. `npm (lockfile)`.
+
+### Frameworks
+
+A component is one name across every framework that ships it, so `lattice add dialog` is the same
+request whichever layer a project is on. Which layer it means comes from `--framework`, or from the
+project's own dependencies when the flag is omitted — depending on `@rbxts/vide`, or on any
+`@lattice-ui/vide-*` package, is enough. Every command reports which it picked and why, e.g.
+`Vide (detected)`.
+
+A project that carries both layers is asked rather than guessed at: picking one would install into
+the wrong half of a codebase that deliberately runs two.
+
+```bash
+npx lattice-ui create my-game --framework vide
+npx lattice-ui add dialog --framework vide
+```
+
+Two React packages have no Vide counterpart — `layer` and `popper` — and asking for one says so
+plainly rather than reporting a typo. A preset keeps its name on both layers and quietly loses the
+members a layer has no package for; the run lists what it dropped.
+
+`doctor` still recognizes a package from either layer, because a leftover from before a migration is
+known, just not from the layer the project is on now.
 
 ### Prompts
 

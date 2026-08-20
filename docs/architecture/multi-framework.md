@@ -1,9 +1,10 @@
 # Multi-framework architecture
 
-**Status:** accepted. Phases 0-3 complete; Phase 4 not started. The contract survived Phase 3 with one refinement (§3.5).
+**Status:** accepted. Phases 0-5 complete; the Vide layer is not yet published, and has not been run.
+The contract survived Phase 3 with one refinement (§3.5) and Phase 4 unchanged.
 **Scope:** adding a Vide layer alongside the existing React layer. A hand-written Luau layer is
 explicitly out of scope for now (see D6).
-**Last updated:** 2026-08-19.
+**Last updated:** 2026-08-20.
 
 > A previous version of this document lived in `docs/multi-framework-architecture.md`, which was
 > never tracked (`docs` was gitignored in full) and is lost. `.gitignore` now keeps the untracked
@@ -214,7 +215,7 @@ checkpoint where the contract may be revised before mass migration.
 | 2 | vertical slice 1: `checkbox` | **done** — one core drives both layers; the Vide harness spec compiles but has not been executed |
 | 3 | vertical slice 2: `popover` (portal + presence + dismissable + popper) | **done** — contract survived with the §3.5 refinement; focus and motion stayed on the React side |
 | 4 | remaining primitives, in waves A–D | **done** |
-| 5 | distribution: playground, harness suite, CLI framework dimension, docs, publish | `@lattice-ui/vide-*` on npm |
+| 5 | distribution: playground, harness suite, CLI framework dimension, docs, publish | **built, not published** — everything but the release is in; see below |
 
 Phase 4 waves:
 
@@ -282,7 +283,7 @@ binding and a flat event prop — the JSX factory, the peer setup and the hoiste
 **Deferred to Phase 5: the CLI framework dimension.** The registry keys components by bare name
 (`checkbox` -> `@lattice-ui/react-checkbox`), so adding a framework axis changes the CLI's data
 format, its commands and its tests. Nothing is installable for Vide until Phase 2 at the earliest, so
-designing that format now would be guesswork.
+designing that format now would be guesswork. (Built in Phase 5; the deferral was right.)
 
 ### Phase 2, as built
 
@@ -407,7 +408,61 @@ the `sync` call itself is wrapped in `untrack`.
 **Not verified: the Vide popover has never run.**
 `apps/test-harness/src/tests/vide-popover` covers the neutralized trigger, the disabled trigger, the
 portal parenting its layer into the PlayerGui, presence-driven mounting, and scope teardown
-destroying the portalled layer — and it typechecks and compiles, but has not been executed.
+destroying the portalled layer — and it typechecks and compiles, but has not been executed. Phase 5
+found why that gap is expensive: the spec was written against a `Popover.Root` that never provided
+its context, and nothing short of running it could have said so.
+
+### Phase 5, as built
+
+Distribution, minus the release. Four things went in, and building them is what finally read the
+Vide layer back rather than only compiling it.
+
+**`apps/playground-vide`** — one scene per primitive, so every Vide package is exercised by
+something a person can look at. It is the React playground's shape: a header that switches theme and
+density, a scene list, and `Vide.match` keeping exactly one scene alive.
+
+**The harness suite** — twenty-two specs under `apps/test-harness/src/tests/vide-*`, at least one
+per package. They assert what a spec can observe without an input device: what mounts, what a
+disabled part refuses, what a re-theme reaches, and what the toast queue does. Activation is out of
+reach — firing `Activated` needs an input device — so the React specs' habit of driving state
+through props rather than through clicks carries over.
+
+**The CLI framework dimension** — deferred here from Phase 1, and the deferral was right: the shape
+only became obvious once there was a second layer to key against. A component is one name with a
+package per framework, so `lattice add dialog` is the same request on either layer, and the registry
+can say plainly that `layer` and `popper` have no Vide package. The framework comes from
+`--framework` or from the project's own dependencies; a project on both layers is asked rather than
+guessed at. `init` and `create` needed a template rather than a flag, because a tsconfig carries one
+JSX factory, so the starter tree is split into the part every project gets and the part particular
+to a layer.
+
+**Docs** — the coverage matrix in the root README, the framework section in the CLI reference, and a
+real README per `vide-*` package in place of the generated scaffold.
+
+Three defects came out of the exercise, all of the same family: a Vide component runs **once**, and
+code written with React's re-render in mind is a snapshot rather than a binding.
+
+- A props table resolved from the theme and spread onto an element never changed again. `Box`,
+  `Text`, `Stack` and `Grid` kept the theme they were built with. `bindDerivedProps` in
+  `@lattice-ui/vide-runtime` resolves such a table through one derive and hands each property back
+  as a getter, which is the only shape Vide re-applies. Function values pass through untouched: a
+  function is already what Vide wants, be it an event handler, an `action`, or a derivable.
+- `MotionProvider` fixed its policy for the lifetime of the tree. Its preferences are derivable now,
+  the way the theme context already was.
+- **The one that mattered.** Seventeen roots that render no element of their own — `Popover.Root`,
+  `Dialog.Root`, `Tabs.Root` and the rest — returned their children function instead of calling it.
+  `Vide.context(value, fn)` runs `fn` inside the new scope and returns its result, so returning the
+  closure handed the caller something that would run in the *caller's* scope, with the context just
+  set nowhere in its chain. Every part inside those roots was reading a context that was not there.
+  They call their children through `renderChildren` now, matching Vide's own `Provider`.
+
+That last one had been shipped-shaped since Phase 2 and was invisible to compilation, to typecheck,
+and to the core unit tests. It took writing a spec that mounted a root and asked what came out.
+
+**Still not verified: nothing in the Vide layer has been executed.** The harness compiles and
+`rojo build` produces a place, but `run-in-roblox` cannot bring Studio up in this environment — it
+either times out or exits immediately having done nothing. Every claim about the Vide layer rests on
+compilation, on the core unit tests, and on reading. Publishing should wait for a run.
 
 ## 8. Decisions
 
