@@ -10,20 +10,13 @@
       "./node_modules/@lattice-ui",
       "../../node_modules/@lattice-ui"
     ],
-    "types": [
-      "types",
-      "compiler-types"
-    ],
+    "types": ["types", "compiler-types"],
     "baseUrl": ".",
     "paths": {
-      "@lattice-ui/*": [
-        "node_modules/@lattice-ui/*"
-      ]
+      "@lattice-ui/*": ["node_modules/@lattice-ui/*"]
     }
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "rbxts": {
     "type": "game",
     "rojo": "default.project.json",

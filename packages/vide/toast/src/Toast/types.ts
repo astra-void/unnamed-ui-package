@@ -1,9 +1,10 @@
-import type { ToastRecord } from "@lattice-ui/core-toast";
+import type { ToastCore, ToastOptions, ToastRecord } from "@lattice-ui/core-toast";
 import type { PresenceMotionConfig } from "@lattice-ui/vide-motion";
 import type { Derivable, PassthroughProps } from "@lattice-ui/vide-runtime";
 import type Vide from "@rbxts/vide";
 
-export type { ToastRecord };
+// `useToast` hands back the queue itself, so a consumer has to be able to name its type.
+export type { ToastCore, ToastOptions, ToastRecord };
 
 export type ToastProviderProps = {
   defaultDurationMs?: Derivable<number | undefined>;

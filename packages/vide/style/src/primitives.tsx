@@ -1,5 +1,5 @@
 import { resolveStyleProps, type Sx } from "@lattice-ui/core-style";
-import { applySlotProps, type PassthroughProps, resolveSlotInstance, Vide } from "@lattice-ui/vide-runtime";
+import { applySlotProps, bindDerivedProps, resolveSlotInstance, Vide } from "@lattice-ui/vide-runtime";
 import type VideTypes from "@rbxts/vide";
 import { useTheme } from "./theme";
 
@@ -28,8 +28,10 @@ const TEXT_OWN_PROPS = ["asChild", "sx", "truncate", "children"] as const;
 
 export function Box(props: BoxProps) {
   const { theme } = useTheme();
-  // Resolved on read, so a theme change re-resolves without the component running again.
-  const merged = resolveStyleProps(props, { ownKeys: BOX_OWN_PROPS, sx: props.sx, theme: theme() });
+  // Bound rather than spread, so a theme change re-resolves `sx` without the component running again.
+  const merged = bindDerivedProps<Frame>(() =>
+    resolveStyleProps(props, { ownKeys: BOX_OWN_PROPS, sx: props.sx, theme: theme() }),
+  );
 
   if (props.asChild === true) {
     const child = resolveSlotInstance(props.children);
@@ -40,13 +42,15 @@ export function Box(props: BoxProps) {
     return applySlotProps(child as GuiObject, merged as never);
   }
 
-  return <frame {...(merged as PassthroughProps<Frame>)}>{props.children}</frame>;
+  return <frame {...merged}>{props.children}</frame>;
 }
 
 export function Text(props: TextProps) {
   const { theme } = useTheme();
   const base = props.truncate === true ? { TextTruncate: Enum.TextTruncate.AtEnd } : {};
-  const merged = resolveStyleProps(props, { ownKeys: TEXT_OWN_PROPS, base, sx: props.sx, theme: theme() });
+  const merged = bindDerivedProps<TextLabel>(() =>
+    resolveStyleProps(props, { ownKeys: TEXT_OWN_PROPS, base, sx: props.sx, theme: theme() }),
+  );
 
   if (props.asChild === true) {
     const child = resolveSlotInstance(props.children);
@@ -57,5 +61,5 @@ export function Text(props: TextProps) {
     return applySlotProps(child as GuiObject, merged as never);
   }
 
-  return <textlabel {...(merged as PassthroughProps<TextLabel>)}>{props.children}</textlabel>;
+  return <textlabel {...merged}>{props.children}</textlabel>;
 }

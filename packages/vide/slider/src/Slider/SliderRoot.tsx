@@ -1,5 +1,5 @@
 import { createSlider } from "@lattice-ui/core-slider";
-import { createVideReactivity } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren } from "@lattice-ui/vide-runtime";
 import { SliderContext } from "./context";
 import type { SliderProps } from "./types";
 
@@ -16,5 +16,5 @@ export function SliderRoot(props: SliderProps) {
     onValueCommit: props.onValueCommit,
   });
 
-  return SliderContext(core, () => props.children);
+  return SliderContext(core, () => renderChildren(props.children));
 }

@@ -8,30 +8,7 @@ import { Checkbox } from "@lattice-ui/vide-checkbox";
 // imports the scope itself has to carry the hoisted-link workaround, and re-exporting it is exactly
 // what `vide-runtime` is for.
 import { Vide } from "@lattice-ui/vide-runtime";
-
-function findChildOfClass<T extends keyof Instances>(parent: Instance, className: T): Instances[T] | undefined {
-  for (const child of parent.GetChildren()) {
-    if (child.IsA(className)) {
-      return child;
-    }
-  }
-
-  return undefined;
-}
-
-// Read through a call so a previous assertion's narrowing does not make the compiler treat the next
-// read of the same property as impossible. These properties change reactively between assertions.
-function isActive(button: TextButton) {
-  return button.Active;
-}
-
-function isSelectable(button: TextButton) {
-  return button.Selectable;
-}
-
-function isVisible(frame: Frame) {
-  return frame.Visible;
-}
+import { findChildOfClass, readProperty } from "../../test-utils/videHarness";
 
 export = () => {
   describe("vide checkbox", () => {
@@ -43,8 +20,14 @@ export = () => {
       assert(root.BorderSizePixel === 0, "Root should neutralize the default border.");
       assert(root.Text === "", 'Root should neutralize the default "Button" text.');
       assert(root.AutoButtonColor === false, "Root should neutralize AutoButtonColor.");
-      assert(isActive(root), "An enabled checkbox should be active.");
-      assert(isSelectable(root), "An enabled checkbox should be selectable.");
+      assert(
+        readProperty(() => root.Active),
+        "An enabled checkbox should be active.",
+      );
+      assert(
+        readProperty(() => root.Selectable),
+        "An enabled checkbox should be selectable.",
+      );
 
       destroy();
     });
@@ -53,14 +36,20 @@ export = () => {
       const disabled = Vide.source(false);
       const [destroy, root] = Vide.root(() => Checkbox.Root({ disabled }) as TextButton);
 
-      assert(isActive(root), "Checkbox should start active.");
+      assert(
+        readProperty(() => root.Active),
+        "Checkbox should start active.",
+      );
 
       disabled(true);
-      assert(!isActive(root), "Disabling the checkbox should clear Active.");
-      assert(!isSelectable(root), "Disabling the checkbox should clear Selectable.");
+      assert(!readProperty(() => root.Active), "Disabling the checkbox should clear Active.");
+      assert(!readProperty(() => root.Selectable), "Disabling the checkbox should clear Selectable.");
 
       disabled(false);
-      assert(isActive(root), "Re-enabling the checkbox should restore Active.");
+      assert(
+        readProperty(() => root.Active),
+        "Re-enabling the checkbox should restore Active.",
+      );
 
       destroy();
     });
@@ -106,10 +95,13 @@ export = () => {
 
       const indicator = findChildOfClass(root, "Frame");
       assert(indicator !== undefined, "A forceMounted indicator should mount while unchecked.");
-      assert(!isVisible(indicator), "A forceMounted indicator should be hidden while unchecked.");
+      assert(!readProperty(() => indicator.Visible), "A forceMounted indicator should be hidden while unchecked.");
 
       checked(true);
-      assert(isVisible(indicator), "Checking the box should reveal the forceMounted indicator.");
+      assert(
+        readProperty(() => indicator.Visible),
+        "Checking the box should reveal the forceMounted indicator.",
+      );
 
       destroy();
     });

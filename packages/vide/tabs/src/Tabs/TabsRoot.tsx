@@ -1,5 +1,5 @@
 import { createTabs } from "@lattice-ui/core-tabs";
-import { createVideReactivity, read, Vide } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, read, renderChildren, Vide } from "@lattice-ui/vide-runtime";
 import { TabsContext } from "./context";
 import type { TabsProps } from "./types";
 
@@ -23,5 +23,5 @@ export function TabsRoot(props: TabsProps) {
     });
   });
 
-  return TabsContext(core, () => props.children);
+  return TabsContext(core, () => renderChildren(props.children));
 }

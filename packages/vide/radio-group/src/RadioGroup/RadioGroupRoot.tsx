@@ -1,5 +1,5 @@
 import { createRadioGroup } from "@lattice-ui/core-radio-group";
-import { createVideReactivity } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren } from "@lattice-ui/vide-runtime";
 import { RadioGroupContext } from "./context";
 import type { RadioGroupProps } from "./types";
 
@@ -13,5 +13,5 @@ export function RadioGroupRoot(props: RadioGroupProps) {
     onValueChange: props.onValueChange,
   });
 
-  return RadioGroupContext(core, () => props.children);
+  return RadioGroupContext(core, () => renderChildren(props.children));
 }

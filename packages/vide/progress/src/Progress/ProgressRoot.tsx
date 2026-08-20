@@ -1,5 +1,5 @@
 import { createProgress } from "@lattice-ui/core-progress";
-import { createVideReactivity } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren } from "@lattice-ui/vide-runtime";
 import { ProgressContext } from "./context";
 import type { ProgressProps } from "./types";
 
@@ -12,7 +12,7 @@ export function ProgressRoot(props: ProgressProps) {
     onValueChange: props.onValueChange,
   });
 
-  return ProgressContext(core, () => props.children);
+  return ProgressContext(core, () => renderChildren(props.children));
 }
 
 export { ProgressRoot as Progress };

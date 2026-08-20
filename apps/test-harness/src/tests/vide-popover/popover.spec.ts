@@ -5,16 +5,7 @@
 import { Popover } from "@lattice-ui/vide-popover";
 import { PortalProvider, Vide } from "@lattice-ui/vide-runtime";
 import { getLocalPlayerGui } from "../../test-utils/playerGui";
-
-function findDescendantOfClass<T extends keyof Instances>(parent: Instance, className: T): Instances[T] | undefined {
-  for (const descendant of parent.GetDescendants()) {
-    if (descendant.IsA(className)) {
-      return descendant;
-    }
-  }
-
-  return undefined;
-}
+import { findDescendantOfClass, readProperty } from "../../test-utils/videHarness";
 
 function countScreenGuisNamed(parent: Instance, name: string) {
   let total = 0;
@@ -25,12 +16,6 @@ function countScreenGuisNamed(parent: Instance, name: string) {
   }
 
   return total;
-}
-
-// Read through a call so an earlier assertion's narrowing does not make the next read of the same
-// property look impossible to the compiler.
-function isActive(button: TextButton) {
-  return button.Active;
 }
 
 export = () => {
@@ -49,7 +34,10 @@ export = () => {
       assert(trigger.BackgroundTransparency === 1, "Trigger should neutralize the default background.");
       assert(trigger.Text === "", 'Trigger should neutralize the default "Button" text.');
       assert(trigger.AutoButtonColor === false, "Trigger should neutralize AutoButtonColor.");
-      assert(isActive(trigger), "An enabled trigger should be active.");
+      assert(
+        readProperty(() => trigger.Active),
+        "An enabled trigger should be active.",
+      );
       assert(trigger.Selectable === false, "The trigger is reached through focus flow, not selection.");
 
       destroy();
@@ -65,7 +53,7 @@ export = () => {
           }) as TextButton,
       );
 
-      assert(!isActive(trigger), "A disabled trigger should not be active.");
+      assert(!readProperty(() => trigger.Active), "A disabled trigger should not be active.");
       assert(changes.size() === 0, "A disabled trigger should not report open changes.");
 
       destroy();

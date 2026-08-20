@@ -1,5 +1,5 @@
 import { createGridLayout, resolveStackLayout } from "@lattice-ui/core-system";
-import { createVideReactivity, type PassthroughProps, Vide } from "@lattice-ui/vide-runtime";
+import { bindDerivedProps, createVideReactivity, Vide } from "@lattice-ui/vide-runtime";
 import { useTheme } from "@lattice-ui/vide-style";
 import type VideTypes from "@rbxts/vide";
 
@@ -15,9 +15,10 @@ export function Stack(props: StackProps) {
   // Alignment, automatic size, gap and padding are all computed from the props and the theme, which
   // is the layout's behavior rather than its appearance. Resolved on read, so a theme change lands.
   const layout = () => resolveStackLayout(props, theme());
+  const frameProps = bindDerivedProps<Frame>(() => layout().frameProps as Record<string, unknown>);
 
   return (
-    <frame {...(layout().frameProps as PassthroughProps<Frame>)}>
+    <frame {...frameProps}>
       <uilistlayout
         FillDirection={() => layout().fillDirection}
         HorizontalAlignment={() => layout().horizontalAlignment}
@@ -50,10 +51,11 @@ export function Grid(props: GridProps) {
   const rx = createVideReactivity();
   const layout = createGridLayout(rx);
   const resolved = () => layout.resolve(props, theme());
+  const frameProps = bindDerivedProps<Frame>(() => resolved().frameProps as Record<string, unknown>);
 
   return (
     <frame
-      {...(resolved().frameProps as PassthroughProps<Frame>)}
+      {...frameProps}
       action={(instance: Frame) => {
         layout.setFrame(instance);
         // The column count follows the width the grid actually got, so it measures rather than

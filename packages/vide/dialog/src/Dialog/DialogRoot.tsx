@@ -1,6 +1,6 @@
 import { createDialog } from "@lattice-ui/core-dialog";
 import { focusGuiObject } from "@lattice-ui/vide-focus";
-import { createVideReactivity } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren } from "@lattice-ui/vide-runtime";
 import { DialogContext } from "./context";
 import type { DialogProps } from "./types";
 
@@ -13,7 +13,7 @@ export function DialogRoot(props: DialogProps) {
     focusInstance: focusGuiObject,
   });
 
-  return DialogContext(core, () => props.children);
+  return DialogContext(core, () => renderChildren(props.children));
 }
 
 export { DialogRoot as Dialog };

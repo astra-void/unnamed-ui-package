@@ -1,6 +1,6 @@
 import { createContextMenu } from "@lattice-ui/core-context-menu";
 import { focusGuiObject } from "@lattice-ui/vide-focus";
-import { createVideReactivity, Vide } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren, Vide } from "@lattice-ui/vide-runtime";
 import { ContextMenuContext } from "./context";
 import type { ContextMenuProps } from "./types";
 
@@ -34,7 +34,7 @@ export function ContextMenuRoot(props: ContextMenuProps) {
     });
   });
 
-  return ContextMenuContext(core, () => props.children);
+  return ContextMenuContext(core, () => renderChildren(props.children));
 }
 
 export { ContextMenuRoot as Menu };

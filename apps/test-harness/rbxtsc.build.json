@@ -4,6 +4,10 @@
     "rootDir": "src",
     "outDir": "out",
     "declaration": false,
+    "baseUrl": ".",
+    "paths": {
+      "@lattice-ui/*": ["node_modules/@lattice-ui/*"]
+    },
     "typeRoots": [
       "./node_modules/@rbxts",
       "../../node_modules/@rbxts",

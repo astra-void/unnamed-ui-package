@@ -1,5 +1,5 @@
 import { createPopover } from "@lattice-ui/core-popover";
-import { createVideReactivity } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren } from "@lattice-ui/vide-runtime";
 import { PopoverContext } from "./context";
 import type { PopoverProps } from "./types";
 
@@ -14,5 +14,5 @@ export function PopoverRoot(props: PopoverProps) {
     onOpenChange: props.onOpenChange,
   });
 
-  return PopoverContext(core, () => props.children);
+  return PopoverContext(core, () => renderChildren(props.children));
 }

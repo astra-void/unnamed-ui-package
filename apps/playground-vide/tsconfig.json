@@ -4,162 +4,58 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@lattice-ui/core-accordion": [
-        "../../packages/core/accordion/src/index.ts"
-      ],
-      "@lattice-ui/core-avatar": [
-        "../../packages/core/avatar/src/index.ts"
-      ],
-      "@lattice-ui/core-checkbox": [
-        "../../packages/core/checkbox/src/index.ts"
-      ],
-      "@lattice-ui/core-combobox": [
-        "../../packages/core/combobox/src/index.ts"
-      ],
-      "@lattice-ui/core-context-menu": [
-        "../../packages/core/context-menu/src/index.ts"
-      ],
-      "@lattice-ui/core-dialog": [
-        "../../packages/core/dialog/src/index.ts"
-      ],
-      "@lattice-ui/core-focus": [
-        "../../packages/core/focus/src/index.ts"
-      ],
-      "@lattice-ui/core-layer": [
-        "../../packages/core/layer/src/index.ts"
-      ],
-      "@lattice-ui/core-menu": [
-        "../../packages/core/menu/src/index.ts"
-      ],
-      "@lattice-ui/core-motion": [
-        "../../packages/core/motion/src/index.ts"
-      ],
-      "@lattice-ui/core-popover": [
-        "../../packages/core/popover/src/index.ts"
-      ],
-      "@lattice-ui/core-popper": [
-        "../../packages/core/popper/src/index.ts"
-      ],
-      "@lattice-ui/core-progress": [
-        "../../packages/core/progress/src/index.ts"
-      ],
-      "@lattice-ui/core-radio-group": [
-        "../../packages/core/radio-group/src/index.ts"
-      ],
-      "@lattice-ui/core-runtime": [
-        "../../packages/core/runtime/src/index.ts"
-      ],
-      "@lattice-ui/core-scroll-area": [
-        "../../packages/core/scroll-area/src/index.ts"
-      ],
-      "@lattice-ui/core-select": [
-        "../../packages/core/select/src/index.ts"
-      ],
-      "@lattice-ui/core-slider": [
-        "../../packages/core/slider/src/index.ts"
-      ],
-      "@lattice-ui/core-style": [
-        "../../packages/core/style/src/index.ts"
-      ],
-      "@lattice-ui/core-switch": [
-        "../../packages/core/switch/src/index.ts"
-      ],
-      "@lattice-ui/core-system": [
-        "../../packages/core/system/src/index.ts"
-      ],
-      "@lattice-ui/core-tabs": [
-        "../../packages/core/tabs/src/index.ts"
-      ],
-      "@lattice-ui/core-text-field": [
-        "../../packages/core/text-field/src/index.ts"
-      ],
-      "@lattice-ui/core-textarea": [
-        "../../packages/core/textarea/src/index.ts"
-      ],
-      "@lattice-ui/core-toast": [
-        "../../packages/core/toast/src/index.ts"
-      ],
-      "@lattice-ui/core-toggle-group": [
-        "../../packages/core/toggle-group/src/index.ts"
-      ],
-      "@lattice-ui/core-tooltip": [
-        "../../packages/core/tooltip/src/index.ts"
-      ],
-      "@lattice-ui/vide-accordion": [
-        "../../packages/vide/accordion/src/index.ts"
-      ],
-      "@lattice-ui/vide-avatar": [
-        "../../packages/vide/avatar/src/index.ts"
-      ],
-      "@lattice-ui/vide-checkbox": [
-        "../../packages/vide/checkbox/src/index.ts"
-      ],
-      "@lattice-ui/vide-combobox": [
-        "../../packages/vide/combobox/src/index.ts"
-      ],
-      "@lattice-ui/vide-context-menu": [
-        "../../packages/vide/context-menu/src/index.ts"
-      ],
-      "@lattice-ui/vide-dialog": [
-        "../../packages/vide/dialog/src/index.ts"
-      ],
-      "@lattice-ui/vide-focus": [
-        "../../packages/vide/focus/src/index.ts"
-      ],
-      "@lattice-ui/vide-menu": [
-        "../../packages/vide/menu/src/index.ts"
-      ],
-      "@lattice-ui/vide-motion": [
-        "../../packages/vide/motion/src/index.ts"
-      ],
-      "@lattice-ui/vide-popover": [
-        "../../packages/vide/popover/src/index.ts"
-      ],
-      "@lattice-ui/vide-progress": [
-        "../../packages/vide/progress/src/index.ts"
-      ],
-      "@lattice-ui/vide-radio-group": [
-        "../../packages/vide/radio-group/src/index.ts"
-      ],
-      "@lattice-ui/vide-runtime": [
-        "../../packages/vide/runtime/src/index.ts"
-      ],
-      "@lattice-ui/vide-scroll-area": [
-        "../../packages/vide/scroll-area/src/index.ts"
-      ],
-      "@lattice-ui/vide-select": [
-        "../../packages/vide/select/src/index.ts"
-      ],
-      "@lattice-ui/vide-slider": [
-        "../../packages/vide/slider/src/index.ts"
-      ],
-      "@lattice-ui/vide-style": [
-        "../../packages/vide/style/src/index.ts"
-      ],
-      "@lattice-ui/vide-switch": [
-        "../../packages/vide/switch/src/index.ts"
-      ],
-      "@lattice-ui/vide-system": [
-        "../../packages/vide/system/src/index.ts"
-      ],
-      "@lattice-ui/vide-tabs": [
-        "../../packages/vide/tabs/src/index.ts"
-      ],
-      "@lattice-ui/vide-text-field": [
-        "../../packages/vide/text-field/src/index.ts"
-      ],
-      "@lattice-ui/vide-textarea": [
-        "../../packages/vide/textarea/src/index.ts"
-      ],
-      "@lattice-ui/vide-toast": [
-        "../../packages/vide/toast/src/index.ts"
-      ],
-      "@lattice-ui/vide-toggle-group": [
-        "../../packages/vide/toggle-group/src/index.ts"
-      ],
-      "@lattice-ui/vide-tooltip": [
-        "../../packages/vide/tooltip/src/index.ts"
-      ]
+      "@lattice-ui/core-accordion": ["../../packages/core/accordion/src/index.ts"],
+      "@lattice-ui/core-avatar": ["../../packages/core/avatar/src/index.ts"],
+      "@lattice-ui/core-checkbox": ["../../packages/core/checkbox/src/index.ts"],
+      "@lattice-ui/core-combobox": ["../../packages/core/combobox/src/index.ts"],
+      "@lattice-ui/core-context-menu": ["../../packages/core/context-menu/src/index.ts"],
+      "@lattice-ui/core-dialog": ["../../packages/core/dialog/src/index.ts"],
+      "@lattice-ui/core-focus": ["../../packages/core/focus/src/index.ts"],
+      "@lattice-ui/core-layer": ["../../packages/core/layer/src/index.ts"],
+      "@lattice-ui/core-menu": ["../../packages/core/menu/src/index.ts"],
+      "@lattice-ui/core-motion": ["../../packages/core/motion/src/index.ts"],
+      "@lattice-ui/core-popover": ["../../packages/core/popover/src/index.ts"],
+      "@lattice-ui/core-popper": ["../../packages/core/popper/src/index.ts"],
+      "@lattice-ui/core-progress": ["../../packages/core/progress/src/index.ts"],
+      "@lattice-ui/core-radio-group": ["../../packages/core/radio-group/src/index.ts"],
+      "@lattice-ui/core-runtime": ["../../packages/core/runtime/src/index.ts"],
+      "@lattice-ui/core-scroll-area": ["../../packages/core/scroll-area/src/index.ts"],
+      "@lattice-ui/core-select": ["../../packages/core/select/src/index.ts"],
+      "@lattice-ui/core-slider": ["../../packages/core/slider/src/index.ts"],
+      "@lattice-ui/core-style": ["../../packages/core/style/src/index.ts"],
+      "@lattice-ui/core-switch": ["../../packages/core/switch/src/index.ts"],
+      "@lattice-ui/core-system": ["../../packages/core/system/src/index.ts"],
+      "@lattice-ui/core-tabs": ["../../packages/core/tabs/src/index.ts"],
+      "@lattice-ui/core-text-field": ["../../packages/core/text-field/src/index.ts"],
+      "@lattice-ui/core-textarea": ["../../packages/core/textarea/src/index.ts"],
+      "@lattice-ui/core-toast": ["../../packages/core/toast/src/index.ts"],
+      "@lattice-ui/core-toggle-group": ["../../packages/core/toggle-group/src/index.ts"],
+      "@lattice-ui/core-tooltip": ["../../packages/core/tooltip/src/index.ts"],
+      "@lattice-ui/vide-accordion": ["../../packages/vide/accordion/src/index.ts"],
+      "@lattice-ui/vide-avatar": ["../../packages/vide/avatar/src/index.ts"],
+      "@lattice-ui/vide-checkbox": ["../../packages/vide/checkbox/src/index.ts"],
+      "@lattice-ui/vide-combobox": ["../../packages/vide/combobox/src/index.ts"],
+      "@lattice-ui/vide-context-menu": ["../../packages/vide/context-menu/src/index.ts"],
+      "@lattice-ui/vide-dialog": ["../../packages/vide/dialog/src/index.ts"],
+      "@lattice-ui/vide-focus": ["../../packages/vide/focus/src/index.ts"],
+      "@lattice-ui/vide-menu": ["../../packages/vide/menu/src/index.ts"],
+      "@lattice-ui/vide-motion": ["../../packages/vide/motion/src/index.ts"],
+      "@lattice-ui/vide-popover": ["../../packages/vide/popover/src/index.ts"],
+      "@lattice-ui/vide-progress": ["../../packages/vide/progress/src/index.ts"],
+      "@lattice-ui/vide-radio-group": ["../../packages/vide/radio-group/src/index.ts"],
+      "@lattice-ui/vide-runtime": ["../../packages/vide/runtime/src/index.ts"],
+      "@lattice-ui/vide-scroll-area": ["../../packages/vide/scroll-area/src/index.ts"],
+      "@lattice-ui/vide-select": ["../../packages/vide/select/src/index.ts"],
+      "@lattice-ui/vide-slider": ["../../packages/vide/slider/src/index.ts"],
+      "@lattice-ui/vide-style": ["../../packages/vide/style/src/index.ts"],
+      "@lattice-ui/vide-switch": ["../../packages/vide/switch/src/index.ts"],
+      "@lattice-ui/vide-system": ["../../packages/vide/system/src/index.ts"],
+      "@lattice-ui/vide-tabs": ["../../packages/vide/tabs/src/index.ts"],
+      "@lattice-ui/vide-text-field": ["../../packages/vide/text-field/src/index.ts"],
+      "@lattice-ui/vide-textarea": ["../../packages/vide/textarea/src/index.ts"],
+      "@lattice-ui/vide-toast": ["../../packages/vide/toast/src/index.ts"],
+      "@lattice-ui/vide-toggle-group": ["../../packages/vide/toggle-group/src/index.ts"],
+      "@lattice-ui/vide-tooltip": ["../../packages/vide/tooltip/src/index.ts"]
     },
     "typeRoots": [
       "./node_modules/@rbxts",
@@ -167,10 +63,7 @@
       "./node_modules/@lattice-ui",
       "../../node_modules/@lattice-ui"
     ],
-    "types": [
-      "types",
-      "compiler-types"
-    ]
+    "types": ["types", "compiler-types"]
   },
   "include": [
     "src",

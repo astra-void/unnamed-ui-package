@@ -18,6 +18,9 @@ export const Tooltip = {
   Content: typeof TooltipContent;
 };
 
+// The Vide layer has no `vide-popper` package — the popper is behavior, and behavior lives in the
+// core — so the placement type is re-exported here, where the prop that takes it is declared.
+export type { PopperPlacement } from "@lattice-ui/core-popper";
 export { useTooltipContext, useTooltipPolicy } from "./Tooltip/context";
 export type {
   TooltipContentProps,

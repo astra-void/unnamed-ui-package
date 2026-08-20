@@ -21,9 +21,11 @@ export const ScrollArea = {
 export { useScrollAreaContext } from "./ScrollArea/context";
 export type {
   ScrollAreaCornerProps,
+  ScrollAreaOrientation,
   ScrollAreaProps,
   ScrollAreaScrollbarProps,
   ScrollAreaThumbProps,
+  ScrollAreaType,
   ScrollAreaViewportProps,
 } from "./ScrollArea/types";
 export { ScrollAreaCorner, ScrollAreaRoot, ScrollAreaScrollbar, ScrollAreaThumb, ScrollAreaViewport };

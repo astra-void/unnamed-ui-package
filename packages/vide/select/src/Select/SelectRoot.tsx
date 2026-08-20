@@ -1,6 +1,6 @@
 import { createSelect } from "@lattice-ui/core-select";
 import { focusGuiObject } from "@lattice-ui/vide-focus";
-import { createVideReactivity, Vide } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren, Vide } from "@lattice-ui/vide-runtime";
 import { SelectContext } from "./context";
 import type { SelectProps } from "./types";
 
@@ -49,7 +49,7 @@ export function SelectRoot(props: SelectProps) {
     });
   });
 
-  return SelectContext(core, () => props.children);
+  return SelectContext(core, () => renderChildren(props.children));
 }
 
 export { SelectRoot as Select };

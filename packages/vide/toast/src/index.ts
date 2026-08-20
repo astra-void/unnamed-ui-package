@@ -28,8 +28,11 @@ export { useToast, useToastContext } from "./Toast/context";
 export type {
   ToastActionProps,
   ToastCloseProps,
+  ToastCore,
   ToastDescriptionProps,
+  ToastOptions,
   ToastProviderProps,
+  ToastRecord,
   ToastRootProps,
   ToastTitleProps,
   ToastViewportProps,

@@ -1,6 +1,6 @@
 import { createMenu } from "@lattice-ui/core-menu";
 import { focusGuiObject } from "@lattice-ui/vide-focus";
-import { createVideReactivity, Vide } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren, Vide } from "@lattice-ui/vide-runtime";
 import { MenuContext } from "./context";
 import type { MenuProps } from "./types";
 
@@ -34,7 +34,7 @@ export function MenuRoot(props: MenuProps) {
     });
   });
 
-  return MenuContext(core, () => props.children);
+  return MenuContext(core, () => renderChildren(props.children));
 }
 
 export { MenuRoot as Menu };

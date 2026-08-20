@@ -1,5 +1,5 @@
 import { createAvatar } from "@lattice-ui/core-avatar";
-import { createVideReactivity, read, Vide } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, read, renderChildren, Vide } from "@lattice-ui/vide-runtime";
 import { AvatarContext } from "./context";
 import type { AvatarProps } from "./types";
 
@@ -18,7 +18,7 @@ export function AvatarRoot(props: AvatarProps) {
     });
   });
 
-  return AvatarContext(core, () => props.children);
+  return AvatarContext(core, () => renderChildren(props.children));
 }
 
 export { AvatarRoot as Avatar };

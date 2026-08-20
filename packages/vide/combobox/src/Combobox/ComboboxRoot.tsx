@@ -1,6 +1,6 @@
 import { createCombobox } from "@lattice-ui/core-combobox";
 import { focusGuiObject } from "@lattice-ui/vide-focus";
-import { createVideReactivity, Vide } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren, Vide } from "@lattice-ui/vide-runtime";
 import { ComboboxContext } from "./context";
 import type { ComboboxProps } from "./types";
 
@@ -58,7 +58,7 @@ export function ComboboxRoot(props: ComboboxProps) {
     });
   });
 
-  return ComboboxContext(core, () => props.children);
+  return ComboboxContext(core, () => renderChildren(props.children));
 }
 
 export { ComboboxRoot as Combobox };

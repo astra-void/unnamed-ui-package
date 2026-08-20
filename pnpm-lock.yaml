@@ -411,6 +411,88 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0
 
+  apps/playground-vide:
+    dependencies:
+      '@lattice-ui/vide-accordion':
+        specifier: workspace:*
+        version: link:../../packages/vide/accordion
+      '@lattice-ui/vide-avatar':
+        specifier: workspace:*
+        version: link:../../packages/vide/avatar
+      '@lattice-ui/vide-checkbox':
+        specifier: workspace:*
+        version: link:../../packages/vide/checkbox
+      '@lattice-ui/vide-combobox':
+        specifier: workspace:*
+        version: link:../../packages/vide/combobox
+      '@lattice-ui/vide-context-menu':
+        specifier: workspace:*
+        version: link:../../packages/vide/context-menu
+      '@lattice-ui/vide-dialog':
+        specifier: workspace:*
+        version: link:../../packages/vide/dialog
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../../packages/vide/focus
+      '@lattice-ui/vide-menu':
+        specifier: workspace:*
+        version: link:../../packages/vide/menu
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../../packages/vide/motion
+      '@lattice-ui/vide-popover':
+        specifier: workspace:*
+        version: link:../../packages/vide/popover
+      '@lattice-ui/vide-progress':
+        specifier: workspace:*
+        version: link:../../packages/vide/progress
+      '@lattice-ui/vide-radio-group':
+        specifier: workspace:*
+        version: link:../../packages/vide/radio-group
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../../packages/vide/runtime
+      '@lattice-ui/vide-scroll-area':
+        specifier: workspace:*
+        version: link:../../packages/vide/scroll-area
+      '@lattice-ui/vide-select':
+        specifier: workspace:*
+        version: link:../../packages/vide/select
+      '@lattice-ui/vide-slider':
+        specifier: workspace:*
+        version: link:../../packages/vide/slider
+      '@lattice-ui/vide-style':
+        specifier: workspace:*
+        version: link:../../packages/vide/style
+      '@lattice-ui/vide-switch':
+        specifier: workspace:*
+        version: link:../../packages/vide/switch
+      '@lattice-ui/vide-system':
+        specifier: workspace:*
+        version: link:../../packages/vide/system
+      '@lattice-ui/vide-tabs':
+        specifier: workspace:*
+        version: link:../../packages/vide/tabs
+      '@lattice-ui/vide-text-field':
+        specifier: workspace:*
+        version: link:../../packages/vide/text-field
+      '@lattice-ui/vide-textarea':
+        specifier: workspace:*
+        version: link:../../packages/vide/textarea
+      '@lattice-ui/vide-toast':
+        specifier: workspace:*
+        version: link:../../packages/vide/toast
+      '@lattice-ui/vide-toggle-group':
+        specifier: workspace:*
+        version: link:../../packages/vide/toggle-group
+      '@lattice-ui/vide-tooltip':
+        specifier: workspace:*
+        version: link:../../packages/vide/tooltip
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
   apps/test-harness:
     dependencies:
       '@lattice-ui/react-accordion':
@@ -494,15 +576,81 @@ importers:
       '@lattice-ui/react-tooltip':
         specifier: workspace:*
         version: link:../../packages/react/tooltip
+      '@lattice-ui/vide-accordion':
+        specifier: workspace:*
+        version: link:../../packages/vide/accordion
+      '@lattice-ui/vide-avatar':
+        specifier: workspace:*
+        version: link:../../packages/vide/avatar
       '@lattice-ui/vide-checkbox':
         specifier: workspace:*
         version: link:../../packages/vide/checkbox
+      '@lattice-ui/vide-combobox':
+        specifier: workspace:*
+        version: link:../../packages/vide/combobox
+      '@lattice-ui/vide-context-menu':
+        specifier: workspace:*
+        version: link:../../packages/vide/context-menu
+      '@lattice-ui/vide-dialog':
+        specifier: workspace:*
+        version: link:../../packages/vide/dialog
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../../packages/vide/focus
+      '@lattice-ui/vide-menu':
+        specifier: workspace:*
+        version: link:../../packages/vide/menu
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../../packages/vide/motion
       '@lattice-ui/vide-popover':
         specifier: workspace:*
         version: link:../../packages/vide/popover
+      '@lattice-ui/vide-progress':
+        specifier: workspace:*
+        version: link:../../packages/vide/progress
+      '@lattice-ui/vide-radio-group':
+        specifier: workspace:*
+        version: link:../../packages/vide/radio-group
       '@lattice-ui/vide-runtime':
         specifier: workspace:*
         version: link:../../packages/vide/runtime
+      '@lattice-ui/vide-scroll-area':
+        specifier: workspace:*
+        version: link:../../packages/vide/scroll-area
+      '@lattice-ui/vide-select':
+        specifier: workspace:*
+        version: link:../../packages/vide/select
+      '@lattice-ui/vide-slider':
+        specifier: workspace:*
+        version: link:../../packages/vide/slider
+      '@lattice-ui/vide-style':
+        specifier: workspace:*
+        version: link:../../packages/vide/style
+      '@lattice-ui/vide-switch':
+        specifier: workspace:*
+        version: link:../../packages/vide/switch
+      '@lattice-ui/vide-system':
+        specifier: workspace:*
+        version: link:../../packages/vide/system
+      '@lattice-ui/vide-tabs':
+        specifier: workspace:*
+        version: link:../../packages/vide/tabs
+      '@lattice-ui/vide-text-field':
+        specifier: workspace:*
+        version: link:../../packages/vide/text-field
+      '@lattice-ui/vide-textarea':
+        specifier: workspace:*
+        version: link:../../packages/vide/textarea
+      '@lattice-ui/vide-toast':
+        specifier: workspace:*
+        version: link:../../packages/vide/toast
+      '@lattice-ui/vide-toggle-group':
+        specifier: workspace:*
+        version: link:../../packages/vide/toggle-group
+      '@lattice-ui/vide-tooltip':
+        specifier: workspace:*
+        version: link:../../packages/vide/tooltip
     devDependencies:
       '@rbxts/react':
         specifier: 17.3.7-ts.1

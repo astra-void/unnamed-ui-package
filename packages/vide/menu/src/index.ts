@@ -27,6 +27,9 @@ export const Menu = {
   Separator: typeof MenuSeparator;
 };
 
+// The Vide layer has no `vide-popper` package — the popper is behavior, and behavior lives in the
+// core — so the placement type is re-exported here, where the prop that takes it is declared.
+export type { PopperPlacement } from "@lattice-ui/core-popper";
 export { useMenuContext, useMenuItemContext } from "./Menu/context";
 export type {
   MenuContentProps,

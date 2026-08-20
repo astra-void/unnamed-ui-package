@@ -9,6 +9,7 @@
     "@lattice-ui/loom-preview",
     "@lattice-ui/playground",
     "@lattice-ui/playground-vela",
+    "@lattice-ui/playground-vide",
     "@lattice-ui/test-harness"
   ],
   "fixed": [

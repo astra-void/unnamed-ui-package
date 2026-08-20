@@ -1,5 +1,5 @@
 import { createTextField } from "@lattice-ui/core-text-field";
-import { createVideReactivity } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren } from "@lattice-ui/vide-runtime";
 import { TextFieldContext } from "./context";
 import type { TextFieldProps } from "./types";
 
@@ -16,5 +16,5 @@ export function TextFieldRoot(props: TextFieldProps) {
     onValueCommit: props.onValueCommit,
   });
 
-  return TextFieldContext(core, () => props.children);
+  return TextFieldContext(core, () => renderChildren(props.children));
 }

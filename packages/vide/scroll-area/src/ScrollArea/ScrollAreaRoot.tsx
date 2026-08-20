@@ -1,5 +1,5 @@
 import { createScrollArea } from "@lattice-ui/core-scroll-area";
-import { createVideReactivity } from "@lattice-ui/vide-runtime";
+import { createVideReactivity, renderChildren } from "@lattice-ui/vide-runtime";
 import { ScrollAreaContext } from "./context";
 import type { ScrollAreaProps } from "./types";
 
@@ -9,7 +9,7 @@ export function ScrollAreaRoot(props: ScrollAreaProps) {
     scrollHideDelayMs: props.scrollHideDelayMs,
   });
 
-  return ScrollAreaContext(core, () => props.children);
+  return ScrollAreaContext(core, () => renderChildren(props.children));
 }
 
 export { ScrollAreaRoot as ScrollArea };

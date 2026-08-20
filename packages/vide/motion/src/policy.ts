@@ -1,21 +1,30 @@
 import {
   type MotionPolicy,
-  type MotionPolicyPreferences,
   readSystemReducedMotion,
   resolveMotionPolicy,
   subscribeSystemReducedMotion,
 } from "@lattice-ui/core-motion";
-import { Vide } from "@lattice-ui/vide-runtime";
+import { type Derivable, read, Vide } from "@lattice-ui/vide-runtime";
 import type VideTypes from "@rbxts/vide";
 
-export const MotionContext = Vide.context<MotionPolicyPreferences>();
+/**
+ * The preferences are carried as derivables, not as the plain values `MotionPolicyPreferences`
+ * holds. A Vide component runs once, so a context value read at that moment would fix the motion
+ * policy for the lifetime of the tree, where the React layer re-reads it on every render.
+ */
+export interface VideMotionPreferences {
+  mode?: Derivable<MotionPolicy["mode"] | undefined>;
+  disableAllMotion?: Derivable<boolean | undefined>;
+  respectSystemReducedMotion?: Derivable<boolean | undefined>;
+}
 
-export function MotionProvider(props: {
-  mode?: MotionPolicy["mode"];
-  disableAllMotion?: boolean;
-  respectSystemReducedMotion?: boolean;
+export const MotionContext = Vide.context<VideMotionPreferences>();
+
+export type MotionProviderProps = VideMotionPreferences & {
   children: () => VideTypes.Node;
-}) {
+};
+
+export function MotionProvider(props: MotionProviderProps) {
   return MotionContext(
     {
       mode: props.mode,
@@ -31,7 +40,7 @@ export function MotionProvider(props: {
  * is up. Read the context at the top level of a component, as always in Vide.
  */
 export function useMotionPolicy(): () => MotionPolicy {
-  const preferences = (MotionContext() as MotionPolicyPreferences | undefined) ?? {};
+  const preferences = (MotionContext() as VideMotionPreferences | undefined) ?? {};
   const systemReducedMotion = Vide.source(readSystemReducedMotion());
 
   Vide.cleanup(
@@ -40,5 +49,13 @@ export function useMotionPolicy(): () => MotionPolicy {
     }),
   );
 
-  return () => resolveMotionPolicy(preferences, systemReducedMotion());
+  return () =>
+    resolveMotionPolicy(
+      {
+        mode: read(preferences.mode),
+        disableAllMotion: read(preferences.disableAllMotion),
+        respectSystemReducedMotion: read(preferences.respectSystemReducedMotion),
+      },
+      systemReducedMotion(),
+    );
 }
