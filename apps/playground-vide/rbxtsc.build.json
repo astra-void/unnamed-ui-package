@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.vide.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "out",
+    "declaration": false,
+    "typeRoots": [
+      "./node_modules/@rbxts",
+      "../../node_modules/@rbxts",
+      "./node_modules/@lattice-ui",
+      "../../node_modules/@lattice-ui"
+    ],
+    "types": [
+      "types",
+      "compiler-types"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@lattice-ui/*": [
+        "node_modules/@lattice-ui/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "rbxts": {
+    "type": "game",
+    "rojo": "default.project.json",
+    "includePath": "include"
+  }
+}

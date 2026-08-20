@@ -1,0 +1,43 @@
+{
+  "name": "@lattice-ui/playground-vide",
+  "version": "0.4.4",
+  "private": true,
+  "scripts": {
+    "build": "rbxtsc -p rbxtsc.build.json",
+    "watch": "rbxtsc -p rbxtsc.build.json -w",
+    "serve": "rojo serve default.project.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "biome check src",
+    "lint:fix": "biome check src --write --unsafe"
+  },
+  "dependencies": {
+    "@lattice-ui/vide-accordion": "workspace:*",
+    "@lattice-ui/vide-avatar": "workspace:*",
+    "@lattice-ui/vide-checkbox": "workspace:*",
+    "@lattice-ui/vide-combobox": "workspace:*",
+    "@lattice-ui/vide-context-menu": "workspace:*",
+    "@lattice-ui/vide-dialog": "workspace:*",
+    "@lattice-ui/vide-focus": "workspace:*",
+    "@lattice-ui/vide-menu": "workspace:*",
+    "@lattice-ui/vide-motion": "workspace:*",
+    "@lattice-ui/vide-popover": "workspace:*",
+    "@lattice-ui/vide-progress": "workspace:*",
+    "@lattice-ui/vide-radio-group": "workspace:*",
+    "@lattice-ui/vide-runtime": "workspace:*",
+    "@lattice-ui/vide-scroll-area": "workspace:*",
+    "@lattice-ui/vide-select": "workspace:*",
+    "@lattice-ui/vide-slider": "workspace:*",
+    "@lattice-ui/vide-style": "workspace:*",
+    "@lattice-ui/vide-switch": "workspace:*",
+    "@lattice-ui/vide-system": "workspace:*",
+    "@lattice-ui/vide-tabs": "workspace:*",
+    "@lattice-ui/vide-text-field": "workspace:*",
+    "@lattice-ui/vide-textarea": "workspace:*",
+    "@lattice-ui/vide-toast": "workspace:*",
+    "@lattice-ui/vide-toggle-group": "workspace:*",
+    "@lattice-ui/vide-tooltip": "workspace:*"
+  },
+  "devDependencies": {
+    "@rbxts/vide": "0.6.1"
+  }
+}
