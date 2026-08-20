@@ -1,102 +1,75 @@
-import { composeEvents, composeRefs, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { useFocusNode } from "@lattice-ui/react-focus";
+import {
+  applyElementSpec,
+  composeRefs,
+  getPassthroughProps,
+  React,
+  Slot,
+  toSlotProps,
+  useLatticeCore,
+} from "@lattice-ui/react-runtime";
 import { ContextMenuItemContextProvider, useContextMenuContext } from "./context";
-import type { ContextMenuItemProps, ContextMenuSelectEvent } from "./types";
+import type { ContextMenuItemProps } from "./types";
 
 const OWN_PROPS = ["asChild", "disabled", "onSelect", "children"] as const;
 
-// See ContextMenuTrigger: only the Roblox instance defaults are neutralized, never appearance.
-const NEUTRAL_PROPS = {
-  AutoButtonColor: false,
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-  Text: "",
-};
-
-function createContextMenuSelectEvent(): ContextMenuSelectEvent {
-  const event: ContextMenuSelectEvent = {
-    defaultPrevented: false,
-    preventDefault: () => {
-      event.defaultPrevented = true;
-    },
-  };
-
-  return event;
-}
-
 export function ContextMenuItem(props: ContextMenuItemProps) {
-  const contextMenuContext = useContextMenuContext();
+  const core = useContextMenuContext().core;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
+
   const itemRef = React.useRef<GuiObject>();
 
-  const [highlighted, setHighlighted] = React.useState(false);
+  // On this component's own reactivity, so a hover or focus change re-renders this item rather
+  // than the menu that contains it.
+  const item = useLatticeCore((rx) =>
+    core.createItem(rx, {
+      disabled: () => propsRef.current.disabled,
+      onSelect: (event) => propsRef.current.onSelect?.(event),
+      getGuiObject: () => itemRef.current,
+    }),
+  );
+
+  React.useEffect(() => {
+    item.register();
+  }, [item]);
 
   const setItemRef = React.useCallback((instance: Instance | undefined) => {
-    itemRef.current = !instance?.IsA("GuiObject") ? undefined : instance;
+    itemRef.current = instance?.IsA("GuiObject") === true ? instance : undefined;
   }, []);
 
-  const handleActivated = React.useCallback(() => {
-    if (props.disabled) {
-      return;
-    }
+  useFocusNode({
+    ref: itemRef,
+    getDisabled: () => item.disabled(),
+    onFocusChange: item.setFocused,
+    onActivate: item.activate,
+  });
 
-    const event = createContextMenuSelectEvent();
-    props.onSelect?.(event);
-
-    if (!event.defaultPrevented) {
-      contextMenuContext.setOpen(false);
-    }
-  }, [contextMenuContext, props.disabled, props.onSelect]);
-
-  const handlePointerEnter = React.useCallback(() => setHighlighted(true), []);
-  const handlePointerLeave = React.useCallback(() => setHighlighted(false), []);
-
-  const ownEvents = React.useMemo(
-    () => ({
-      Activated: handleActivated,
-      MouseEnter: handlePointerEnter,
-      MouseLeave: handlePointerLeave,
-    }),
-    [handleActivated, handlePointerEnter, handlePointerLeave],
-  );
-
-  const disabled = props.disabled === true;
+  const highlighted = item.highlighted();
+  const disabled = item.disabled();
 
   // Highlight is tracked, never painted: consumers read it here and style however they like.
-  const itemContextValue = React.useMemo(
-    () => ({
-      highlighted: highlighted && !disabled,
-      disabled,
-    }),
-    [disabled, highlighted],
-  );
+  const itemContextValue = React.useMemo(() => ({ highlighted, disabled }), [disabled, highlighted]);
 
   const passthrough = getPassthroughProps<TextButton>(props, OWN_PROPS);
-  const behaviorProps = {
-    Active: !disabled,
-    Event: composeEvents(passthrough.Event, ownEvents),
-  };
-  const ref = composeRefs<Instance>(passthrough.ref as never, setItemRef);
-
-  if (props.asChild) {
-    const child = props.children;
-    if (!child) {
-      error("[ContextMenuItem] `asChild` requires a child element.");
-    }
-
-    // No neutral defaults here: the rendered element belongs to the consumer.
-    return (
-      <ContextMenuItemContextProvider value={itemContextValue}>
-        <Slot {...toSlotProps(passthrough)} {...behaviorProps} ref={ref}>
-          {child}
-        </Slot>
-      </ContextMenuItemContextProvider>
-    );
-  }
+  const merged = applyElementSpec(item.spec(), passthrough, { neutral: props.asChild !== true });
+  merged.ref = composeRefs<GuiObject>(merged.ref as never, setItemRef);
 
   return (
     <ContextMenuItemContextProvider value={itemContextValue}>
-      <textbutton {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps} ref={ref as never}>
-        {props.children}
-      </textbutton>
+      {props.asChild ? (
+        (() => {
+          const child = props.children;
+          if (!child) {
+            error("[ContextMenuItem] `asChild` requires a child element.");
+          }
+
+          // No neutral defaults here: the rendered element belongs to the consumer.
+          return <Slot {...toSlotProps(merged)}>{child}</Slot>;
+        })()
+      ) : (
+        <textbutton {...merged}>{props.children}</textbutton>
+      )}
     </ContextMenuItemContextProvider>
   );
 }

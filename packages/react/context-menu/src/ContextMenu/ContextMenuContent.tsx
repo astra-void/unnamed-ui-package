@@ -78,8 +78,9 @@ function ContextMenuContentImpl(props: {
   const contentBoundaryRef = React.useRef<GuiObject>();
 
   const popper = usePopper({
-    anchorRef: contextMenuContext.virtualAnchorRef,
-    contentRef: contextMenuContext.contentRef,
+    // The instances live in the core, so the popper reads them from there.
+    getAnchor: contextMenuContext.core.getVirtualAnchor,
+    getContent: contextMenuContext.core.getContent,
     alignOffset: props.alignOffset,
     collisionPadding: props.collisionPadding,
     sideOffset: props.sideOffset,
@@ -98,18 +99,18 @@ function ContextMenuContentImpl(props: {
   const setContentRef = React.useCallback(
     (instance: Instance | undefined) => {
       const guiObject = toGuiObject(instance);
-      contextMenuContext.contentRef.current = guiObject;
+      contextMenuContext.core.setContent(guiObject);
       contentBoundaryRef.current = guiObject;
       motion.ref.current = guiObject;
     },
-    [contextMenuContext.contentRef, motion.ref],
+    [contextMenuContext.core, motion.ref],
   );
 
   const setVirtualAnchorRef = React.useCallback(
     (instance: Instance | undefined) => {
-      contextMenuContext.virtualAnchorRef.current = toGuiObject(instance);
+      contextMenuContext.core.setVirtualAnchor(toGuiObject(instance));
     },
-    [contextMenuContext.virtualAnchorRef],
+    [contextMenuContext.core],
   );
 
   const handleDismiss = React.useCallback(() => {

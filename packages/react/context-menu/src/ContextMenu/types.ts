@@ -1,3 +1,4 @@
+import type { ContextMenuCore } from "@lattice-ui/core-context-menu";
 import type { LayerInteractEvent } from "@lattice-ui/react-layer";
 import type { PresenceMotionConfig as MotionConfig } from "@lattice-ui/react-motion";
 import type { PopperPlacement } from "@lattice-ui/react-popper";
@@ -18,8 +19,8 @@ export type ContextMenuContextValue = {
    */
   anchorPosition: Vector2;
   openAtPosition: (position: Vector2) => void;
-  virtualAnchorRef: React.MutableRefObject<GuiObject | undefined>;
-  contentRef: React.MutableRefObject<GuiObject | undefined>;
+  /** The core, for the parts that build an item or position against the instances. */
+  core: ContextMenuCore;
 };
 
 export type ContextMenuProps = {

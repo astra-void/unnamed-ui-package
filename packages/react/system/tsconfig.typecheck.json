@@ -14,6 +14,9 @@
       "@lattice-ui/core-checkbox": [
         "core/checkbox/src/index.ts"
       ],
+      "@lattice-ui/core-context-menu": [
+        "core/context-menu/src/index.ts"
+      ],
       "@lattice-ui/core-dialog": [
         "core/dialog/src/index.ts"
       ],
@@ -157,6 +160,9 @@
       ],
       "@lattice-ui/vide-checkbox": [
         "vide/checkbox/src/index.ts"
+      ],
+      "@lattice-ui/vide-context-menu": [
+        "vide/context-menu/src/index.ts"
       ],
       "@lattice-ui/vide-dialog": [
         "vide/dialog/src/index.ts"

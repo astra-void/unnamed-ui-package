@@ -1,17 +1,13 @@
-import { getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { applyElementSpec, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { useContextMenuContext } from "./context";
 import type { ContextMenuLabelProps } from "./types";
 
 const OWN_PROPS = ["asChild", "children"] as const;
 
-// See ContextMenuTrigger: only the Roblox instance defaults are neutralized, never appearance.
-const NEUTRAL_PROPS = {
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-  Text: "",
-};
-
 export function ContextMenuLabel(props: ContextMenuLabelProps) {
+  const core = useContextMenuContext().core;
   const passthrough = getPassthroughProps<TextLabel>(props, OWN_PROPS);
+  const merged = applyElementSpec(core.labelSpec(), passthrough, { neutral: props.asChild !== true });
 
   if (props.asChild) {
     const child = props.children;
@@ -20,12 +16,8 @@ export function ContextMenuLabel(props: ContextMenuLabelProps) {
     }
 
     // No neutral defaults here: the rendered element belongs to the consumer.
-    return <Slot {...toSlotProps(passthrough)}>{child}</Slot>;
+    return <Slot {...toSlotProps(merged)}>{child}</Slot>;
   }
 
-  return (
-    <textlabel {...NEUTRAL_PROPS} {...passthrough}>
-      {props.children}
-    </textlabel>
-  );
+  return <textlabel {...merged}>{props.children}</textlabel>;
 }

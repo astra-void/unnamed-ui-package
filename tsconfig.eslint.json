@@ -38,6 +38,8 @@
       "@lattice-ui/vide-dialog": ["packages/vide/dialog/src/index.ts"],
       "@lattice-ui/core-menu": ["packages/core/menu/src/index.ts"],
       "@lattice-ui/vide-menu": ["packages/vide/menu/src/index.ts"],
+      "@lattice-ui/core-context-menu": ["packages/core/context-menu/src/index.ts"],
+      "@lattice-ui/vide-context-menu": ["packages/vide/context-menu/src/index.ts"],
       "@lattice-ui/core-runtime": ["packages/core/runtime/src/index.ts"],
       "@lattice-ui/vide-runtime": ["packages/vide/runtime/src/index.ts"],
       "@lattice-ui/vide-popover": ["packages/vide/popover/src/index.ts"],

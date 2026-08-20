@@ -1,16 +1,13 @@
-import { getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { applyElementSpec, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { useContextMenuContext } from "./context";
 import type { ContextMenuSeparatorProps } from "./types";
 
 const OWN_PROPS = ["asChild", "children"] as const;
 
-// See ContextMenuTrigger: only the Roblox instance defaults are neutralized, never appearance.
-const NEUTRAL_PROPS = {
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-};
-
 export function ContextMenuSeparator(props: ContextMenuSeparatorProps) {
+  const core = useContextMenuContext().core;
   const passthrough = getPassthroughProps<Frame>(props, OWN_PROPS);
+  const merged = applyElementSpec(core.separatorSpec(), passthrough, { neutral: props.asChild !== true });
 
   if (props.asChild) {
     const child = props.children;
@@ -19,12 +16,8 @@ export function ContextMenuSeparator(props: ContextMenuSeparatorProps) {
     }
 
     // No neutral defaults here: the rendered element belongs to the consumer.
-    return <Slot {...toSlotProps(passthrough)}>{child}</Slot>;
+    return <Slot {...toSlotProps(merged)}>{child}</Slot>;
   }
 
-  return (
-    <frame {...NEUTRAL_PROPS} {...passthrough}>
-      {props.children}
-    </frame>
-  );
+  return <frame {...merged}>{props.children}</frame>;
 }

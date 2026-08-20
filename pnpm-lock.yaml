@@ -535,6 +535,18 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/context-menu:
+    dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/core-menu':
+        specifier: workspace:*
+        version: link:../menu
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/dialog:
     dependencies:
       '@lattice-ui/core-runtime':
@@ -751,6 +763,12 @@ importers:
 
   packages/react/context-menu:
     dependencies:
+      '@lattice-ui/core-context-menu':
+        specifier: workspace:*
+        version: link:../../core/context-menu
+      '@lattice-ui/react-focus':
+        specifier: workspace:*
+        version: link:../focus
       '@lattice-ui/react-layer':
         specifier: workspace:*
         version: link:../layer
@@ -1260,6 +1278,31 @@ importers:
       '@lattice-ui/core-runtime':
         specifier: workspace:*
         version: link:../../core/runtime
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/context-menu:
+    dependencies:
+      '@lattice-ui/core-context-menu':
+        specifier: workspace:*
+        version: link:../../core/context-menu
+      '@lattice-ui/core-layer':
+        specifier: workspace:*
+        version: link:../../core/layer
+      '@lattice-ui/core-popper':
+        specifier: workspace:*
+        version: link:../../core/popper
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
       '@lattice-ui/vide-motion':
         specifier: workspace:*
         version: link:../motion
