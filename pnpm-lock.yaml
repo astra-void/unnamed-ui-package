@@ -679,6 +679,12 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/toast:
+    dependencies:
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/toggle-group:
     dependencies:
       '@lattice-ui/core-focus':
@@ -1202,6 +1208,9 @@ importers:
 
   packages/react/toast:
     dependencies:
+      '@lattice-ui/core-toast':
+        specifier: workspace:*
+        version: link:../../core/toast
       '@lattice-ui/react-motion':
         specifier: workspace:*
         version: link:../motion
@@ -1643,6 +1652,22 @@ importers:
       '@lattice-ui/vide-focus':
         specifier: workspace:*
         version: link:../focus
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/toast:
+    dependencies:
+      '@lattice-ui/core-toast':
+        specifier: workspace:*
+        version: link:../../core/toast
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
       '@lattice-ui/vide-runtime':
         specifier: workspace:*
         version: link:../runtime

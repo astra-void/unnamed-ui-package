@@ -27,6 +27,7 @@
       "@lattice-ui/core-context-menu": ["../../packages/core/context-menu/src/index.ts"],
       "@lattice-ui/core-select": ["../../packages/core/select/src/index.ts"],
       "@lattice-ui/core-combobox": ["../../packages/core/combobox/src/index.ts"],
+      "@lattice-ui/core-toast": ["../../packages/core/toast/src/index.ts"],
       "@lattice-ui/core-runtime": ["../../packages/core/runtime/src/index.ts"],
       "@lattice-ui/react-accordion": ["../../packages/react/accordion/src/index.ts"],
       "@lattice-ui/react-avatar": ["../../packages/react/avatar/src/index.ts"],

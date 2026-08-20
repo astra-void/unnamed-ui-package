@@ -71,6 +71,9 @@
       "@lattice-ui/core-textarea": [
         "core/textarea/src/index.ts"
       ],
+      "@lattice-ui/core-toast": [
+        "core/toast/src/index.ts"
+      ],
       "@lattice-ui/core-toggle-group": [
         "core/toggle-group/src/index.ts"
       ],
@@ -217,6 +220,9 @@
       ],
       "@lattice-ui/vide-textarea": [
         "vide/textarea/src/index.ts"
+      ],
+      "@lattice-ui/vide-toast": [
+        "vide/toast/src/index.ts"
       ],
       "@lattice-ui/vide-toggle-group": [
         "vide/toggle-group/src/index.ts"

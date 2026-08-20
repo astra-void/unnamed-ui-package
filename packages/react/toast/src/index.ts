@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-toast";
+
 import { ToastAction } from "./Toast/ToastAction";
 import { ToastClose } from "./Toast/ToastClose";
 import { ToastDescription } from "./Toast/ToastDescription";
@@ -16,8 +18,6 @@ export const Toast = {
   Close: ToastClose,
 } as const;
 
-export type { ToastRecord } from "./Toast/queue";
-export { dequeueToast, enqueueToast, getVisibleToasts, pruneExpiredToasts } from "./Toast/queue";
 export { useToast } from "./Toast/ToastProvider";
 export type {
   ToastActionProps,

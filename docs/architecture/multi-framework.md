@@ -213,7 +213,7 @@ checkpoint where the contract may be revised before mass migration.
 | 1 | workspace plumbing accepts a second layer | **done** — `packages/core/runtime` and `packages/vide/runtime` exist and the full `check` / `build` / `typecheck` / `lint` suite passes |
 | 2 | vertical slice 1: `checkbox` | **done** — one core drives both layers; the Vide harness spec compiles but has not been executed |
 | 3 | vertical slice 2: `popover` (portal + presence + dismissable + popper) | **done** — contract survived with the §3.5 refinement; focus and motion stayed on the React side |
-| 4 | remaining primitives, in waves A–D | **waves A and B done**; C and D open |
+| 4 | remaining primitives, in waves A–D | **waves A, B and C done**; D open |
 | 5 | distribution: playground, harness suite, CLI framework dimension, docs, publish | `@lattice-ui/vide-*` on npm |
 
 Phase 4 waves:
@@ -228,7 +228,17 @@ Phase 4 waves:
   let the player type into, the auto-resize pass that runs twice because `TextBounds` lags the edit
   that caused it, the drag that follows one finger or any mouse movement, and scrollbar visibility
   that hides on idle only under `type="scroll"`.
-- **C** — dialog, tooltip, menu, context-menu, select, combobox, toast, accordion
+- **C** — dialog, tooltip, menu, context-menu, select, combobox, toast, accordion — **done**. Two
+  rules came out of this wave. A child that owns state builds its core on its *own* reactivity, not
+  its parent's: an item's highlight on the menu's reactivity re-renders the menu, which in React
+  does not re-render the item. And selection that depends on a registry settles once the batch has
+  registered, never per registration — resolving after the first item alone hands the selection to
+  it, because the rest are not there yet.
+
+  The subtle behavior each core had to keep is the point of the exercise: the guarded pair of events
+  one gamepad activation fires, a combobox telling its own write to the input apart from the player
+  typing, and the label cache that lets a selection still have a name after the popup holding its
+  item has closed.
 - **D** — style, system (most React-context-shaped; may ship for Vide later or not at all)
 
 ### Phase 1, as built

@@ -44,6 +44,8 @@
       "@lattice-ui/vide-select": ["packages/vide/select/src/index.ts"],
       "@lattice-ui/core-combobox": ["packages/core/combobox/src/index.ts"],
       "@lattice-ui/vide-combobox": ["packages/vide/combobox/src/index.ts"],
+      "@lattice-ui/core-toast": ["packages/core/toast/src/index.ts"],
+      "@lattice-ui/vide-toast": ["packages/vide/toast/src/index.ts"],
       "@lattice-ui/core-runtime": ["packages/core/runtime/src/index.ts"],
       "@lattice-ui/vide-runtime": ["packages/vide/runtime/src/index.ts"],
       "@lattice-ui/vide-popover": ["packages/vide/popover/src/index.ts"],

@@ -35,6 +35,7 @@
       "@lattice-ui/core-tabs",
       "@lattice-ui/core-text-field",
       "@lattice-ui/core-textarea",
+      "@lattice-ui/core-toast",
       "@lattice-ui/core-toggle-group",
       "@lattice-ui/core-tooltip",
       "@lattice-ui/react-accordion",
@@ -84,6 +85,7 @@
       "@lattice-ui/vide-tabs",
       "@lattice-ui/vide-text-field",
       "@lattice-ui/vide-textarea",
+      "@lattice-ui/vide-toast",
       "@lattice-ui/vide-toggle-group",
       "@lattice-ui/vide-tooltip",
       "lattice-ui"

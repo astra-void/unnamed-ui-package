@@ -1,0 +1,9 @@
+{
+  "name": "vide-toast",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

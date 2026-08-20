@@ -1,7 +1,7 @@
+import type { ToastCore, ToastRecord } from "@lattice-ui/core-toast";
 import type { PresenceMotionConfig as MotionConfig } from "@lattice-ui/react-motion";
 import type { PassthroughProps } from "@lattice-ui/react-runtime";
 import type React from "@rbxts/react";
-import type { ToastRecord } from "./queue";
 
 export type ToastOptions = {
   id?: string;
@@ -19,6 +19,8 @@ export type ToastContextValue = {
   remove: (id: string) => void;
   finalize: (id: string) => void;
   clear: () => void;
+  /** The core, for the parts that read a spec rather than the queue. */
+  core: ToastCore;
 };
 
 export type ToastApi = {
