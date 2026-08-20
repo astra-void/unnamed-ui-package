@@ -1,126 +1,51 @@
-import { React, useControllableState } from "@lattice-ui/react-runtime";
+import { createSelect } from "@lattice-ui/core-select";
+import { focusGuiObject } from "@lattice-ui/react-focus";
+import { React, useLatticeCore } from "@lattice-ui/react-runtime";
 import { SelectContextProvider } from "./context";
-import type { SelectItemRegistration, SelectProps } from "./types";
-
-function getOrderedItems(items: Array<SelectItemRegistration>) {
-  const ordered = [...items];
-  ordered.sort((left, right) => left.order < right.order);
-  return ordered;
-}
+import type { SelectProps } from "./types";
 
 export function SelectRoot(props: SelectProps) {
-  const [open, setOpenState] = useControllableState<boolean>({
-    value: props.open,
-    defaultValue: props.defaultOpen ?? false,
-    onChange: props.onOpenChange,
-  });
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const [value, setValueState] = useControllableState<string | undefined>({
-    value: props.value,
-    defaultValue: props.defaultValue,
-    onChange: (nextValue) => {
-      if (nextValue !== undefined) {
-        props.onValueChange?.(nextValue);
-      }
-    },
-  });
-
-  const disabled = props.disabled === true;
-  const required = props.required === true;
-
-  const triggerRef = React.useRef<GuiObject>();
-  const contentRef = React.useRef<GuiObject>();
-
-  const itemEntriesRef = React.useRef<Array<SelectItemRegistration>>([]);
-  const [registryRevision, setRegistryRevision] = React.useState(0);
-
-  const registerItem = React.useCallback((item: SelectItemRegistration) => {
-    itemEntriesRef.current.push(item);
-    setRegistryRevision((revision) => revision + 1);
-
-    return () => {
-      const index = itemEntriesRef.current.findIndex((entry) => entry.id === item.id);
-      if (index >= 0) {
-        itemEntriesRef.current.remove(index);
-        setRegistryRevision((revision) => revision + 1);
-      }
-    };
-  }, []);
-
-  const resolveOrderedItems = React.useCallback(() => {
-    return getOrderedItems(itemEntriesRef.current);
-  }, [registryRevision]);
-
-  const getItemText = React.useCallback(
-    (candidateValue: string) => {
-      const selected = resolveOrderedItems().find((item) => item.value === candidateValue);
-      return selected?.getTextValue();
-    },
-    [resolveOrderedItems],
+  const core = useLatticeCore((rx) =>
+    createSelect(rx, {
+      value: () => propsRef.current.value,
+      defaultValue: propsRef.current.defaultValue,
+      open: () => propsRef.current.open,
+      defaultOpen: propsRef.current.defaultOpen ?? false,
+      disabled: () => propsRef.current.disabled,
+      required: () => propsRef.current.required,
+      onValueChange: (value) => propsRef.current.onValueChange?.(value),
+      onOpenChange: (open) => propsRef.current.onOpenChange?.(open),
+      focusInstance: focusGuiObject,
+    }),
   );
 
-  const setOpen = React.useCallback(
-    (nextOpen: boolean) => {
-      if (disabled && nextOpen) {
-        return;
-      }
+  const open = core.open();
+  const value = core.value();
+  const registryRevision = core.registryRevision();
+  const disabled = core.disabled();
+  const required = core.required();
 
-      setOpenState(nextOpen);
-    },
-    [disabled, setOpenState],
-  );
-
-  const setValue = React.useCallback(
-    (nextValue: string) => {
-      if (disabled) {
-        return;
-      }
-
-      const selected = resolveOrderedItems().find((item) => item.value === nextValue);
-      if (selected?.getDisabled()) {
-        return;
-      }
-
-      setValueState(nextValue);
-    },
-    [disabled, resolveOrderedItems, setValueState],
-  );
-
+  // The controlled value can move onto an item that is disabled or gone; registration resolves the
+  // same thing from inside the core.
   React.useEffect(() => {
-    if (value === undefined) {
-      return;
-    }
-
-    const orderedItems = resolveOrderedItems();
-    // An empty registry means the content is unmounted (menu closed), not that
-    // the selected item disappeared — keep the current value in that case.
-    if (orderedItems.size() === 0) {
-      return;
-    }
-
-    const selected = orderedItems.find((item) => item.value === value);
-    if (selected && !selected.getDisabled()) {
-      return;
-    }
-
-    const fallback = orderedItems.find((item) => !item.getDisabled());
-    setValueState(fallback?.value);
-  }, [registryRevision, resolveOrderedItems, setValueState, value]);
+    core.syncValue();
+  }, [core, registryRevision, value]);
 
   const contextValue = React.useMemo(
     () => ({
       open,
-      setOpen,
+      setOpen: core.setOpen,
       value,
-      setValue,
+      setValue: core.setValue,
       disabled,
       required,
-      triggerRef,
-      contentRef,
-      registerItem,
-      getItemText,
+      getItemText: core.getItemText,
+      core,
     }),
-    [disabled, getItemText, open, registerItem, required, setOpen, setValue, value],
+    [core, disabled, open, required, value],
   );
 
   return <SelectContextProvider value={contextValue}>{props.children}</SelectContextProvider>;

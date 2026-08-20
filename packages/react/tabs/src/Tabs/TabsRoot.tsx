@@ -18,12 +18,13 @@ export function TabsRoot(props: TabsProps) {
 
   const value = core.value();
   const orientation = core.orientation();
+  const registryRevision = core.registryRevision();
 
   // Selection settles onto an enabled tab whenever the controlled value moves: registration and
   // disabling already resolve it from inside the core.
   React.useEffect(() => {
     core.syncSelection();
-  }, [core, value]);
+  }, [core, registryRevision, value]);
 
   const contextValue = React.useMemo(
     () => ({ value, orientation, setValue: core.setValue, moveSelection: core.moveSelection, core }),

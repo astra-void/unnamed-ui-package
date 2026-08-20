@@ -622,6 +622,15 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/core/select:
+    dependencies:
+      '@lattice-ui/core-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/core-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/core/slider:
     dependencies:
       '@lattice-ui/core-motion':
@@ -1018,6 +1027,9 @@ importers:
 
   packages/react/select:
     dependencies:
+      '@lattice-ui/core-select':
+        specifier: workspace:*
+        version: link:../../core/select
       '@lattice-ui/react-focus':
         specifier: workspace:*
         version: link:../focus
@@ -1477,6 +1489,31 @@ importers:
       '@lattice-ui/core-scroll-area':
         specifier: workspace:*
         version: link:../../core/scroll-area
+      '@lattice-ui/vide-runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rbxts/vide':
+        specifier: 0.6.1
+        version: 0.6.1
+
+  packages/vide/select:
+    dependencies:
+      '@lattice-ui/core-layer':
+        specifier: workspace:*
+        version: link:../../core/layer
+      '@lattice-ui/core-popper':
+        specifier: workspace:*
+        version: link:../../core/popper
+      '@lattice-ui/core-select':
+        specifier: workspace:*
+        version: link:../../core/select
+      '@lattice-ui/vide-focus':
+        specifier: workspace:*
+        version: link:../focus
+      '@lattice-ui/vide-motion':
+        specifier: workspace:*
+        version: link:../motion
       '@lattice-ui/vide-runtime':
         specifier: workspace:*
         version: link:../runtime

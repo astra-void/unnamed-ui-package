@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-select";
+
 import { SelectContent } from "./Select/SelectContent";
 import { SelectGroup } from "./Select/SelectGroup";
 import { SelectItem } from "./Select/SelectItem";
@@ -37,7 +39,6 @@ export type {
   SelectGroupProps,
   SelectItemContextValue,
   SelectItemProps,
-  SelectItemRegistration,
   SelectLabelProps,
   SelectPortalProps,
   SelectProps,

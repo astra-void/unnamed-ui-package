@@ -40,6 +40,8 @@
       "@lattice-ui/vide-menu": ["packages/vide/menu/src/index.ts"],
       "@lattice-ui/core-context-menu": ["packages/core/context-menu/src/index.ts"],
       "@lattice-ui/vide-context-menu": ["packages/vide/context-menu/src/index.ts"],
+      "@lattice-ui/core-select": ["packages/core/select/src/index.ts"],
+      "@lattice-ui/vide-select": ["packages/vide/select/src/index.ts"],
       "@lattice-ui/core-runtime": ["packages/core/runtime/src/index.ts"],
       "@lattice-ui/vide-runtime": ["packages/vide/runtime/src/index.ts"],
       "@lattice-ui/vide-popover": ["packages/vide/popover/src/index.ts"],

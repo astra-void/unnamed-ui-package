@@ -61,6 +61,8 @@ vi.mock("@lattice-ui/react-motion", () => ({
 import { SelectContextProvider } from "../../../packages/react/select/src/Select/context";
 import { SelectItem } from "../../../packages/react/select/src/Select/SelectItem";
 import { SelectTrigger } from "../../../packages/react/select/src/Select/SelectTrigger";
+import { createSelect } from "../../../packages/core/select/src/Select/createSelect";
+import { createStandaloneReactivity } from "../../../packages/core/runtime/src/reactivity";
 import type { SelectContextValue } from "../../../packages/react/select/src/Select/types";
 
 afterEach(() => {
@@ -73,20 +75,33 @@ function flushDefer() {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-function makeContext(overrides: Partial<SelectContextValue> = {}): SelectContextValue {
+// A real core: the activation guard that collapses one activation's paired events lives in the
+// trigger it builds, so a stubbed context would test nothing.
+function makeContext(
+  overrides: {
+    open?: boolean;
+    disabled?: boolean;
+    setOpen?: (open: boolean) => void;
+    setValue?: (value: string) => void;
+  } = {},
+) {
+  const core = createSelect(createStandaloneReactivity(), {
+    defaultOpen: overrides.open ?? false,
+    disabled: () => overrides.disabled === true,
+    onOpenChange: (open) => overrides.setOpen?.(open),
+    onValueChange: (value) => overrides.setValue?.(value),
+  });
+
   return {
-    open: false,
-    setOpen: vi.fn(),
-    value: undefined,
-    setValue: vi.fn(),
-    disabled: false,
-    required: false,
-    triggerRef: { current: undefined },
-    contentRef: { current: undefined },
-    registerItem: () => () => {},
-    getItemText: () => undefined,
-    ...overrides,
-  };
+    open: core.open(),
+    setOpen: core.setOpen,
+    value: core.value(),
+    setValue: core.setValue,
+    disabled: core.disabled(),
+    required: core.required(),
+    getItemText: core.getItemText,
+    core,
+  } as SelectContextValue;
 }
 
 function captureChildProps() {
@@ -178,7 +193,7 @@ describe("SelectItem gamepad activation", () => {
     const setOpen = vi.fn();
     const { Probe, getProps } = captureChildProps();
     renderInSelect(
-      makeContext({ setValue, setOpen }),
+      makeContext({ open: true, setValue, setOpen }),
       React.createElement(SelectItem, { value: "apple", asChild: true }, React.createElement(Probe)),
     );
 

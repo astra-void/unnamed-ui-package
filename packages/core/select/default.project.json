@@ -1,0 +1,9 @@
+{
+  "name": "core-select",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}

@@ -50,6 +50,9 @@
       "@lattice-ui/core-scroll-area": [
         "core/scroll-area/src/index.ts"
       ],
+      "@lattice-ui/core-select": [
+        "core/select/src/index.ts"
+      ],
       "@lattice-ui/core-slider": [
         "core/slider/src/index.ts"
       ],
@@ -190,6 +193,9 @@
       ],
       "@lattice-ui/vide-scroll-area": [
         "vide/scroll-area/src/index.ts"
+      ],
+      "@lattice-ui/vide-select": [
+        "vide/select/src/index.ts"
       ],
       "@lattice-ui/vide-slider": [
         "vide/slider/src/index.ts"

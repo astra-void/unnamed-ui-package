@@ -51,6 +51,13 @@ export interface TabsCore {
    * or becomes disabled hands selection to the next enabled one after it, not to the first.
    */
   syncSelection: () => void;
+  /**
+   * Bumped whenever a trigger registers or unregisters.
+   *
+   * Adapters settle selection once the batch has landed rather than per registration: resolving
+   * after the first trigger alone would hand selection to it, because the rest are not there yet.
+   */
+  registryRevision: () => number;
   listSpec: () => ElementSpec<Frame>;
   createTrigger: (options: TabsTriggerOptions) => TabsTriggerCore;
   createContent: (value: string) => TabsContentCore;

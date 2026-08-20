@@ -1,3 +1,4 @@
+import type { SelectCore } from "@lattice-ui/core-select";
 import type { LayerInteractEvent } from "@lattice-ui/react-layer";
 import type { PresenceMotionConfig as MotionConfig } from "@lattice-ui/react-motion";
 import type { PopperPlacement } from "@lattice-ui/react-popper";
@@ -7,14 +8,6 @@ import type React from "@rbxts/react";
 export type SelectSetOpen = (open: boolean) => void;
 export type SelectSetValue = (value: string) => void;
 
-export type SelectItemRegistration = {
-  id: number;
-  value: string;
-  order: number;
-  getDisabled: () => boolean;
-  getTextValue: () => string;
-};
-
 export type SelectContextValue = {
   open: boolean;
   setOpen: SelectSetOpen;
@@ -22,10 +15,9 @@ export type SelectContextValue = {
   setValue: SelectSetValue;
   disabled: boolean;
   required: boolean;
-  triggerRef: React.MutableRefObject<GuiObject | undefined>;
-  contentRef: React.MutableRefObject<GuiObject | undefined>;
-  registerItem: (item: SelectItemRegistration) => () => void;
   getItemText: (value: string) => string | undefined;
+  /** The core, for the parts that build an item or position against the instances. */
+  core: SelectCore;
 };
 
 /** Per-item state consumers read to style the item; the primitive never paints it. */

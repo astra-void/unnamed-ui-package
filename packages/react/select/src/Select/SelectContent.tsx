@@ -75,8 +75,9 @@ function SelectContentImpl(props: {
   const contentBoundaryRef = React.useRef<GuiObject>();
 
   const popper = usePopper({
-    anchorRef: selectContext.triggerRef,
-    contentRef: selectContext.contentRef,
+    // The instances live in the core, so the popper reads them from there.
+    getAnchor: selectContext.core.getTrigger,
+    getContent: selectContext.core.getContent,
     alignOffset: props.alignOffset,
     collisionPadding: props.collisionPadding,
     sideOffset: props.sideOffset,
@@ -97,11 +98,11 @@ function SelectContentImpl(props: {
   const setContentRef = React.useCallback(
     (instance: Instance | undefined) => {
       const guiObject = toGuiObject(instance);
-      selectContext.contentRef.current = guiObject;
+      selectContext.core.setContent(guiObject);
       contentBoundaryRef.current = guiObject;
       motion.ref.current = guiObject;
     },
-    [motion.ref, selectContext.contentRef],
+    [motion.ref, selectContext.core],
   );
 
   const handleDismiss = React.useCallback(() => {
@@ -160,7 +161,7 @@ function SelectContentImpl(props: {
       onInteractOutside={props.onInteractOutside}
       onPointerDownOutside={props.onPointerDownOutside}
       contentBoundaryRef={contentBoundaryRef}
-      insideRefs={[selectContext.triggerRef]}
+      insideRoots={selectContext.core.getInsideRoots}
     >
       <FocusScope
         active={open}

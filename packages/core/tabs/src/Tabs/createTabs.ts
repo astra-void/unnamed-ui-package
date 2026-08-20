@@ -89,6 +89,7 @@ export function createTabs(rx: Reactivity, options: TabsOptions = {}): TabsCore 
   });
 
   const triggers: TabsTriggerRegistration[] = [];
+  const registryRevisionSource = rx.source(0);
   let lastSelectedOrder: number | undefined;
 
   function orientation(): TabsOrientation {
@@ -184,7 +185,7 @@ export function createTabs(rx: Reactivity, options: TabsOptions = {}): TabsCore 
           getGuiObject: triggerOptions.getGuiObject,
           getDisabled: triggerDisabled,
         });
-        syncSelection();
+        registryRevisionSource.set(registryRevisionSource.get() + 1);
 
         rx.cleanup(() => {
           const index = triggers.findIndex((entry) => entry.id === id);
@@ -193,7 +194,7 @@ export function createTabs(rx: Reactivity, options: TabsOptions = {}): TabsCore 
           }
 
           registered = false;
-          syncSelection();
+          registryRevisionSource.set(registryRevisionSource.get() + 1);
         });
       },
       spec: (): ElementSpec<TextButton> => ({
@@ -248,6 +249,7 @@ export function createTabs(rx: Reactivity, options: TabsOptions = {}): TabsCore 
     orientation,
     moveSelection,
     syncSelection,
+    registryRevision: () => registryRevisionSource.get(),
     listSpec: () => ({ neutral: LIST_NEUTRAL }),
     createTrigger,
     createContent,

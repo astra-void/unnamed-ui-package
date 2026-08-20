@@ -16,6 +16,7 @@ export function TabsRoot(props: TabsProps) {
   // disabling resolve it from inside the core.
   rx.effect(() => {
     read(props.value ?? undefined);
+    core.registryRevision();
 
     Vide.untrack(() => {
       core.syncSelection();

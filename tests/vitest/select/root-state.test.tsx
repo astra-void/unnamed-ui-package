@@ -1,109 +1,94 @@
-// @vitest-environment jsdom
+// @ts-nocheck
 
-// Regression tests: Select items live inside Select.Content and unmount
-// whenever the popup closes, so an empty item registry is the DEFAULT state.
-// The value-validation effect must not treat it as "selected item vanished".
+// Value retention lives in `@lattice-ui/core-select` now, so these drive the core directly: an item
+// registers when the popup opens and unregisters when it closes, and the selected value has to
+// survive the close without being mistaken for a selection that disappeared.
 
-import { act, cleanup, render } from "@testing-library/react";
-import React from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { createSelect } from "../../../packages/core/select/src/Select/createSelect";
+import { createStandaloneReactivity } from "../../../packages/core/runtime/src/reactivity";
 
-vi.mock("@lattice-ui/react-runtime", async () => {
-  const react = await import("react");
-  const controllable = await import("../../../packages/react/runtime/src/useControllableState");
-  const strictContext = await import("../../../packages/react/runtime/src/context");
-
-  return {
-
-    useLatticeCore: (await import("../../../packages/react/runtime/src/reactivity")).useLatticeCore,
-
-    applyElementSpec: (await import("../../../packages/react/runtime/src/elementSpec")).applyElementSpec,
-    React: react.default,
-    useControllableState: controllable.useControllableState,
-    createStrictContext: strictContext.createStrictContext,
-  };
-});
-
-import { SelectRoot } from "../../../packages/react/select/src/Select/SelectRoot";
-import { useSelectContext } from "../../../packages/react/select/src/Select/context";
-import type { SelectContextValue } from "../../../packages/react/select/src/Select/types";
-
-afterEach(() => {
-  cleanup();
-});
-
-function renderSelect(rootProps: Record<string, unknown>) {
-  let context: SelectContextValue | undefined;
-
-  function Probe() {
-    context = useSelectContext();
-    return null;
-  }
-
-  const view = render(
-    React.createElement(SelectRoot, rootProps as never, React.createElement(Probe)),
-  );
-
-  return { view, getContext: () => context! };
+function makeSelect(options = {}) {
+  return createSelect(createStandaloneReactivity(), options);
 }
 
-function makeItem(overrides: { id: number; value: string; disabled?: boolean }) {
-  return {
-    id: overrides.id,
-    value: overrides.value,
-    order: overrides.id,
-    getDisabled: () => overrides.disabled === true,
-    getTextValue: () => overrides.value,
-  };
+/**
+ * Registers an item on its own reactivity, so it can be disposed independently.
+ *
+ * Registration only bumps the revision; settling the value is the adapter's call once the whole
+ * batch has landed, which is what `core.syncValue()` stands in for here.
+ */
+function register(core, value, options = {}) {
+  const rx = createStandaloneReactivity();
+  const item = core.createItem(rx, {
+    value,
+    disabled: () => options.disabled === true,
+    getTextValue: () => options.textValue ?? value,
+    getGuiObject: () => undefined,
+  });
+
+  item.register();
+
+  return { item, unregister: () => rx.dispose() };
 }
 
-describe("SelectRoot value retention", () => {
+describe("select value retention", () => {
   it("keeps defaultValue when no items are registered (popup closed at mount)", () => {
-    const { getContext } = renderSelect({ defaultValue: "beta" });
+    const core = makeSelect({ defaultValue: "beta" });
 
-    expect(getContext().value).toBe("beta");
+    expect(core.value()).toBe("beta");
   });
 
   it("keeps the selected value after all items unregister (popup closes)", () => {
-    const { getContext } = renderSelect({ defaultValue: "beta" });
+    const core = makeSelect({ defaultValue: "beta" });
 
-    let unregisterAlpha: (() => void) | undefined;
-    let unregisterBeta: (() => void) | undefined;
+    const alpha = register(core, "alpha");
+    const beta = register(core, "beta");
+    core.syncValue();
+    expect(core.value()).toBe("beta");
 
-    // Popup opens: items register.
-    act(() => {
-      unregisterAlpha = getContext().registerItem(makeItem({ id: 1, value: "alpha" }));
-      unregisterBeta = getContext().registerItem(makeItem({ id: 2, value: "beta" }));
-    });
-    expect(getContext().value).toBe("beta");
+    alpha.unregister();
+    beta.unregister();
+    core.syncValue();
 
-    // Popup closes: items unregister — value must survive.
-    act(() => {
-      unregisterAlpha!();
-      unregisterBeta!();
-    });
-    expect(getContext().value).toBe("beta");
+    expect(core.value()).toBe("beta");
   });
 
   it("still falls back when the registry is non-empty and the value is invalid", () => {
-    const { getContext } = renderSelect({ defaultValue: "ghost" });
+    const core = makeSelect({ defaultValue: "ghost" });
 
-    act(() => {
-      getContext().registerItem(makeItem({ id: 1, value: "alpha" }));
-      getContext().registerItem(makeItem({ id: 2, value: "beta" }));
-    });
+    register(core, "alpha");
+    register(core, "beta");
+    core.syncValue();
 
-    expect(getContext().value).toBe("alpha");
+    expect(core.value()).toBe("alpha");
   });
 
   it("still falls back off a disabled selected item", () => {
-    const { getContext } = renderSelect({ defaultValue: "beta" });
+    const core = makeSelect({ defaultValue: "beta" });
 
-    act(() => {
-      getContext().registerItem(makeItem({ id: 1, value: "alpha" }));
-      getContext().registerItem(makeItem({ id: 2, value: "beta", disabled: true }));
-    });
+    register(core, "alpha");
+    register(core, "beta", { disabled: true });
+    core.syncValue();
 
-    expect(getContext().value).toBe("alpha");
+    expect(core.value()).toBe("alpha");
+  });
+
+  it("refuses to open while disabled, but still closes", () => {
+    const core = makeSelect({ disabled: () => true, defaultOpen: true });
+
+    core.setOpen(false);
+    expect(core.open()).toBe(false);
+
+    core.setOpen(true);
+    expect(core.open()).toBe(false);
+  });
+
+  it("reports an item's text for the current selection", () => {
+    const core = makeSelect({ defaultValue: "alpha" });
+    register(core, "alpha", { textValue: "Alpha" });
+
+    expect(core.getItemText("alpha")).toBe("Alpha");
+    expect(core.getItemText("ghost")).toBeUndefined();
   });
 });

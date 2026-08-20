@@ -1,78 +1,42 @@
-import { useActivationGuard, useFocusNode } from "@lattice-ui/react-focus";
-import { composeEvents, composeRefs, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { useFocusNode } from "@lattice-ui/react-focus";
+import {
+  applyElementSpec,
+  composeRefs,
+  getPassthroughProps,
+  React,
+  Slot,
+  toSlotProps,
+  useLatticeCore,
+} from "@lattice-ui/react-runtime";
 import { useSelectContext } from "./context";
 import type { SelectTriggerProps } from "./types";
 
 const OWN_PROPS = ["asChild", "disabled", "children"] as const;
 
-// Roblox instance defaults are themselves a look: a bare `textbutton` renders an opaque grey box
-// labelled "Button". Neutralize only that, and leave every real appearance decision (colors, size,
-// fonts, text) to the consumer. Passthrough props are spread after these, so they stay overridable.
-const NEUTRAL_PROPS = {
-  AutoButtonColor: false,
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-  Text: "",
-};
-
-function toGuiObject(instance: Instance | undefined) {
-  if (!instance?.IsA("GuiObject")) {
-    return undefined;
-  }
-
-  return instance;
-}
-
 export function SelectTrigger(props: SelectTriggerProps) {
-  const selectContext = useSelectContext();
-  const disabled = selectContext.disabled || props.disabled === true;
-  const triggerRef = selectContext.triggerRef;
+  const core = useSelectContext().core;
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
 
-  const setTriggerRef = React.useCallback(
-    (instance: Instance | undefined) => {
-      triggerRef.current = toGuiObject(instance);
-    },
-    [triggerRef],
-  );
+  // The core owns the trigger instance; focus navigation registers through a React ref, so the
+  // instance is mirrored into one here rather than duplicated as state.
+  const triggerRef = React.useRef<GuiObject>();
+  const captureTrigger = React.useCallback((instance: Instance | undefined) => {
+    triggerRef.current = instance?.IsA("GuiObject") === true ? instance : undefined;
+  }, []);
+
+  // Built once: the trigger owns the activation guard that collapses the paired events of a single
+  // gamepad or keyboard activation.
+  const trigger = useLatticeCore(() => core.createTrigger({ disabled: () => propsRef.current.disabled }));
 
   useFocusNode({
     ref: triggerRef,
-    disabled,
+    getDisabled: () => trigger.disabled(),
   });
 
-  const claimActivation = useActivationGuard();
-
-  // Both `Activated` and the `Return`/`Space` `InputBegan` branch route through
-  // this guarded toggle so a single gamepad/keyboard activation — which fires
-  // both events — flips `open` once instead of cancelling itself out.
-  const toggleOpen = React.useCallback(() => {
-    if (disabled || !claimActivation()) {
-      return;
-    }
-
-    selectContext.setOpen(!selectContext.open);
-  }, [claimActivation, disabled, selectContext]);
-
-  const handleInputBegan = React.useCallback(
-    (_rbx: GuiObject, inputObject: InputObject) => {
-      const keyCode = inputObject.KeyCode;
-      if (keyCode === Enum.KeyCode.Return || keyCode === Enum.KeyCode.Space) {
-        toggleOpen();
-      }
-    },
-    [toggleOpen],
-  );
-
   const passthrough = getPassthroughProps<TextButton>(props, OWN_PROPS);
-  const behaviorProps = {
-    Active: !disabled,
-    Event: composeEvents(passthrough.Event, {
-      Activated: toggleOpen,
-      InputBegan: handleInputBegan,
-    }),
-    Selectable: !disabled,
-    ref: composeRefs<Instance>(passthrough.ref as never, setTriggerRef),
-  };
+  const merged = applyElementSpec(trigger.spec(), passthrough, { neutral: props.asChild !== true });
+  merged.ref = composeRefs<Instance>(merged.ref as never, captureTrigger);
 
   if (props.asChild) {
     const child = props.children;
@@ -81,16 +45,8 @@ export function SelectTrigger(props: SelectTriggerProps) {
     }
 
     // No neutral defaults here: the rendered element belongs to the consumer.
-    return (
-      <Slot {...toSlotProps(passthrough)} {...behaviorProps}>
-        {child}
-      </Slot>
-    );
+    return <Slot {...toSlotProps(merged)}>{child}</Slot>;
   }
 
-  return (
-    <textbutton {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
-      {props.children}
-    </textbutton>
-  );
+  return <textbutton {...merged}>{props.children}</textbutton>;
 }
