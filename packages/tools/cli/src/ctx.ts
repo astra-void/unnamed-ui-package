@@ -5,8 +5,10 @@ import { detectPackageManager, type PackageManagerResolutionSource } from "./cor
 import type { PackageManagerPin } from "./core/pm/devEngines";
 import type { PackageManager, PackageManagerName } from "./core/pm/types";
 import { findRoot } from "./core/project/findRoot";
+import { type ResolvedFramework, resolveFramework } from "./core/project/framework";
+import { readPackageJson } from "./core/project/readPackageJson";
 import { loadRegistry } from "./core/registry/load";
-import type { Registry } from "./core/registry/schema";
+import { type FrameworkRegistry, type Registry, resolveFrameworkRegistry } from "./core/registry/schema";
 
 export interface ContextOptions {
   cwd: string;
@@ -14,6 +16,8 @@ export interface ContextOptions {
   dryRun: boolean;
   yes: boolean;
   verbose?: boolean;
+  /** Which layer the command is for. Detected from the project when it is not passed. */
+  framework?: string;
 }
 
 export interface CliContext {
@@ -28,7 +32,11 @@ export interface CliContext {
   installedPackageManagers: PackageManagerName[];
   pmResolutionSource: PackageManagerResolutionSource;
   pins: PackageManagerPin[];
+  /** Every framework, which is what `doctor` needs to recognize a package from any layer. */
   registry: Registry;
+  /** The active framework's slice of it, which is what every other command works against. */
+  components: FrameworkRegistry;
+  framework: ResolvedFramework;
 }
 
 export async function createContext(
@@ -57,6 +65,11 @@ export async function createContext(
     },
   });
   const registry = config?.registry ?? (await loadRegistry());
+  // A project without a package.json cannot say which framework it is on, which is only reachable
+  // through `allowMissingProject`; the default framework covers it.
+  const packageJson = await readPackageJson(projectRoot).catch(() => undefined);
+  const framework = resolveFramework(registry, packageJson, options.framework);
+  const components = resolveFrameworkRegistry(registry, framework.framework);
 
   return {
     cwd,
@@ -71,5 +84,7 @@ export async function createContext(
     pmResolutionSource: pm.source,
     pins: pm.pins,
     registry,
+    components,
+    framework,
   };
 }

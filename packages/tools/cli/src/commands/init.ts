@@ -34,6 +34,7 @@ export interface InitCommandInput {
   yes: boolean;
   dryRun: boolean;
   template?: string;
+  framework?: string;
   lint?: boolean;
   verbose?: boolean;
 }
@@ -93,15 +94,57 @@ const PNPM_NPMRC_PATH = ".npmrc";
 const PNPM_NODE_LINKER_LINE = "node-linker=hoisted";
 
 const CORE_VERSION_PACKAGES = {
-  latticeStyle: "@lattice-ui/react-style",
   latticeCli: "lattice-ui",
-  rbxtsReact: "@rbxts/react",
-  rbxtsReactRoblox: "@rbxts/react-roblox",
   rbxtsCompilerTypes: "@rbxts/compiler-types",
   rbxtsTypes: "@rbxts/types",
   robloxTs: "roblox-ts",
   typescript: "typescript",
 } as const;
+
+/**
+ * What a starter needs that depends on which layer it is for.
+ *
+ * The template tree is split the same way: `templates/init` is the part every project gets, and
+ * `templates/init-<framework>` carries the tsconfig's JSX factory, the client entry point, and the
+ * dependencies that only make sense on that layer.
+ */
+export const FRAMEWORK_VERSION_PACKAGES: Record<string, Record<string, string>> = {
+  react: {
+    latticeStyle: "@lattice-ui/react-style",
+    rbxtsReact: "@rbxts/react",
+    rbxtsReactRoblox: "@rbxts/react-roblox",
+  },
+  vide: {
+    latticeStyle: "@lattice-ui/vide-style",
+    rbxtsVide: "@rbxts/vide",
+  },
+};
+
+export function frameworkTemplateDir(framework: string): string {
+  return path.resolve(__dirname, `../../templates/init-${framework}`);
+}
+
+const DEFAULT_FRAMEWORK = "react";
+
+/**
+ * Which layer to scaffold.
+ *
+ * The registry decides what `lattice add` may install; a starter is a different question, because
+ * it needs a template of its own. Only a framework with one can be scaffolded.
+ */
+export function selectFramework(provided: string | undefined): string {
+  const value = provided?.trim();
+  if (!value || value.length === 0) {
+    return DEFAULT_FRAMEWORK;
+  }
+
+  if (!FRAMEWORK_VERSION_PACKAGES[value]) {
+    const names = Object.keys(FRAMEWORK_VERSION_PACKAGES).sort((left, right) => left.localeCompare(right));
+    throw usageError(`No starter template for framework: ${value}.`, `Supported frameworks: ${names.join(", ")}`);
+  }
+
+  return value;
+}
 
 const LINT_VERSION_PACKAGES = {
   eslint: "eslint",
@@ -349,13 +392,20 @@ function inferProjectName(projectRoot: string, manifest: PackageJson): string {
   return path.basename(projectRoot);
 }
 
-function buildVersionReplacements(projectName: string, versions: Record<string, string>): Record<string, string> {
+function buildVersionReplacements(
+  projectName: string,
+  versions: Record<string, string>,
+  framework: string,
+): Record<string, string> {
+  const frameworkPackages = FRAMEWORK_VERSION_PACKAGES[framework] ?? {};
+
   return {
     __PROJECT_NAME__: projectName,
-    __LATTICE_STYLE_VERSION__: versions[CORE_VERSION_PACKAGES.latticeStyle],
+    __LATTICE_STYLE_VERSION__: versions[frameworkPackages.latticeStyle] ?? "",
     __LATTICE_CLI_VERSION__: versions[CORE_VERSION_PACKAGES.latticeCli],
-    __RBXTS_REACT_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsReact],
-    __RBXTS_REACT_ROBLOX_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsReactRoblox],
+    __RBXTS_REACT_VERSION__: versions[frameworkPackages.rbxtsReact] ?? "",
+    __RBXTS_REACT_ROBLOX_VERSION__: versions[frameworkPackages.rbxtsReactRoblox] ?? "",
+    __RBXTS_VIDE_VERSION__: versions[frameworkPackages.rbxtsVide] ?? "",
     __RBXTS_COMPILER_TYPES_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsCompilerTypes],
     __RBXTS_TYPES_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsTypes],
     __ROBLOX_TS_VERSION__: versions[CORE_VERSION_PACKAGES.robloxTs],
@@ -435,17 +485,12 @@ async function planPnpmNpmrc(projectRoot: string, packageManager: PackageManager
 }
 
 function collectChangedFiles(
-  templateReport: CopyTemplateReport,
-  lintReport: CopyTemplateReport | undefined,
+  reports: CopyTemplateReport[],
   manifestPlan: ManifestPlan,
   gitignorePlan: GitignorePlan,
   npmrcPlan: NpmrcPlan,
 ): string[] {
-  const files = [
-    ...templateReport.created,
-    ...templateReport.merged,
-    ...(lintReport ? [...lintReport.created, ...lintReport.merged] : []),
-  ];
+  const files = reports.flatMap((report) => [...report.created, ...report.merged]);
 
   if (manifestPlan.changed) {
     files.push("package.json");
@@ -462,30 +507,22 @@ function collectChangedFiles(
   return [...new Set(files)].sort((left, right) => left.localeCompare(right));
 }
 
-function countCreatedFiles(
-  templateReport: CopyTemplateReport,
-  lintReport: CopyTemplateReport | undefined,
-  gitignorePlan: GitignorePlan,
-  npmrcPlan: NpmrcPlan,
-): number {
-  return (
-    templateReport.created.length +
-    (lintReport?.created.length ?? 0) +
-    (gitignorePlan.created ? 1 : 0) +
-    (npmrcPlan.created ? 1 : 0)
-  );
+function countCreatedFiles(reports: CopyTemplateReport[], gitignorePlan: GitignorePlan, npmrcPlan: NpmrcPlan): number {
+  const fromTemplates = reports.reduce((total, report) => total + report.created.length, 0);
+
+  return fromTemplates + (gitignorePlan.created ? 1 : 0) + (npmrcPlan.created ? 1 : 0);
 }
 
 function countMergedFiles(
-  templateReport: CopyTemplateReport,
-  lintReport: CopyTemplateReport | undefined,
+  reports: CopyTemplateReport[],
   manifestPlan: ManifestPlan,
   gitignorePlan: GitignorePlan,
   npmrcPlan: NpmrcPlan,
 ): number {
+  const fromTemplates = reports.reduce((total, report) => total + report.merged.length, 0);
+
   return (
-    templateReport.merged.length +
-    (lintReport?.merged.length ?? 0) +
+    fromTemplates +
     (manifestPlan.changed ? 1 : 0) +
     (gitignorePlan.changed && !gitignorePlan.created ? 1 : 0) +
     (npmrcPlan.changed && !npmrcPlan.created ? 1 : 0)
@@ -510,6 +547,7 @@ export async function runInitCommand(
   }
 
   const template = await selectTemplate(input.template);
+  const framework = selectFramework(input.framework);
   const lintEnabled = await selectLintEnabled(runtime, input.lint, promptConfirmFn);
   const resolvedPm = await detectPackageManagerFn(projectRoot, input.pm, {
     runtime,
@@ -525,6 +563,7 @@ export async function runInitCommand(
   logger.fields([
     ["Project", linkPath(projectRoot, input.cwd)],
     ["Template", template],
+    ["Framework", framework],
     ["Manager", describePackageManager(resolvedPm.name, resolvedPm.source)],
     ["Lint/format", lintEnabled ? "enabled" : "disabled"],
   ]);
@@ -532,47 +571,46 @@ export async function runInitCommand(
   const currentManifest = await readPackageJson(projectRoot);
   const packagesToResolve = selectResolvablePackages([
     ...Object.values(CORE_VERSION_PACKAGES),
+    ...Object.values(FRAMEWORK_VERSION_PACKAGES[framework] ?? {}),
     ...(lintEnabled ? Object.values(LINT_VERSION_PACKAGES) : []),
     ...resolveLegacyReplacements(currentManifest),
   ]);
   const versions = applyPinnedVersions(await resolveLatestVersionsFn(packagesToResolve));
-  const replacements = buildVersionReplacements(inferProjectName(projectRoot, currentManifest), versions);
+  const replacements = buildVersionReplacements(inferProjectName(projectRoot, currentManifest), versions, framework);
 
-  const templateDir = path.resolve(__dirname, "../../templates/init");
-  const lintTemplateDir = path.resolve(__dirname, "../../templates/init-lint");
-  const templateManifest = await readTemplateJson<PackageJson>(templateDir, "package.json", replacements);
-  const lintManifest = lintEnabled
-    ? await readTemplateJson<PackageJson>(lintTemplateDir, "package.json", replacements)
-    : undefined;
+  // The base tree is what every project gets; the framework tree carries the JSX factory, the
+  // client entry point and the dependencies that only make sense on that layer.
+  const templateDirs = [path.resolve(__dirname, "../../templates/init"), frameworkTemplateDir(framework)];
+  if (lintEnabled) {
+    templateDirs.push(path.resolve(__dirname, "../../templates/init-lint"));
+  }
 
-  const templateReport = await copyTemplateSafe(templateDir, projectRoot, {
-    dryRun: true,
-    logger,
-    replacements,
-    shouldIncludeFile: (relativePath) => relativePath !== "package.json",
-  });
-  const lintReport = lintEnabled
-    ? await copyTemplateSafe(lintTemplateDir, projectRoot, {
+  const templateManifests: PackageJson[] = [];
+  for (const dir of templateDirs) {
+    templateManifests.push(await readTemplateJson<PackageJson>(dir, "package.json", replacements));
+  }
+
+  const templateReports: CopyTemplateReport[] = [];
+  for (const dir of templateDirs) {
+    templateReports.push(
+      await copyTemplateSafe(dir, projectRoot, {
         dryRun: true,
         logger,
         replacements,
         shouldIncludeFile: (relativePath) => relativePath !== "package.json",
-      })
-    : undefined;
-  const manifestPlan = planManifestChanges(
-    currentManifest,
-    lintManifest ? [templateManifest, lintManifest] : [templateManifest],
-    resolvedPm.name,
-    versions,
-  );
+      }),
+    );
+  }
+
+  const manifestPlan = planManifestChanges(currentManifest, templateManifests, resolvedPm.name, versions);
   const gitignorePlan = await planGitignore(projectRoot);
   const npmrcPlan = await planPnpmNpmrc(projectRoot, resolvedPm.name);
-  const changedFiles = collectChangedFiles(templateReport, lintReport, manifestPlan, gitignorePlan, npmrcPlan);
+  const changedFiles = collectChangedFiles(templateReports, manifestPlan, gitignorePlan, npmrcPlan);
   const addedPackages = [...new Set([...manifestPlan.addedDependencies, ...manifestPlan.addedDevDependencies])].sort(
     (left, right) => left.localeCompare(right),
   );
-  const createdCount = countCreatedFiles(templateReport, lintReport, gitignorePlan, npmrcPlan);
-  const mergedCount = countMergedFiles(templateReport, lintReport, manifestPlan, gitignorePlan, npmrcPlan);
+  const createdCount = countCreatedFiles(templateReports, gitignorePlan, npmrcPlan);
+  const mergedCount = countMergedFiles(templateReports, manifestPlan, gitignorePlan, npmrcPlan);
   const localLattice = resolveLocalLatticeCommand(resolvedPm.name);
   const installRequired = manifestPlan.changed || npmrcPlan.changed;
 
@@ -652,15 +690,8 @@ export async function runInitCommand(
     const directorySnapshots = await snapshotDirectories(projectRoot, PROJECT_DIRECTORIES);
 
     try {
-      await copyTemplateSafe(templateDir, projectRoot, {
-        dryRun: false,
-        logger,
-        replacements,
-        shouldIncludeFile: (relativePath) => relativePath !== "package.json",
-      });
-
-      if (lintEnabled) {
-        await copyTemplateSafe(lintTemplateDir, projectRoot, {
+      for (const dir of templateDirs) {
+        await copyTemplateSafe(dir, projectRoot, {
           dryRun: false,
           logger,
           replacements,

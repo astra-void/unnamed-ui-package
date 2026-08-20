@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@lattice-ui/react-style": "__LATTICE_STYLE_VERSION__",
+    "@rbxts/react": "__RBXTS_REACT_VERSION__",
+    "@rbxts/react-roblox": "__RBXTS_REACT_ROBLOX_VERSION__"
+  }
+}

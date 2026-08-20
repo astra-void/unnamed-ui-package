@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@lattice-ui/vide-style": "__LATTICE_STYLE_VERSION__",
+    "@rbxts/vide": "__RBXTS_VIDE_VERSION__"
+  }
+}

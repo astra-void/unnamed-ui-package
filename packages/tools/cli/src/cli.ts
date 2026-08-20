@@ -5,7 +5,7 @@ import { runCreateCommand } from "./commands/create";
 import { runDoctorCommand } from "./commands/doctor";
 import { runInitCommand } from "./commands/init";
 import { runRemoveCommand } from "./commands/remove";
-import { resolveComponentSelection } from "./commands/selection";
+import { assertKnownComponentNames } from "./commands/selection";
 import { runUpgradeCommand } from "./commands/upgrade";
 import { usageError } from "./core/errors";
 import { loadRegistry } from "./core/registry/load";
@@ -32,18 +32,55 @@ const GLOBAL_OPTIONS: [string, string][] = [
 const PM_OPTION: [string, string] = ["    --pm <pnpm|npm|yarn>", "Force a package manager instead of detecting one."];
 const YES_OPTION: [string, string] = ["-y, --yes", "Skip prompts and accept the default answer for each."];
 const DRY_RUN_OPTION: [string, string] = ["    --dry-run", "Show what would happen without touching the project."];
+const FRAMEWORK_OPTION: [string, string] = [
+  "    --framework <react|vide>",
+  "Which layer to work with. Detected from the project when omitted.",
+];
 
+/**
+ * Lists the registry, grouped by which frameworks ship each component.
+ *
+ * A flat list would read as though every name were available everywhere, which is the one thing a
+ * reader on the newer layer most needs not to believe.
+ */
 function listRegistryNames(registry: Registry): string[] {
-  const components = Object.keys(registry.packages).sort((left, right) => left.localeCompare(right));
-  const presets = Object.keys(registry.presets).sort((left, right) => left.localeCompare(right));
+  const frameworkNames = Object.keys(registry.frameworks).sort((left, right) => left.localeCompare(right));
+  const everywhere: string[] = [];
+  const bySubset = new Map<string, string[]>();
 
-  return [
-    "Components:",
-    ...wrapNames(components),
+  for (const componentName of Object.keys(registry.packages).sort((left, right) => left.localeCompare(right))) {
+    const shipsFor = frameworkNames.filter((name) => registry.packages[componentName].frameworks[name] !== undefined);
+
+    if (shipsFor.length === frameworkNames.length) {
+      everywhere.push(componentName);
+      continue;
+    }
+
+    const key = shipsFor.join(", ");
+    const existing = bySubset.get(key);
+    if (existing) {
+      existing.push(componentName);
+    } else {
+      bySubset.set(key, [componentName]);
+    }
+  }
+
+  const presets = Object.keys(registry.presets).sort((left, right) => left.localeCompare(right));
+  const lines: string[] = [
+    "Frameworks:",
+    ...frameworkNames.map((name) => `  ${name} (${registry.frameworks[name].label})`),
     "",
-    "Presets:",
-    ...presets.map((preset) => `  ${preset} (${registry.presets[preset].join(", ")})`),
+    `Components (${frameworkNames.join(" and ")}):`,
+    ...wrapNames(everywhere),
   ];
+
+  for (const [subset, names] of [...bySubset].sort((left, right) => left[0].localeCompare(right[0]))) {
+    lines.push("", `Components (${subset} only):`, ...wrapNames(names));
+  }
+
+  lines.push("", "Presets:", ...presets.map((preset) => `  ${preset} (${registry.presets[preset].join(", ")})`));
+
+  return lines;
 }
 
 /** Packs names into ~76-column rows so long registries do not scroll a terminal off-screen. */
@@ -78,9 +115,15 @@ const COMMANDS: CommandSpec[] = [
       PM_OPTION,
       ["    --git", "Initialize a git repository in the new project."],
       ["    --template <rbxts>", "Template to scaffold from. Defaults to rbxts."],
+      FRAMEWORK_OPTION,
       ["    --lint / --no-lint", "Force ESLint + Prettier setup on or off."],
     ],
-    examples: ["lattice create", "lattice create my-game --pm npm --git --no-lint", "lattice create my-game --yes"],
+    examples: [
+      "lattice create",
+      "lattice create my-game --framework vide",
+      "lattice create my-game --pm npm --git --no-lint",
+      "lattice create my-game --yes",
+    ],
   },
   {
     name: "init",
@@ -91,9 +134,15 @@ const COMMANDS: CommandSpec[] = [
       DRY_RUN_OPTION,
       PM_OPTION,
       ["    --template <rbxts>", "Template to initialize from. Defaults to rbxts."],
+      FRAMEWORK_OPTION,
       ["    --lint", "Also set up ESLint + Prettier."],
     ],
-    examples: ["lattice init", "lattice init --dry-run", "lattice init --yes --pm pnpm --lint"],
+    examples: [
+      "lattice init",
+      "lattice init --framework vide",
+      "lattice init --dry-run",
+      "lattice init --yes --pm pnpm --lint",
+    ],
   },
   {
     name: "add",
@@ -101,11 +150,17 @@ const COMMANDS: CommandSpec[] = [
     usage: "lattice add [name...] [options]",
     options: [
       ["    --preset <preset...>", "Add every component in a preset. Comma-separated."],
+      FRAMEWORK_OPTION,
       YES_OPTION,
       DRY_RUN_OPTION,
       PM_OPTION,
     ],
-    examples: ["lattice add", "lattice add dialog toast", "lattice add dialog,toast --preset overlay --dry-run"],
+    examples: [
+      "lattice add",
+      "lattice add dialog toast",
+      "lattice add dialog --framework vide",
+      "lattice add dialog,toast --preset overlay --dry-run",
+    ],
     extra: listRegistryNames,
   },
   {
@@ -114,6 +169,7 @@ const COMMANDS: CommandSpec[] = [
     usage: "lattice remove [name...] [options]",
     options: [
       ["    --preset <preset...>", "Remove every component in a preset. Comma-separated."],
+      FRAMEWORK_OPTION,
       YES_OPTION,
       DRY_RUN_OPTION,
       PM_OPTION,
@@ -127,6 +183,7 @@ const COMMANDS: CommandSpec[] = [
     usage: "lattice upgrade [name...] [options]",
     options: [
       ["    --preset <preset...>", "Limit the upgrade to a preset. Comma-separated."],
+      FRAMEWORK_OPTION,
       YES_OPTION,
       DRY_RUN_OPTION,
       PM_OPTION,
@@ -138,8 +195,8 @@ const COMMANDS: CommandSpec[] = [
     name: "doctor",
     summary: "Check lockfiles, peers, and provider expectations.",
     usage: "lattice doctor [options]",
-    options: [PM_OPTION],
-    examples: ["lattice doctor", "lattice doctor --pm pnpm"],
+    options: [FRAMEWORK_OPTION, PM_OPTION],
+    examples: ["lattice doctor", "lattice doctor --pm pnpm", "lattice doctor --framework vide"],
   },
 ];
 
@@ -216,6 +273,7 @@ interface ParsedCreateArgs {
   pm?: string;
   git?: boolean;
   template?: string;
+  framework?: string;
   lint?: boolean;
   verbose: boolean;
 }
@@ -224,6 +282,7 @@ interface ParsedSelectionArgs {
   names: string[];
   presets: string[];
   pm?: string;
+  framework?: string;
   yes: boolean;
   dryRun: boolean;
   verbose: boolean;
@@ -233,6 +292,7 @@ interface ParsedInitArgs {
   yes: boolean;
   dryRun: boolean;
   pm?: string;
+  framework?: string;
   template?: string;
   lint?: boolean;
   verbose: boolean;
@@ -240,6 +300,7 @@ interface ParsedInitArgs {
 
 interface ParsedDoctorArgs {
   pm?: string;
+  framework?: string;
   verbose: boolean;
 }
 
@@ -331,6 +392,7 @@ function parseTopLevel(argv: string[]): ParsedCommandLine {
 }
 
 function parseCreateArgs(args: string[]): ParsedCreateArgs {
+  let framework: string | undefined;
   const positionals: string[] = [];
   let yes = false;
   let verbose = false;
@@ -387,6 +449,13 @@ function parseCreateArgs(args: string[]): ParsedCreateArgs {
       continue;
     }
 
+    if (token === "--framework" || token.startsWith("--framework=")) {
+      const read = readOptionValue(args, index, "--framework");
+      framework = read.value;
+      index = read.nextIndex;
+      continue;
+    }
+
     if (token.startsWith("-")) {
       unknownOptionError("create", token);
     }
@@ -408,6 +477,7 @@ function parseCreateArgs(args: string[]): ParsedCreateArgs {
     pm,
     git,
     template,
+    framework,
     lint,
     verbose,
   };
@@ -418,6 +488,7 @@ function parseInitArgs(args: string[]): ParsedInitArgs {
   let dryRun = false;
   let verbose = false;
   let pm: string | undefined;
+  let framework: string | undefined;
   let template: string | undefined;
   let lint: boolean | undefined;
 
@@ -453,6 +524,13 @@ function parseInitArgs(args: string[]): ParsedInitArgs {
       continue;
     }
 
+    if (token === "--framework" || token.startsWith("--framework=")) {
+      const read = readOptionValue(args, index, "--framework");
+      framework = read.value;
+      index = read.nextIndex;
+      continue;
+    }
+
     if (token === "--lint") {
       lint = true;
       continue;
@@ -473,6 +551,7 @@ function parseInitArgs(args: string[]): ParsedInitArgs {
     yes,
     dryRun,
     pm,
+    framework,
     template,
     lint,
     verbose,
@@ -483,6 +562,7 @@ function parseSelectionArgs(args: string[], command: "add" | "remove" | "upgrade
   const names: string[] = [];
   const presets: string[] = [];
   let pm: string | undefined;
+  let framework: string | undefined;
   let yes = false;
   let dryRun = false;
   let verbose = false;
@@ -500,6 +580,13 @@ function parseSelectionArgs(args: string[], command: "add" | "remove" | "upgrade
     if (token === "--pm" || token.startsWith("--pm=")) {
       const read = readOptionValue(args, index, "--pm");
       pm = read.value;
+      index = read.nextIndex;
+      continue;
+    }
+
+    if (token === "--framework" || token.startsWith("--framework=")) {
+      const read = readOptionValue(args, index, "--framework");
+      framework = read.value;
       index = read.nextIndex;
       continue;
     }
@@ -530,6 +617,7 @@ function parseSelectionArgs(args: string[], command: "add" | "remove" | "upgrade
     names,
     presets,
     pm,
+    framework,
     yes,
     dryRun,
     verbose,
@@ -538,6 +626,7 @@ function parseSelectionArgs(args: string[], command: "add" | "remove" | "upgrade
 
 function parseDoctorArgs(args: string[]): ParsedDoctorArgs {
   let pm: string | undefined;
+  let framework: string | undefined;
   let verbose = false;
 
   for (let index = 0; index < args.length; index += 1) {
@@ -546,6 +635,13 @@ function parseDoctorArgs(args: string[]): ParsedDoctorArgs {
     if (token === "--pm" || token.startsWith("--pm=")) {
       const read = readOptionValue(args, index, "--pm");
       pm = read.value;
+      index = read.nextIndex;
+      continue;
+    }
+
+    if (token === "--framework" || token.startsWith("--framework=")) {
+      const read = readOptionValue(args, index, "--framework");
+      framework = read.value;
       index = read.nextIndex;
       continue;
     }
@@ -566,7 +662,7 @@ function parseDoctorArgs(args: string[]): ParsedDoctorArgs {
     );
   }
 
-  return { pm, verbose };
+  return { pm, framework, verbose };
 }
 
 async function readCliVersion(): Promise<string> {
@@ -645,10 +741,11 @@ export async function runCli(argv: string[]): Promise<void> {
     const selection = parseSelectionArgs(parsed.commandArgs, command);
 
     // Validate names against the registry before package-manager detection, which can prompt or
-    // fail for reasons unrelated to the typo the user actually made.
+    // fail for reasons unrelated to the typo the user actually made. Whether a name ships for the
+    // project's framework needs the project, so that check waits for the context.
     const registry = await loadRegistry();
     if (selection.names.length > 0 || selection.presets.length > 0) {
-      resolveComponentSelection({ registry }, { names: selection.names, presets: selection.presets });
+      assertKnownComponentNames(registry, { names: selection.names, presets: selection.presets });
     }
 
     const ctx = await createContext(
@@ -658,6 +755,7 @@ export async function runCli(argv: string[]): Promise<void> {
         dryRun: selection.dryRun,
         yes: selection.yes,
         verbose: selection.verbose,
+        framework: selection.framework,
       },
       { registry },
     );
@@ -681,6 +779,7 @@ export async function runCli(argv: string[]): Promise<void> {
       dryRun: false,
       yes: false,
       verbose: doctorArgs.verbose,
+      framework: doctorArgs.framework,
     });
     await runDoctorCommand(ctx);
     return;

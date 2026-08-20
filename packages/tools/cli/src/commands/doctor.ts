@@ -3,6 +3,7 @@ import { getDependencyNames, type PackageJsonLike } from "../core/fs/patch";
 import { PINNED_VERSIONS } from "../core/npm/pins";
 import { describePackageManager, linkPath, plural, resolveLocalLatticeCommand, summarizeItems } from "../core/output";
 import type { PackageManagerName } from "../core/pm/types";
+import { describeFramework } from "../core/project/framework";
 import { LEGACY_PACKAGE_RENAMES } from "../core/project/legacyPackages";
 import { readPackageJson } from "../core/project/readPackageJson";
 import { parseProviderRequirement } from "../core/registry/schema";
@@ -94,6 +95,7 @@ export async function runDoctorCommand(ctx: CliContext): Promise<void> {
   ctx.logger.fields([
     ["Project", linkPath(ctx.projectRoot, ctx.cwd)],
     ["Manager", describePackageManager(ctx.pmName, ctx.pmResolutionSource)],
+    ["Framework", describeFramework(ctx)],
   ]);
 
   const manifest = await readPackageJson(ctx.projectRoot);
@@ -150,9 +152,17 @@ export async function runDoctorCommand(ctx: CliContext): Promise<void> {
     });
   }
 
-  const componentByNpm = new Map<string, string>();
+  /**
+   * Every layer's packages, not just the active one's.
+   *
+   * A project on Vide can still have a React package left over from before it moved, and calling
+   * that unknown would be wrong — it is known, and it is from the other layer.
+   */
+  const componentByNpm = new Map<string, { component: string; framework: string }>();
   for (const [componentName, entry] of Object.entries(ctx.registry.packages)) {
-    componentByNpm.set(entry.npm, componentName);
+    for (const [frameworkName, forFramework] of Object.entries(entry.frameworks)) {
+      componentByNpm.set(forFramework.npm, { component: componentName, framework: frameworkName });
+    }
   }
 
   for (const npmPackage of installedLatticeComponents) {
@@ -166,8 +176,8 @@ export async function runDoctorCommand(ctx: CliContext): Promise<void> {
       continue;
     }
 
-    const componentName = componentByNpm.get(npmPackage);
-    if (!componentName) {
+    const known = componentByNpm.get(npmPackage);
+    if (!known) {
       issues.push({
         code: "unknown-lattice-package",
         level: "warn",
@@ -176,9 +186,11 @@ export async function runDoctorCommand(ctx: CliContext): Promise<void> {
       continue;
     }
 
-    const entry = ctx.registry.packages[componentName];
+    const componentName = known.component;
+    const entry = ctx.registry.packages[componentName].frameworks[known.framework];
+    const peers = entry.peers ?? ctx.registry.frameworks[known.framework].peers;
 
-    for (const peer of entry.peers ?? []) {
+    for (const peer of peers) {
       if (!installedDependencies.has(peer)) {
         issues.push({
           code: "missing-peer",

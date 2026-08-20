@@ -7,6 +7,7 @@ import {
   plural,
   resolveLocalLatticeCommand,
 } from "../core/output";
+import { describeFramework } from "../core/project/framework";
 import { LEGACY_PACKAGE_RENAMES } from "../core/project/legacyPackages";
 import { readPackageJson } from "../core/project/readPackageJson";
 import { promptMultiSelect } from "../core/prompt";
@@ -16,7 +17,7 @@ import { resolveComponentSelection, type SelectionInput } from "./selection";
 
 function getSelectedRegistryPackages(ctx: CliContext, input: SelectionInput): string[] {
   const components = resolveComponentSelection(ctx, input);
-  return components.map((component) => ctx.registry.packages[component].npm);
+  return components.map((component) => ctx.components.packages[component].npm);
 }
 
 function normalizeList(values: string[]): string[] {
@@ -65,6 +66,7 @@ export async function runUpgradeCommand(ctx: CliContext, input: SelectionInput):
   ctx.logger.fields([
     ["Project", linkPath(ctx.projectRoot, ctx.cwd)],
     ["Manager", describePackageManager(ctx.pmName, ctx.pmResolutionSource)],
+    ["Framework", describeFramework(ctx)],
   ]);
 
   for (const name of legacyInstalled) {

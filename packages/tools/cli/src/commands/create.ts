@@ -13,6 +13,7 @@ import type { PackageManagerName } from "../core/pm/types";
 import { readPackageJson } from "../core/project/readPackageJson";
 import { writePackageJson } from "../core/project/writePackageJson";
 import { type PromptRuntime, promptConfirm, promptInput, promptSelect } from "../core/prompt";
+import { FRAMEWORK_VERSION_PACKAGES, frameworkTemplateDir, selectFramework } from "./init";
 
 export interface CreateCommandInput {
   cwd: string;
@@ -21,6 +22,7 @@ export interface CreateCommandInput {
   yes: boolean;
   git?: boolean;
   template?: string;
+  framework?: string;
   lint?: boolean;
   verbose?: boolean;
 }
@@ -37,10 +39,7 @@ interface CreateCommandRuntimeOverrides {
 const SUPPORTED_TEMPLATE = "rbxts";
 
 const CORE_VERSION_PACKAGES = {
-  latticeStyle: "@lattice-ui/react-style",
   latticeCli: "lattice-ui",
-  rbxtsReact: "@rbxts/react",
-  rbxtsReactRoblox: "@rbxts/react-roblox",
   rbxtsCompilerTypes: "@rbxts/compiler-types",
   rbxtsTypes: "@rbxts/types",
   robloxTs: "roblox-ts",
@@ -332,6 +331,7 @@ export async function runCreateCommand(
   const runtime: PromptRuntime = { yes: input.yes };
 
   const template = await selectTemplate(input.template);
+  const framework = selectFramework(input.framework);
   if (template !== SUPPORTED_TEMPLATE) {
     throw usageError(`Unsupported template: ${template}`);
   }
@@ -359,20 +359,37 @@ export async function runCreateCommand(
   logger.fields([
     ["Location", linkPath(targetRoot, input.cwd)],
     ["Template", template],
+    ["Framework", framework],
     ["Manager", describePackageManager(resolvedPm.name, resolvedPm.source)],
     ["Git", gitEnabled ? "enabled" : "disabled (use --git to enable)"],
     ["Lint/format", lintEnabled ? "enabled" : "disabled"],
   ]);
 
+  const frameworkPackages = FRAMEWORK_VERSION_PACKAGES[framework] ?? {};
   const versionSpinner = logger.spinner("Resolving latest package versions…");
   const packagesToResolve = selectResolvablePackages([
     ...Object.values(CORE_VERSION_PACKAGES),
+    ...Object.values(frameworkPackages),
     ...(lintEnabled ? Object.values(LINT_VERSION_PACKAGES) : []),
   ]);
   const versions = applyPinnedVersions(await resolveLatestVersionsFn(packagesToResolve));
   versionSpinner.succeed("Package versions resolved.");
 
+  // The base tree is what every project gets; the framework tree carries the JSX factory, the
+  // client entry point and the dependencies that only make sense on that layer.
   const templateDir = path.resolve(__dirname, "../../templates/init");
+  const replacements = {
+    __PROJECT_NAME__: inferPackageName(targetRoot),
+    __LATTICE_STYLE_VERSION__: versions[frameworkPackages.latticeStyle] ?? "",
+    __LATTICE_CLI_VERSION__: versions[CORE_VERSION_PACKAGES.latticeCli],
+    __RBXTS_REACT_VERSION__: versions[frameworkPackages.rbxtsReact] ?? "",
+    __RBXTS_REACT_ROBLOX_VERSION__: versions[frameworkPackages.rbxtsReactRoblox] ?? "",
+    __RBXTS_VIDE_VERSION__: versions[frameworkPackages.rbxtsVide] ?? "",
+    __RBXTS_COMPILER_TYPES_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsCompilerTypes],
+    __RBXTS_TYPES_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsTypes],
+    __ROBLOX_TS_VERSION__: versions[CORE_VERSION_PACKAGES.robloxTs],
+    __TYPESCRIPT_VERSION__: versions[CORE_VERSION_PACKAGES.typescript],
+  };
 
   // Scaffolding, install and git init are one unit: a failure at any step discards the
   // whole target directory instead of leaving an unusable half-created project behind.
@@ -385,18 +402,18 @@ export async function runCreateCommand(
     report = await copyTemplateSafe(templateDir, targetRoot, {
       dryRun: false,
       logger,
-      replacements: {
-        __PROJECT_NAME__: inferPackageName(targetRoot),
-        __LATTICE_STYLE_VERSION__: versions[CORE_VERSION_PACKAGES.latticeStyle],
-        __LATTICE_CLI_VERSION__: versions[CORE_VERSION_PACKAGES.latticeCli],
-        __RBXTS_REACT_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsReact],
-        __RBXTS_REACT_ROBLOX_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsReactRoblox],
-        __RBXTS_COMPILER_TYPES_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsCompilerTypes],
-        __RBXTS_TYPES_VERSION__: versions[CORE_VERSION_PACKAGES.rbxtsTypes],
-        __ROBLOX_TS_VERSION__: versions[CORE_VERSION_PACKAGES.robloxTs],
-        __TYPESCRIPT_VERSION__: versions[CORE_VERSION_PACKAGES.typescript],
-      },
+      replacements,
     });
+    const frameworkReport = await copyTemplateSafe(frameworkTemplateDir(framework), targetRoot, {
+      dryRun: false,
+      logger,
+      replacements,
+    });
+    report = {
+      created: [...report.created, ...frameworkReport.created],
+      merged: [...report.merged, ...frameworkReport.merged],
+      skipped: [...report.skipped, ...frameworkReport.skipped],
+    };
     scaffoldSpinner.succeed(`Scaffold complete (${report.created.length} created, ${report.merged.length} merged).`);
 
     if (lintEnabled) {

@@ -8,6 +8,7 @@ import {
   plural,
   resolveLocalLatticeCommand,
 } from "../core/output";
+import { describeFramework } from "../core/project/framework";
 import { readPackageJson } from "../core/project/readPackageJson";
 import { promptMultiSelect } from "../core/prompt";
 import type { CliContext } from "../ctx";
@@ -33,8 +34,8 @@ export async function runRemoveCommand(ctx: CliContext, input: SelectionInput): 
       throw usageError("No components selected. Provide component names or --preset when using --yes.");
     }
 
-    const installedComponents = Object.keys(ctx.registry.packages)
-      .filter((componentName) => installedDependencies.has(ctx.registry.packages[componentName].npm))
+    const installedComponents = Object.keys(ctx.components.packages)
+      .filter((componentName) => installedDependencies.has(ctx.components.packages[componentName].npm))
       .sort((left, right) => left.localeCompare(right));
 
     if (installedComponents.length === 0) {
@@ -57,19 +58,20 @@ export async function runRemoveCommand(ctx: CliContext, input: SelectionInput): 
     );
   }
 
-  const specs = normalizeList(components.map((component) => ctx.registry.packages[component].npm));
+  const specs = normalizeList(components.map((component) => ctx.components.packages[component].npm));
   const plannedSpecs = specs.filter((spec) => installedDependencies.has(spec));
   const missingComponents = normalizeList(
-    components.filter((component) => !installedDependencies.has(ctx.registry.packages[component].npm)),
+    components.filter((component) => !installedDependencies.has(ctx.components.packages[component].npm)),
   );
   const removedComponents = normalizeList(
-    components.filter((component) => installedDependencies.has(ctx.registry.packages[component].npm)),
+    components.filter((component) => installedDependencies.has(ctx.components.packages[component].npm)),
   );
 
   ctx.logger.header("lattice remove", dryRun ? "dry run" : undefined);
   ctx.logger.fields([
     ["Project", linkPath(ctx.projectRoot, ctx.cwd)],
     ["Manager", describePackageManager(ctx.pmName, ctx.pmResolutionSource)],
+    ["Framework", describeFramework(ctx)],
     ["Components", components.join(", ")],
   ]);
 

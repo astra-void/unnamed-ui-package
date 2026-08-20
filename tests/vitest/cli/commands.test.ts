@@ -12,7 +12,7 @@ import type { Logger } from "../../../packages/tools/cli/src/core/logger";
 import { detectPackageManager } from "../../../packages/tools/cli/src/core/pm/detect";
 import type { PackageManager } from "../../../packages/tools/cli/src/core/pm/types";
 import * as promptModule from "../../../packages/tools/cli/src/core/prompt";
-import type { Registry } from "../../../packages/tools/cli/src/core/registry/schema";
+import { type Registry, resolveFrameworkRegistry } from "../../../packages/tools/cli/src/core/registry/schema";
 import type { CliContext } from "../../../packages/tools/cli/src/ctx";
 
 const tempDirs: string[] = [];
@@ -90,9 +90,33 @@ function createResolvedVersions(version = "1.0.0") {
   return vi.fn(async (packages: string[]) => Object.fromEntries(packages.map((packageName) => [packageName, version])));
 }
 
+/**
+ * A single-framework registry from the flat shape these tests describe.
+ *
+ * Peers default to none rather than to the framework's, so a test that says nothing about peers
+ * keeps saying nothing about them.
+ */
+function reactRegistry(
+  packages: Record<string, { npm: string; peers?: string[]; providers?: string[]; notes?: string[] }>,
+  presets: Record<string, string[]> = {},
+): Registry {
+  return {
+    frameworks: {
+      react: { label: "React", peers: ["@rbxts/react", "@rbxts/react-roblox"], detect: ["@rbxts/react"] },
+      vide: { label: "Vide", peers: ["@rbxts/vide"], detect: ["@rbxts/vide"] },
+    },
+    defaultFramework: "react",
+    packages: Object.fromEntries(
+      Object.entries(packages).map(([name, entry]) => [name, { frameworks: { react: { peers: [], ...entry } } }]),
+    ),
+    presets,
+  };
+}
+
 function createContext(params: {
   projectRoot: string;
   registry: Registry;
+  framework?: string;
   options?: Partial<CliContext["options"]>;
   pm?: Partial<PackageManager>;
   logger?: Logger;
@@ -121,6 +145,11 @@ function createContext(params: {
     pmResolutionSource: (params.detectedLockfiles ?? ["npm"]).length > 0 ? "lockfile" : "installed",
     pins: params.pins ?? [],
     registry: params.registry,
+    components: resolveFrameworkRegistry(params.registry, params.framework ?? params.registry.defaultFramework),
+    framework: {
+      framework: params.framework ?? params.registry.defaultFramework,
+      source: params.framework === undefined ? "default" : "flag",
+    },
   };
 }
 
@@ -858,6 +887,49 @@ describe("command behavior", () => {
     expect(install).toHaveBeenCalledWith(dir);
   });
 
+  it("init scaffolds the Vide layer when asked for it", async () => {
+    const dir = await createTempDir();
+    await writeFile(path.join(dir, "package.json"), JSON.stringify({ name: "tmp" }, null, 2), "utf8");
+
+    await runInitCommand(
+      { cwd: dir, yes: true, dryRun: false, framework: "vide" },
+      {
+        detectPackageManagerFn: vi.fn(async () => ({
+          name: "npm" as const,
+          manager: createPackageManager(),
+          lockfiles: [],
+          installed: ["npm" as const],
+          source: "installed" as const,
+          pins: [],
+        })),
+        resolveLatestVersionsFn: createResolvedVersions(),
+      },
+    );
+
+    const manifest = JSON.parse(await readFile(path.join(dir, "package.json"), "utf8")) as {
+      dependencies: Record<string, string>;
+    };
+    const tsconfig = JSON.parse(await readFile(path.join(dir, "tsconfig.json"), "utf8")) as {
+      compilerOptions: { jsxFactory: string };
+    };
+    const entry = await readFile(path.join(dir, "src/client/main.client.tsx"), "utf8");
+
+    // A tsconfig carries one JSX factory, which is the whole reason the starter needs a template
+    // per framework rather than a flag.
+    expect(tsconfig.compilerOptions.jsxFactory).toBe("Vide.jsx");
+    expect(Object.keys(manifest.dependencies).sort()).toEqual(["@lattice-ui/vide-style", "@rbxts/vide"]);
+    expect(entry).toContain("Vide.mount");
+  });
+
+  it("init refuses a framework it has no starter template for", async () => {
+    const dir = await createTempDir();
+    await writeFile(path.join(dir, "package.json"), JSON.stringify({ name: "tmp" }, null, 2), "utf8");
+
+    await expect(runInitCommand({ cwd: dir, yes: true, dryRun: false, framework: "fusion" })).rejects.toThrow(
+      /no starter template for framework/i,
+    );
+  });
+
   it("init prompts for omitted package manager and lint choices", async () => {
     const dir = await createTempDir();
     await writeFile(path.join(dir, "package.json"), JSON.stringify({ name: "tmp" }, null, 2), "utf8");
@@ -1358,18 +1430,15 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       pm: { name: "npm", add },
-      registry: {
-        packages: {
+      registry: reactRegistry({
           popover: {
             npm: "@lattice-ui/react-popover",
             peers: ["@rbxts/react", "@rbxts/react-roblox"],
             providers: ["@lattice-ui/react-layer:PortalProvider?"],
           },
-        },
-        presets: {
+        }, {
           overlay: ["popover"],
-        },
-      },
+        }),
     });
 
     await runAddCommand(ctx, { names: [], presets: ["overlay"] });
@@ -1389,14 +1458,11 @@ describe("command behavior", () => {
       projectRoot: dir,
       options: { dryRun: true },
       logger,
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: {
             npm: "@lattice-ui/react-style",
           },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runAddCommand(ctx, { names: ["style"], presets: [] });
@@ -1418,14 +1484,11 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       options: { yes: true },
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: {
             npm: "@lattice-ui/react-style",
           },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await expect(runAddCommand(ctx, { names: [], presets: [] })).rejects.toThrow(/when using --yes/i);
@@ -1453,13 +1516,10 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       pm: { name: "npm", remove },
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
           dialog: { npm: "@lattice-ui/react-dialog" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runRemoveCommand(ctx, { names: ["style"], presets: [] });
@@ -1490,12 +1550,9 @@ describe("command behavior", () => {
       projectRoot: dir,
       options: { dryRun: true, yes: true },
       logger,
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runRemoveCommand(ctx, { names: ["style"], presets: [] });
@@ -1529,13 +1586,10 @@ describe("command behavior", () => {
       projectRoot: dir,
       logger,
       pm: { name: "npm", remove },
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
           dialog: { npm: "@lattice-ui/react-dialog" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runRemoveCommand(ctx, { names: ["style", "dialog"], presets: [] });
@@ -1554,12 +1608,9 @@ describe("command behavior", () => {
       projectRoot: dir,
       options: { yes: false },
       logger,
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runRemoveCommand(ctx, { names: [], presets: [] });
@@ -1592,14 +1643,11 @@ describe("command behavior", () => {
       projectRoot: dir,
       options: { yes: false },
       pm: { name: "npm", remove },
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
           dialog: { npm: "@lattice-ui/react-dialog" },
           toast: { npm: "@lattice-ui/react-toast" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runRemoveCommand(ctx, { names: [], presets: [] });
@@ -1638,13 +1686,10 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       pm: { name: "npm", add },
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
           popover: { npm: "@lattice-ui/react-popover" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runUpgradeCommand(ctx, { names: [], presets: [] });
@@ -1676,12 +1721,9 @@ describe("command behavior", () => {
       projectRoot: dir,
       options: { dryRun: true, yes: true },
       logger,
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runUpgradeCommand(ctx, { names: ["style"], presets: [] });
@@ -1711,10 +1753,7 @@ describe("command behavior", () => {
       projectRoot: dir,
       options: { dryRun: true, yes: true },
       logger,
-      registry: {
-        packages: registryPackages,
-        presets: {},
-      },
+      registry: reactRegistry(registryPackages),
     });
 
     await runUpgradeCommand(ctx, {
@@ -1734,12 +1773,9 @@ describe("command behavior", () => {
       projectRoot: dir,
       options: { dryRun: true, yes: true },
       logger,
-      registry: {
-        packages: {
+      registry: reactRegistry({
           style: { npm: "@lattice-ui/react-style" },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await runUpgradeCommand(ctx, { names: ["style"], presets: [] });
@@ -1757,10 +1793,7 @@ describe("command behavior", () => {
       projectRoot: dir,
       logger,
       pm: { name: "pnpm" },
-      registry: {
-        packages: {},
-        presets: {},
-      },
+      registry: reactRegistry({}, {}),
     });
 
     await expect(runDoctorCommand(ctx)).resolves.toBeUndefined();
@@ -1790,10 +1823,7 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       logger,
-      registry: {
-        packages: {},
-        presets: {},
-      },
+      registry: reactRegistry({}, {}),
     });
 
     await expect(runDoctorCommand(ctx)).resolves.toBeUndefined();
@@ -1824,10 +1854,7 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       logger,
-      registry: {
-        packages: { style: { npm: "@lattice-ui/react-style" } },
-        presets: {},
-      },
+      registry: reactRegistry({ style: { npm: "@lattice-ui/react-style" } }, {}),
     });
 
     await expect(runDoctorCommand(ctx)).resolves.toBeUndefined();
@@ -1858,10 +1885,7 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       logger,
-      registry: {
-        packages: { style: { npm: "@lattice-ui/react-style" } },
-        presets: {},
-      },
+      registry: reactRegistry({ style: { npm: "@lattice-ui/react-style" } }, {}),
     });
 
     await expect(runDoctorCommand(ctx)).resolves.toBeUndefined();
@@ -1892,10 +1916,7 @@ describe("command behavior", () => {
     const ctx = createContext({
       projectRoot: dir,
       logger,
-      registry: {
-        packages: {},
-        presets: {},
-      },
+      registry: reactRegistry({}, {}),
     });
 
     await expect(runDoctorCommand(ctx)).rejects.toThrow(/1 error/);
@@ -1928,32 +1949,26 @@ describe("command behavior", () => {
 
     const warningCtx = createContext({
       projectRoot: dir,
-      registry: {
-        packages: {
+      registry: reactRegistry({
           popover: {
             npm: "@lattice-ui/react-popover",
             peers: ["@rbxts/react", "@rbxts/react-roblox"],
             providers: ["@lattice-ui/react-layer:PortalProvider?"],
           },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await expect(runDoctorCommand(warningCtx)).resolves.toBeUndefined();
 
     const errorCtx = createContext({
       projectRoot: dir,
-      registry: {
-        packages: {
+      registry: reactRegistry({
           popover: {
             npm: "@lattice-ui/react-popover",
             peers: ["@rbxts/react", "@rbxts/react-roblox"],
             providers: ["@lattice-ui/react-layer:PortalProvider"],
           },
-        },
-        presets: {},
-      },
+        }, {}),
     });
 
     await expect(runDoctorCommand(errorCtx)).rejects.toThrow(/doctor found/i);

@@ -7,11 +7,7 @@
     "watch": "rbxtsc -p tsconfig.json -w",
     "typecheck": "tsc -p tsconfig.json"
   },
-  "dependencies": {
-    "@lattice-ui/react-style": "__LATTICE_STYLE_VERSION__",
-    "@rbxts/react": "__RBXTS_REACT_VERSION__",
-    "@rbxts/react-roblox": "__RBXTS_REACT_ROBLOX_VERSION__"
-  },
+  "dependencies": {},
   "devDependencies": {
     "lattice-ui": "__LATTICE_CLI_VERSION__",
     "@rbxts/compiler-types": "__RBXTS_COMPILER_TYPES_VERSION__",

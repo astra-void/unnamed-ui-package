@@ -9,6 +9,7 @@ import {
   plural,
   resolveLocalLatticeCommand,
 } from "../core/output";
+import { describeFramework } from "../core/project/framework";
 import { readPackageJson } from "../core/project/readPackageJson";
 import { promptMultiSelect } from "../core/prompt";
 import { parseProviderRequirement } from "../core/registry/schema";
@@ -29,14 +30,14 @@ async function resolveSelectionInput(ctx: CliContext, input: SelectionInput): Pr
     yes: ctx.options.yes,
   };
 
-  const presetOptions = Object.keys(ctx.registry.presets)
+  const presetOptions = Object.keys(ctx.components.presets)
     .sort((left, right) => left.localeCompare(right))
     .map((presetName) => ({
-      label: `${presetName} (${ctx.registry.presets[presetName].join(", ")})`,
+      label: `${presetName} (${ctx.components.presets[presetName].join(", ")})`,
       value: presetName,
     }));
 
-  const componentOptions = Object.keys(ctx.registry.packages)
+  const componentOptions = Object.keys(ctx.components.packages)
     .sort((left, right) => left.localeCompare(right))
     .map((componentName) => ({
       label: componentName,
@@ -64,7 +65,7 @@ export async function runAddCommand(ctx: CliContext, input: SelectionInput): Pro
   const notes: GroupItem[] = [];
 
   for (const component of components) {
-    const entry = ctx.registry.packages[component];
+    const entry = ctx.components.packages[component];
     specs.add(entry.npm);
 
     for (const peer of entry.peers ?? []) {
@@ -101,8 +102,23 @@ export async function runAddCommand(ctx: CliContext, input: SelectionInput): Pro
   ctx.logger.fields([
     ["Project", linkPath(ctx.projectRoot, ctx.cwd)],
     ["Manager", describePackageManager(ctx.pmName, ctx.pmResolutionSource)],
+    ["Framework", describeFramework(ctx)],
     ["Components", components.join(", ")],
   ]);
+
+  // A preset means the same request on every layer and quietly loses the members a layer has no
+  // package for, so say which ones rather than letting the install look complete.
+  const droppedFromPresets = resolvedInput.presets
+    .flatMap((preset) => ctx.registry.presets[preset] ?? [])
+    .filter((member) => ctx.components.packages[member] === undefined)
+    .sort((left, right) => left.localeCompare(right));
+
+  if (droppedFromPresets.length > 0) {
+    ctx.logger.group(`Not available for ${ctx.components.label}`, [...new Set(droppedFromPresets)], {
+      tone: "warn",
+      limit: ITEM_LIMIT,
+    });
+  }
 
   if (plannedSpecs.length > 0) {
     ctx.logger.group(

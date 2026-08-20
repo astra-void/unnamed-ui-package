@@ -50,7 +50,16 @@ describe("runCli", () => {
   });
 
   it("requires remove selection in --yes mode", async () => {
-    await expect(runCli(["remove", "--yes"])).rejects.toThrow(/when using --yes/i);
+    // The framework is pinned because this test runs inside the monorepo, which is on both layers.
+    await expect(runCli(["remove", "--yes", "--framework", "react"])).rejects.toThrow(/when using --yes/i);
+  });
+
+  it("asks which framework a command is for when the project depends on more than one", async () => {
+    await expect(runCli(["remove", "--yes"])).rejects.toThrow(/depends on more than one framework/i);
+  });
+
+  it("rejects a framework the registry does not declare", async () => {
+    await expect(runCli(["add", "dialog", "--framework", "fusion"])).rejects.toThrow(/unknown framework/i);
   });
 
   it("rejects unknown options for remove", async () => {
@@ -58,7 +67,7 @@ describe("runCli", () => {
   });
 
   it("accepts -y as an alias for --yes", async () => {
-    await expect(runCli(["remove", "-y"])).rejects.toThrow(/when using --yes/i);
+    await expect(runCli(["remove", "-y", "--framework", "react"])).rejects.toThrow(/when using --yes/i);
   });
 
   it("prints command help for <command> --help instead of failing on the flag", async () => {
@@ -66,8 +75,11 @@ describe("runCli", () => {
 
     expect(output).toContain("lattice add [name...] [options]");
     expect(output).toContain("--preset <preset...>");
-    // The registry listing is what makes components discoverable without running the command.
-    expect(output).toContain("Components:");
+    // The registry listing is what makes components discoverable without running the command, and
+    // it is grouped by framework so a name never reads as available everywhere when it is not.
+    expect(output).toContain("--framework <react|vide>");
+    expect(output).toContain("Components (react and vide):");
+    expect(output).toContain("Components (react only):");
     expect(output).toContain("dialog");
     expect(output).toContain("overlay (popover, tooltip, dialog, toast)");
   });
