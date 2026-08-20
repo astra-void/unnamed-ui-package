@@ -74,8 +74,9 @@ function ComboboxContentImpl(props: {
   const contentBoundaryRef = React.useRef<GuiObject>();
 
   const popper = usePopper({
-    anchorRef: comboboxContext.anchorRef,
-    contentRef: comboboxContext.contentRef,
+    // The instances live in the core, so the popper reads them from there.
+    getAnchor: comboboxContext.core.getAnchor,
+    getContent: comboboxContext.core.getContent,
     alignOffset: props.alignOffset,
     collisionPadding: props.collisionPadding,
     sideOffset: props.sideOffset,
@@ -96,11 +97,11 @@ function ComboboxContentImpl(props: {
   const setContentRef = React.useCallback(
     (instance: Instance | undefined) => {
       const guiObject = toGuiObject(instance);
-      comboboxContext.contentRef.current = guiObject;
+      comboboxContext.core.setContent(guiObject);
       contentBoundaryRef.current = guiObject;
       motion.ref.current = guiObject;
     },
-    [comboboxContext.contentRef, motion.ref],
+    [comboboxContext.core, motion.ref],
   );
 
   const handleDismiss = React.useCallback(() => {
@@ -164,7 +165,7 @@ function ComboboxContentImpl(props: {
   return (
     <DismissableLayer
       enabled={open}
-      insideRefs={[comboboxContext.triggerRef, comboboxContext.inputRef]}
+      insideRoots={comboboxContext.core.getInsideRoots}
       modal={false}
       onDismiss={handleDismiss}
       onInteractOutside={props.onInteractOutside}

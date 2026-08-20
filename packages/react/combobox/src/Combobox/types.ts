@@ -1,3 +1,4 @@
+import type { ComboboxCore } from "@lattice-ui/core-combobox";
 import type { LayerInteractEvent } from "@lattice-ui/react-layer";
 import type { PresenceMotionConfig as MotionConfig } from "@lattice-ui/react-motion";
 import type { PopperPlacement } from "@lattice-ui/react-popper";
@@ -9,15 +10,6 @@ export type ComboboxFilterFn = (itemText: string, query: string) => boolean;
 export type ComboboxSetOpen = (open: boolean) => void;
 export type ComboboxSetValue = (value: string) => void;
 export type ComboboxSetInputValue = (inputValue: string) => void;
-
-export type ComboboxItemRegistration = {
-  id: number;
-  value: string;
-  order: number;
-  getDisabled: () => boolean;
-  getTextValue: () => string;
-  getInstance: () => GuiObject | undefined;
-};
 
 export type ComboboxContextValue = {
   open: boolean;
@@ -32,12 +24,9 @@ export type ComboboxContextValue = {
   readOnly: boolean;
   required: boolean;
   filterFn: ComboboxFilterFn;
-  anchorRef: React.MutableRefObject<GuiObject | undefined>;
-  triggerRef: React.MutableRefObject<GuiObject | undefined>;
-  inputRef: React.MutableRefObject<TextBox | undefined>;
-  contentRef: React.MutableRefObject<GuiObject | undefined>;
-  registerItem: (item: ComboboxItemRegistration) => () => void;
   getItemText: (value: string) => string | undefined;
+  /** The core, for the parts that build an item or position against the instances. */
+  core: ComboboxCore;
 };
 
 /** Per-item state consumers read to style the item; the primitive never paints it. */

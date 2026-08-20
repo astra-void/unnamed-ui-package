@@ -1,3 +1,5 @@
+export * from "@lattice-ui/core-combobox";
+
 import { ComboboxContent } from "./Combobox/ComboboxContent";
 import { ComboboxGroup } from "./Combobox/ComboboxGroup";
 import { ComboboxInput } from "./Combobox/ComboboxInput";
@@ -23,12 +25,6 @@ export const Combobox = {
 } as const;
 
 export { useComboboxItemContext } from "./Combobox/context";
-export {
-  defaultComboboxFilter,
-  filterComboboxOptions,
-  resolveComboboxInputValue,
-  resolveForcedComboboxValue,
-} from "./Combobox/logic";
 export type {
   ComboboxContentProps,
   ComboboxContextValue,
@@ -37,7 +33,6 @@ export type {
   ComboboxInputProps,
   ComboboxItemContextValue,
   ComboboxItemProps,
-  ComboboxItemRegistration,
   ComboboxLabelProps,
   ComboboxPortalProps,
   ComboboxProps,

@@ -1,17 +1,16 @@
-import { composeEvents, composeRefs, getPassthroughProps, React, Slot, toSlotProps } from "@lattice-ui/react-runtime";
+import { useFocusNode } from "@lattice-ui/react-focus";
+import {
+  applyElementSpec,
+  composeRefs,
+  getPassthroughProps,
+  React,
+  Slot,
+  toSlotProps,
+} from "@lattice-ui/react-runtime";
 import { useComboboxContext } from "./context";
 import type { ComboboxInputProps } from "./types";
 
-const UserInputService = game.GetService("UserInputService");
-
-const OWN_PROPS = ["asChild", "disabled", "readOnly", "placeholder", "children"] as const;
-
-// See ComboboxTrigger: only the Roblox instance defaults are neutralized, never appearance.
-const NEUTRAL_PROPS = {
-  BackgroundTransparency: 1,
-  BorderSizePixel: 0,
-  Text: "",
-};
+const OWN_PROPS = ["asChild", "children"] as const;
 
 function toTextBox(instance: Instance | undefined) {
   if (!instance?.IsA("TextBox")) {
@@ -22,90 +21,29 @@ function toTextBox(instance: Instance | undefined) {
 }
 
 export function ComboboxInput(props: ComboboxInputProps) {
-  const comboboxContext = useComboboxContext();
-  const disabled = comboboxContext.disabled || props.disabled === true;
-  const readOnly = comboboxContext.readOnly || props.readOnly === true;
+  const core = useComboboxContext().core;
+  const focusRef = React.useRef<GuiObject>();
 
-  // Focusing the field opens the list — with an empty query every item matches,
-  // so the user sees the full set and can then type to narrow it. Kept in a ref
-  // and connected imperatively so the closure never captures a stale
-  // `disabled`/`setOpen`. A disabled combobox refuses to open; readOnly opens.
-  const openOnFocusRef = React.useRef<() => void>();
-  openOnFocusRef.current = () => {
-    if (disabled) {
-      return;
-    }
-
-    comboboxContext.setOpen(true);
-  };
-
-  const focusedConnectionRef = React.useRef<RBXScriptConnection>();
+  useFocusNode({
+    ref: focusRef,
+    getDisabled: () => core.disabled(),
+    // The list is open while the player is typing, so arrow keys belong to the list rather than to
+    // focus movement — the caret stays where it is.
+    getCapturesDirectional: () => core.open(),
+  });
 
   const setInputRef = React.useCallback(
     (instance: Instance | undefined) => {
-      const previousInput = comboboxContext.inputRef.current;
-      const nextInput = toTextBox(instance);
-
-      comboboxContext.inputRef.current = nextInput;
-
-      focusedConnectionRef.current?.Disconnect();
-      focusedConnectionRef.current = undefined;
-
-      if (nextInput) {
-        comboboxContext.anchorRef.current = nextInput;
-        focusedConnectionRef.current = nextInput.Focused.Connect(() => {
-          openOnFocusRef.current?.();
-        });
-        return;
-      }
-
-      if (comboboxContext.anchorRef.current === previousInput) {
-        comboboxContext.anchorRef.current = comboboxContext.triggerRef.current;
-      }
+      const textBox = toTextBox(instance);
+      core.setInput(textBox);
+      focusRef.current = textBox;
     },
-    [comboboxContext.anchorRef, comboboxContext.inputRef, comboboxContext.triggerRef],
-  );
-
-  const lastInputValueRef = React.useRef(comboboxContext.inputValue);
-  lastInputValueRef.current = comboboxContext.inputValue;
-
-  const handleTextChanged = React.useCallback(
-    (textBox: TextBox) => {
-      if (textBox.Text === lastInputValueRef.current) {
-        return;
-      }
-
-      if (UserInputService.GetFocusedTextBox() !== textBox) {
-        return;
-      }
-
-      if (disabled || readOnly) {
-        if (textBox.Text !== lastInputValueRef.current) {
-          textBox.Text = lastInputValueRef.current;
-        }
-
-        return;
-      }
-
-      comboboxContext.setInputValue(textBox.Text);
-    },
-    [comboboxContext, disabled, readOnly],
+    [core],
   );
 
   const passthrough = getPassthroughProps<TextBox>(props, OWN_PROPS);
-  const behaviorProps = {
-    Active: !disabled,
-    // Roblox clears a TextBox on focus by default, which would wipe the controlled query.
-    ClearTextOnFocus: false,
-    PlaceholderText: props.placeholder ?? "",
-    Selectable: !disabled,
-    Text: comboboxContext.inputValue,
-    TextEditable: !disabled && !readOnly,
-    Change: composeEvents(passthrough.Change, {
-      Text: handleTextChanged as Callback,
-    }),
-    ref: composeRefs<Instance>(passthrough.ref as never, setInputRef),
-  };
+  const merged = applyElementSpec(core.inputSpec(), passthrough, { neutral: props.asChild !== true });
+  merged.ref = composeRefs<Instance>(merged.ref as never, setInputRef);
 
   if (props.asChild) {
     const child = props.children;
@@ -114,16 +52,8 @@ export function ComboboxInput(props: ComboboxInputProps) {
     }
 
     // No neutral defaults here: the rendered element belongs to the consumer.
-    return (
-      <Slot {...toSlotProps(passthrough)} {...behaviorProps}>
-        {child}
-      </Slot>
-    );
+    return <Slot {...toSlotProps(merged)}>{child}</Slot>;
   }
 
-  return (
-    <textbox {...NEUTRAL_PROPS} {...passthrough} {...behaviorProps}>
-      {props.children}
-    </textbox>
-  );
+  return <textbox {...merged}>{props.children}</textbox>;
 }

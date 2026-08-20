@@ -1,0 +1,9 @@
+{
+  "name": "core-combobox",
+  "tree": {
+    "$path": "out",
+    "out": {
+      "$path": "out"
+    }
+  }
+}
